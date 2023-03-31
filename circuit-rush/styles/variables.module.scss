@@ -1,0 +1,14 @@
+@import 'mixins';
+
+$red: red;
+$green: green;
+
+.title {
+    color: $red;
+}
+
+@include mobile() {
+    .title {
+        color: $green;
+    }
+}
