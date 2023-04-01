@@ -9,10 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
+    "gsap": "^3.11.5",
     "next": "13.2.4",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "three": "^0.151.2"
   }
 }
