@@ -75,18 +75,33 @@ export default function Home() {
         });
 
         const controls = {
-          wheelRotation: 10
+          wheelSideRotation: 0,
+          wheelRotation: 0
         };
+        const axisHelper = new THREE.AxesHelper(10)
         const frontRightWheel = car.getObjectByName('Front_Right_Wheel');
+        frontRightWheel.add(axisHelper);
         const frontLeftWheel = car.getObjectByName('Front_Left_Wheel');
-        const wheelFolder = gui.addFolder('Wheel Rotation');
-        wheelFolder.add(controls, 'wheelRotation', -180, 180).min(-20).max(20).step(1)
+        const rearWheels = car.getObjectByName('Rear_Wheels');
+        const frontWheelFolder = gui.addFolder('Wheel Side Rotation');
+        frontWheelFolder.add(controls, 'wheelSideRotation', -180, 180).min(-20).max(20).step(1)
                   .onChange((value) => {
                     frontRightWheel.rotation.y = (Math.PI / 180) * value;
                     frontLeftWheel.rotation.y = (Math.PI / 180) * value;
                   });
-        frontRightWheel.rotation.y = (Math.PI / 180) * controls.wheelRotation;
-        frontLeftWheel.rotation.y = (Math.PI / 180) * controls.wheelRotation;
+        frontRightWheel.rotation.y = (Math.PI / 180) * controls.wheelSideRotation;
+        frontLeftWheel.rotation.y = (Math.PI / 180) * controls.wheelSideRotation;
+
+        const wheelsFolder = gui.addFolder('Wheel Rotation');
+        wheelsFolder.add(controls, 'wheelRotation', -180, 180).min(0).max(360).step(12)
+                  .onChange((value) => {
+                    frontRightWheel.rotation.x = (Math.PI / 180) * value;
+                    frontLeftWheel.rotation.x = (Math.PI / 180) * value;
+                    rearWheels.rotation.x = (Math.PI / 180) * value;
+                  });
+        frontRightWheel.rotation.x = (Math.PI / 180) * controls.wheelRotation;
+        frontLeftWheel.rotation.x = (Math.PI / 180) * controls.wheelRotation;
+        rearWheels.rotation.x = (Math.PI / 180) * controls.wheelRotation;
       });
     
     }
