@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three'; 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -25,9 +25,10 @@ export default function Home() {
     camera.position.z = 5;
     const renderer = new THREE.WebGLRenderer({ canvas });
     
-    const planeGeometry = new THREE.PlaneGeometry(2, 5);
+    const planeGeometry = new THREE.PlaneGeometry(20, 50);
     const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xFF0000 });
     const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.position.set(0, -1, 0);
     plane.rotation.x = -Math.PI / 2;
     scene.add(plane);
 
@@ -48,21 +49,22 @@ export default function Home() {
     resizeRenderer();
     window.addEventListener('resize', resizeRenderer);
 
-    function animate() {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
-      controls.update();
-    }
-    animate();
-    
-    if (typeof window !== 'undefined') {
-      const dat = require('dat.gui');
-      const gui = new dat.GUI();
     
       const loader = new GLTFLoader();
       const dracoLoader = new DRACOLoader();
+      const rotations = {
+        wheelSideRotation: 0,
+        wheelRotation: 0
+      };
       dracoLoader.setDecoderPath('/draco/');
       loader.setDRACOLoader(dracoLoader);
+
+      let frontRightWheel;
+      let frontLeftWheel;
+      let rearWheels;
+
+
+
       loader.load('/assets/models/car.gltf', (gltf) => {
         const car = gltf.scene;
         car.scale.set(0.25, 0.25, 0.25);
@@ -73,42 +75,112 @@ export default function Home() {
           metalness: 0.5,
           roughness: 0.5,
         });
-
-        const controls = {
-          wheelSideRotation: 0,
-          wheelRotation: 0
-        };
+        car.traverse((obj) => {
+          if (obj instanceof THREE.Mesh) {
+            obj.material = carMaterial;
+          }
+        });
         const axisHelper = new THREE.AxesHelper(10)
-        const frontRightWheel = car.getObjectByName('Front_Right_Wheel');
+        frontRightWheel = car.getObjectByName('Front_Right_Wheel');
         frontRightWheel.add(axisHelper);
-        const frontLeftWheel = car.getObjectByName('Front_Left_Wheel');
-        const rearWheels = car.getObjectByName('Rear_Wheels');
-        const frontWheelFolder = gui.addFolder('Wheel Side Rotation');
-        frontWheelFolder.add(controls, 'wheelSideRotation', -180, 180).min(-20).max(20).step(1)
-                  .onChange((value) => {
-                    frontRightWheel.rotation.y = (Math.PI / 180) * value;
-                    frontLeftWheel.rotation.y = (Math.PI / 180) * value;
-                  });
-        frontRightWheel.rotation.y = (Math.PI / 180) * controls.wheelSideRotation;
-        frontLeftWheel.rotation.y = (Math.PI / 180) * controls.wheelSideRotation;
-
-        const wheelsFolder = gui.addFolder('Wheel Rotation');
-        wheelsFolder.add(controls, 'wheelRotation', -180, 180).min(0).max(360).step(12)
-                  .onChange((value) => {
-                    frontRightWheel.rotation.x = (Math.PI / 180) * value;
-                    frontLeftWheel.rotation.x = (Math.PI / 180) * value;
-                    rearWheels.rotation.x = (Math.PI / 180) * value;
-                  });
-        frontRightWheel.rotation.x = (Math.PI / 180) * controls.wheelRotation;
-        frontLeftWheel.rotation.x = (Math.PI / 180) * controls.wheelRotation;
-        rearWheels.rotation.x = (Math.PI / 180) * controls.wheelRotation;
+        frontRightWheel.rotation.order = 'YXZ';
+        frontLeftWheel = car.getObjectByName('Front_Left_Wheel');
+        frontLeftWheel.rotation.order = 'YXZ';
+        rearWheels = car.getObjectByName('Rear_Wheels');
+        animateCar();
       });
-    
-    }
 
-    return () => {
-      window.removeEventListener('resize', resizeRenderer);
-    };
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+        controls.update();
+      }
+      animate();
+      
+      function animateCar(){
+        requestAnimationFrame(animateCar);
+        renderer.render(scene, camera);
+        controls.update();
+        frontRightWheel.rotation.y = (Math.PI / 180) * rotations.wheelSideRotation;
+        frontLeftWheel.rotation.y = (Math.PI / 180) * rotations.wheelSideRotation;
+        rearWheels.rotation.x = (Math.PI / 180) * rotations.wheelRotation;
+      }
+      let wheelIntervalId = null;
+      let leftDirection = false;
+      let rightDirection = false;
+      const handling = 5;
+      const maxRotation = 20;
+      const minRotation = -20;
+
+function handleKeyDown(event) {
+  
+  switch (event.keyCode) {
+    case 37:
+      clearInterval(wheelIntervalId);
+      wheelIntervalId = null;
+      leftDirection = true;
+      wheelIntervalId = setInterval(() => {
+        rotations.wheelSideRotation = Math.min(rotations.wheelSideRotation + handling, maxRotation);
+        if (rotations.wheelSideRotation === maxRotation) clearInterval(wheelIntervalId);
+      }, 20);
+      break;
+    case 38:
+      // rotations.wheelRotation = rotations.wheelRotation + handling;
+      break;
+    case 39:
+      clearInterval(wheelIntervalId);
+      wheelIntervalId = null;
+      rightDirection = true;
+      wheelIntervalId = setInterval(() => {
+        rotations.wheelSideRotation = Math.max(rotations.wheelSideRotation - handling, minRotation);
+        if (rotations.wheelSideRotation === minRotation) clearInterval(wheelIntervalId);
+      }, 20);
+      break;
+    default:
+      break;
+  }
+}
+
+function handleKeyUp(event) {
+  switch (event.keyCode) {
+    case 37:
+      leftDirection = false;
+      clearInterval(wheelIntervalId);
+      wheelIntervalId = null;
+      let limit = 0;
+      rightDirection ? limit = minRotation : limit = 0;
+        wheelIntervalId = setInterval(() => {
+          rotations.wheelSideRotation = Math.max(rotations.wheelSideRotation - handling, limit);
+          if (rotations.wheelSideRotation <= limit) clearInterval(wheelIntervalId);
+        }, 20);
+      break;
+    case 38:
+
+      break;
+    case 39:
+      clearInterval(wheelIntervalId);
+      rightDirection = false;
+      wheelIntervalId = null;
+      let limit2 = 0;
+      leftDirection ? limit2 = maxRotation : limit2 = 0;
+        wheelIntervalId = setInterval(() => {
+          rotations.wheelSideRotation = Math.min(rotations.wheelSideRotation + handling, limit2);
+          if (rotations.wheelSideRotation >= limit2) clearInterval(wheelIntervalId);
+        }, 20); 
+      break;
+    default:
+      break;
+  }
+}
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
+      
+      return () => {
+        window.removeEventListener('resize', resizeRenderer);
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keyup', handleKeyUp);
+      };
+      
   }, []);
 
   return (

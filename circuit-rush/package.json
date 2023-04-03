@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "ammo.js": "^0.0.10",
+    "cannon": "^0.6.2",
     "dat.gui": "^0.7.9",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
