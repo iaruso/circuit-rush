@@ -13,7 +13,8 @@ import variables from '@/styles/variables.module.scss';
 export default function Home() {
   const canvasRef = useRef(null);
   const controlsRef = useRef(null);
-
+  const [speedValue, setSpeedValue] = useState(0); // Declare a state variable
+  const [gearValue, setGearValue] = useState(0); // Declare a state variable
   useEffect(() => {
 
     const textureLoader = new THREE.TextureLoader();
@@ -51,7 +52,7 @@ export default function Home() {
     var groundMaterial = new CANNON.Material('groundMaterial');
     var wheelMaterial = new CANNON.Material('wheelMaterial');
     var wheelGroundContactMaterial = new CANNON.ContactMaterial(wheelMaterial, groundMaterial, {
-        friction: 0.3,
+        friction: 0.2,
         restitution: 0,
         contactEquationStiffness: 1000,
     });
@@ -60,7 +61,7 @@ export default function Home() {
     
     // car physics body
     var chassisShape = new CANNON.Box(new CANNON.Vec3(1, 0.3, 2));
-    var chassisBody = new CANNON.Body({mass: 250});
+    var chassisBody = new CANNON.Body({mass: 400});
     chassisBody.addShape(chassisShape);
     chassisBody.position.set(0, 2, 0);
     chassisBody.angularVelocity.set(0, 0, 0); // initial velocity
@@ -108,11 +109,10 @@ export default function Home() {
     vehicle.addToWorld(physicsWorld);
     
     // car wheels
-    var wheelBodies = [],
-        wheelVisuals = [];
+    var wheelBodies = [];
     vehicle.wheelInfos.forEach(function(wheel) {
-      var shape = new CANNON.Cylinder(wheel.radius, wheel.radius, wheel.radius / 2, 24);
-      var body = new CANNON.Body({mass: 2, material: wheelMaterial});
+      var shape = new CANNON.Cylinder(wheel.radius, wheel.radius, wheel.radius / 2, 12);
+      var body = new CANNON.Body({mass: 20, material: wheelMaterial});
       var q = new CANNON.Quaternion();
       q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
       body.addShape(shape, new CANNON.Vec3(), q);
@@ -174,7 +174,7 @@ const test2 = new THREE.Object3D();
 test2.position.set(0, 0, 0);
 
 const test3 = new THREE.Object3D();
-test3.position.set(0, 5, -15);
+test3.position.set(0, 15, -45);
 
 test2.add(test3);
 
@@ -224,9 +224,9 @@ physicsWorld.addBody(planeBody)
         const carMaterial = new THREE.MeshMatcapMaterial();
         carMaterial.matcap = matcapTexture;
         car.traverse((obj) => {
-          /*if (obj instanceof THREE.Mesh) {
+          if (obj instanceof THREE.Mesh) {
             obj.material = carMaterial;
-          }*/
+          }
           console.log(obj)
           if (obj.name== 'Body'){
             obj.material = carMaterial;
@@ -256,12 +256,12 @@ physicsWorld.addBody(planeBody)
 
 
 
-      /*const cannonDebugger = new CannonDebugger(scene, physicsWorld, {
+      const cannonDebugger = new CannonDebugger(scene, physicsWorld, {
         color: 0xff0000
-      });*/
+      });
       function animate() {
         physicsWorld.fixedStep();
-        //cannonDebugger.update();
+        cannonDebugger.update();
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
         controls.update();
@@ -275,12 +275,19 @@ physicsWorld.addBody(planeBody)
       var wheelInfo2 = vehicle.wheelInfos[1]; //RR
       var wheelInfo3 = vehicle.wheelInfos[2]; //FL
       var wheelInfo4 = vehicle.wheelInfos[3]; //FR
-    
+      var speed;
+      var dotProduct
 
       function animateCar(){
-        
+        var velocity = chassisBody.velocity;
+        speed = Math.round(velocity.length() * 3.6);
+          setSpeedValue(speed);
+
+
+          
+      
         physicsWorld.fixedStep();
-        //cannonDebugger.update();
+        cannonDebugger.update();
         carBody.position.copy(chassisBody.position);
         carBody.quaternion.copy(chassisBody.quaternion);
 
@@ -313,38 +320,61 @@ requestAnimationFrame(animateCar);
         controls.update();
       }
       
-      let wheelIntervalId = null;
-      let leftDirection = false;
-      let rightDirection = false;
-      const handling = 5;
-      const maxRotation = 20;
-      const minRotation = -20;
-
+      var currentGear = 1;
+      setGearValue(currentGear);
       function navigate(e) {
-        if (e.type != 'keydown' && e.type != 'keyup') return;
-        var keyup = e.type == 'keyup';
+        if (e.type !== 'keydown' && e.type !== 'keyup') return;
+        var keyup = e.type === 'keyup';
+        var maxSpeed = 200; // Maximum speed in units per second
+        var currentSpeed = speed; // Current speed of the vehicle
+
+        var engineForces = [2000, 4000, 6000, 10000, 10000, 0]; 
+        var brakeForces = [500, 1000, 1500, 2000, 2000, 2000];
+        var maxSpeeds = [50, 100, 150, 200, 250, 400];
+      
+        for (var i = 1; i < maxSpeeds.length; i++) {
+          if (currentSpeed <= maxSpeeds[i-1]) {
+            currentGear = i;
+            break;
+          }
+        }
+        setGearValue(currentGear);
+      
+
+      
+        // Apply engine force and brake force to the vehicle
+        
         vehicle.setBrake(0, 0);
         vehicle.setBrake(0, 1);
         vehicle.setBrake(0, 2);
         vehicle.setBrake(0, 3);
+
+        var norm = 1 - Math.min((speed / 400), 0.5);
+        
       
-        var engineForce = 1000,
-            maxSteerVal = 0.3;
-        switch(e.keyCode) {
+        // Set max steering value
+        var maxSteerVal = (Math.PI / 4) * norm;
       
+        // Update steering based on key input
+        switch (e.keyCode) {
           case 38: // forward
-            vehicle.applyEngineForce(keyup ? 0 : -engineForce, 2);
-            vehicle.applyEngineForce(keyup ? 0 : -engineForce, 3);
+       
+              vehicle.applyEngineForce(keyup ? 0 : -engineForces[currentGear], 2);
+              vehicle.applyEngineForce(keyup ? 0 : -engineForces[currentGear], 3);
+
             break;
       
           case 40: // backward
-            vehicle.applyEngineForce(keyup ? 0 : engineForce, 2);
-            vehicle.applyEngineForce(keyup ? 0 : engineForce, 3);
+
+              vehicle.applyEngineForce(keyup ? 0 : brakeForces[currentGear], 2);
+              vehicle.applyEngineForce(keyup ? 0 : brakeForces[currentGear], 3);
+            
             break;
       
           case 39: // right
             vehicle.setSteeringValue(keyup ? 0 : -maxSteerVal, 2);
             vehicle.setSteeringValue(keyup ? 0 : -maxSteerVal, 3);
+            
             break;
       
           case 37: // left
@@ -353,6 +383,8 @@ requestAnimationFrame(animateCar);
             break;
         }
       }
+      
+      
       document.addEventListener('keydown', navigate);
       document.addEventListener('keyup', navigate);
       
@@ -367,6 +399,7 @@ requestAnimationFrame(animateCar);
   return (
     <div className={styles.container}>
       <canvas className={styles.canvas} ref={canvasRef} />
+      <p id="speed">{speedValue} + {gearValue}</p>
     </div>
   );
 }
