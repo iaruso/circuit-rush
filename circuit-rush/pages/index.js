@@ -15,6 +15,7 @@ export default function Home() {
   const controlsRef = useRef(null);
   const [speedValue, setSpeedValue] = useState(0); // Declare a state variable
   const [gearValue, setGearValue] = useState(0); // Declare a state variable
+  const [directionValue, setDirectionValue] = useState(0);
   useEffect(() => {
 
     const textureLoader = new THREE.TextureLoader();
@@ -112,7 +113,7 @@ export default function Home() {
     var wheelBodies = [];
     vehicle.wheelInfos.forEach(function(wheel) {
       var shape = new CANNON.Cylinder(wheel.radius, wheel.radius, wheel.radius / 2, 12);
-      var body = new CANNON.Body({mass: 20, material: wheelMaterial});
+      var body = new CANNON.Body({mass: 100, material: wheelMaterial});
       var q = new CANNON.Quaternion();
       q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
       body.addShape(shape, new CANNON.Vec3(), q);
@@ -276,13 +277,29 @@ physicsWorld.addBody(planeBody)
       var wheelInfo3 = vehicle.wheelInfos[2]; //FL
       var wheelInfo4 = vehicle.wheelInfos[3]; //FR
       var speed;
-      var dotProduct
+      var dotProduct;
 
       function animateCar(){
         var velocity = chassisBody.velocity;
         speed = Math.round(velocity.length() * 3.6);
           setSpeedValue(speed);
-
+          var direction = new CANNON.Vec3(0, 0, 1); // Assuming initial direction is along negative Z-axis
+          vehicle.chassisBody.vectorToWorldFrame(direction, direction); // Update direction vector to world frame
+          
+          var velocity = vehicle.chassisBody.velocity; // Get the velocity of the vehicle
+          
+          dotProduct = velocity.dot(direction); // Calculate the dot product
+          
+          if (dotProduct > 0) {
+            console.log('Vehicle is moving forward');
+            setDirectionValue('F')
+          } else if (dotProduct < 0) {
+            console.log('Vehicle is moving backward');
+            setDirectionValue('B')
+          } else {
+            console.log('Vehicle is not moving');
+          }
+          
 
           
       
@@ -353,22 +370,28 @@ requestAnimationFrame(animateCar);
         
       
         // Set max steering value
-        var maxSteerVal = (Math.PI / 4) * norm;
+        var maxSteerVal = (Math.PI / 10) * norm;
       
         // Update steering based on key input
         switch (e.keyCode) {
           case 38: // forward
-       
-              vehicle.applyEngineForce(keyup ? 0 : -engineForces[currentGear], 2);
-              vehicle.applyEngineForce(keyup ? 0 : -engineForces[currentGear], 3);
-
+              if (dotProduct >= 0){
+                vehicle.applyEngineForce(keyup ? 0 : -engineForces[currentGear], 2);
+                vehicle.applyEngineForce(keyup ? 0 : -engineForces[currentGear], 3);
+              } else {
+                vehicle.applyEngineForce(keyup ? 0 : -brakeForces[currentGear], 2);
+                vehicle.applyEngineForce(keyup ? 0 : -brakeForces[currentGear], 3);
+              }
             break;
       
           case 40: // backward
-
+            if (dotProduct >= 0) {
               vehicle.applyEngineForce(keyup ? 0 : brakeForces[currentGear], 2);
               vehicle.applyEngineForce(keyup ? 0 : brakeForces[currentGear], 3);
-            
+            } else {
+              vehicle.applyEngineForce(keyup ? 0 : engineForces[currentGear]/10, 2);
+              vehicle.applyEngineForce(keyup ? 0 : engineForces[currentGear]/10, 3);
+            }
             break;
       
           case 39: // right
@@ -399,7 +422,7 @@ requestAnimationFrame(animateCar);
   return (
     <div className={styles.container}>
       <canvas className={styles.canvas} ref={canvasRef} />
-      <p id="speed">{speedValue} + {gearValue}</p>
+      <p id="speed">{speedValue} + {gearValue} ({directionValue})</p>
     </div>
   );
 }
