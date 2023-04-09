@@ -175,7 +175,7 @@ const test2 = new THREE.Object3D();
 test2.position.set(0, 0, 0);
 
 const test3 = new THREE.Object3D();
-test3.position.set(0, 15, -45);
+test3.position.set(0, 10, -20);
 
 test2.add(test3);
 
@@ -228,7 +228,6 @@ physicsWorld.addBody(planeBody)
           if (obj instanceof THREE.Mesh) {
             obj.material = carMaterial;
           }
-          console.log(obj)
           if (obj.name== 'Body'){
             obj.material = carMaterial;
           }
@@ -290,16 +289,6 @@ physicsWorld.addBody(planeBody)
           
           dotProduct = velocity.dot(direction); // Calculate the dot product
           
-          if (dotProduct > 0) {
-            console.log('Vehicle is moving forward');
-            setDirectionValue('F')
-          } else if (dotProduct < 0) {
-            console.log('Vehicle is moving backward');
-            setDirectionValue('B')
-          } else {
-            console.log('Vehicle is not moving');
-          }
-          
 
           
       
@@ -345,18 +334,22 @@ requestAnimationFrame(animateCar);
         var maxSpeed = 200; // Maximum speed in units per second
         var currentSpeed = speed; // Current speed of the vehicle
 
-        var engineForces = [2000, 4000, 6000, 10000, 10000, 0]; 
-        var brakeForces = [500, 1000, 1500, 2000, 2000, 2000];
-        var maxSpeeds = [50, 100, 150, 200, 250, 400];
+        var engineForces = [1800, 1500, 1200, 1200, 1200, 0]; 
+        var brakeForces = [1000, 1500, 2000, 2000, 2000, 0];
+        var maxSpeeds = [50, 100, 150, 200, 250, 300];
       
-        for (var i = 1; i < maxSpeeds.length; i++) {
-          if (currentSpeed <= maxSpeeds[i-1]) {
+        for (var i = 0; i < maxSpeeds.length + 1; i++) {
+          if (currentSpeed <= maxSpeeds[i]) {
             currentGear = i;
             break;
           }
         }
         setGearValue(currentGear);
-      
+        
+        const adjustMin = 0.5, adjustMax = 2;
+        var minSpeed = currentGear === 0 ? 0 : maxSpeeds[currentGear - 1];
+        const adjustValue = ((currentSpeed - minSpeed) / (maxSpeeds[currentGear] - minSpeed)) * (adjustMax - adjustMin) + adjustMin;
+        console.log(adjustValue)
 
       
         // Apply engine force and brake force to the vehicle
@@ -367,7 +360,16 @@ requestAnimationFrame(animateCar);
         vehicle.setBrake(0, 3);
 
         var norm = 1 - Math.min((speed / 400), 0.5);
-        
+        const myValue = 0.3; // Example value
+const minRange1 = 0.15; // Minimum value of original range
+const maxRange1 = 0.3; // Maximum value of original range
+const minRange2 = 1; // Minimum value of target range
+const maxRange2 = 2; // Maximum value of target range
+
+// Calculate the mapped value using a one-liner equation
+const mappedValue = ((myValue - minRange1) / (maxRange1 - minRange1)) * (maxRange2 - minRange2) + minRange2;
+
+
       
         // Set max steering value
         var maxSteerVal = (Math.PI / 10) * norm;
@@ -382,12 +384,13 @@ requestAnimationFrame(animateCar);
                 vehicle.applyEngineForce(keyup ? 0 : -brakeForces[currentGear], 2);
                 vehicle.applyEngineForce(keyup ? 0 : -brakeForces[currentGear], 3);
               }
+              
             break;
       
           case 40: // backward
             if (dotProduct >= 0) {
-              vehicle.applyEngineForce(keyup ? 0 : brakeForces[currentGear], 2);
-              vehicle.applyEngineForce(keyup ? 0 : brakeForces[currentGear], 3);
+              vehicle.applyEngineForce(keyup ? 0 : brakeForces[currentGear] * mappedValue, 2);
+              vehicle.applyEngineForce(keyup ? 0 : brakeForces[currentGear] * mappedValue, 3);
             } else {
               vehicle.applyEngineForce(keyup ? 0 : engineForces[currentGear]/10, 2);
               vehicle.applyEngineForce(keyup ? 0 : engineForces[currentGear]/10, 3);
@@ -422,7 +425,7 @@ requestAnimationFrame(animateCar);
   return (
     <div className={styles.container}>
       <canvas className={styles.canvas} ref={canvasRef} />
-      <p id="speed">{speedValue} + {gearValue} ({directionValue})</p>
+      <p id="speed">{speedValue} + {gearValue + 1} ({directionValue})</p>
     </div>
   );
 }
