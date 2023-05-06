@@ -2,9 +2,12 @@ import { useEffect, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Perf } from 'r3f-perf'
-import * as THREE from 'three';
-import Circuit from './Circuit';
+import * as THREE from 'three'
+import Circuit from './Circuit'
 import { useControls } from 'leva'
+import Vehicle from './Vehicle'
+import { RigidBody, Physics } from '@react-three/rapier'
+import PhysicsWorld from './PhysicsWorld'
 
 
 export default function Experience() {
@@ -24,7 +27,7 @@ export default function Experience() {
   useEffect(() => {
     if (!light.current) return
     light.current.shadow.camera = shadowCamera
-    light.current.shadow.bias = 0.0001
+    light.current.shadow.bias = -0.0001
     light.current.shadow.mapSize.width = 2048
     light.current.shadow.mapSize.height = 2048
   }, [light, shadowCamera, scene])
@@ -39,11 +42,15 @@ export default function Experience() {
         <directionalLight 
           ref={light} 
           castShadow 
-          position={ [ -10, 20, -30 ] }
+          position={ [ -100, 100, -100 ] }
           intensity={ 1 }
           shadow-camera={shadowCamera}
         />
-        <ambientLight intensity={ 0.8 } />
-        <Circuit/>
+        <ambientLight intensity={ 0.6 } />
+        <Physics gravity={[0, -9.81, -2]}>
+          <Circuit/>
+          <PhysicsWorld/>
+          <Vehicle/>
+        </Physics>
     </>
 }

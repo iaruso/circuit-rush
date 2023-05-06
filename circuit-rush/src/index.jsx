@@ -22,7 +22,7 @@ function App() {
       }}
       style={{ backgroundColor: settings.bg }}
     >
-      <Experience />
+        <Experience />
     </Canvas>
   );
 }
