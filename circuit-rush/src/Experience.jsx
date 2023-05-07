@@ -6,7 +6,7 @@ import * as THREE from 'three'
 import Circuit from './Circuit'
 import { useControls } from 'leva'
 import Vehicle from './Vehicle'
-import { RigidBody, Physics } from '@react-three/rapier'
+import { Physics, Debug } from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 
 
@@ -14,22 +14,27 @@ export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
 
+  const settings = useControls({
+    light: '#d4e0ff'
+  });
+
   const shadowCameraSize = 200
   const shadowCamera = new THREE.OrthographicCamera(
     -shadowCameraSize,
     shadowCameraSize,
     shadowCameraSize,
     -shadowCameraSize,
-    0.5,
+    2,
     500
   )
 
   useEffect(() => {
     if (!light.current) return
+    light.current.shadowCameraVisible = true;
     light.current.shadow.camera = shadowCamera
-    light.current.shadow.bias = -0.0001
-    light.current.shadow.mapSize.width = 2048
-    light.current.shadow.mapSize.height = 2048
+    light.current.shadow.bias = 0.0001
+    light.current.shadow.mapSize.width = 4096
+    light.current.shadow.mapSize.height = 4096
   }, [light, shadowCamera, scene])
 
  
@@ -46,11 +51,13 @@ export default function Experience() {
           intensity={ 1 }
           shadow-camera={shadowCamera}
         />
-        <ambientLight intensity={ 0.6 } />
-        <Physics gravity={[0, -9.81, -2]}>
-          <Circuit/>
-          <PhysicsWorld/>
-          <Vehicle/>
+        <ambientLight intensity={ 1.2 } color={settings.light}/>
+        <Physics gravity={[0, -9.81, 0]}>
+          {/* <Debug color="black" scale={1}> */}
+            <Circuit/>
+            <PhysicsWorld/>
+            <Vehicle/>
+          {/* </Debug> */}
         </Physics>
     </>
 }

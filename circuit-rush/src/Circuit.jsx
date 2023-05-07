@@ -4,7 +4,17 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { useTexture, Clone, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { useControls } from 'leva'
-import { RigidBody } from '@react-three/rapier'
+import { usePlane } from '@react-three/cannon'
+
+function Plane(props) {
+  const [ref] = usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], ...props }))
+  return (
+    <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]}>
+            <planeGeometry args={[400, 400]}/>
+            <meshStandardMaterial color={'#ffffff'} transparent={true} opacity={0} />
+    </mesh>
+  )
+}
 
 export default function Circuit() {
   const { scene } = useGLTF('./circuit.glb');
@@ -13,7 +23,6 @@ export default function Circuit() {
     });
 
     scene.traverse((child) => {
-        console.log(child.children)
         if (child.isMesh) {
           child.material = new THREE.MeshStandardMaterial({
             color: settings.color,
@@ -21,7 +30,6 @@ export default function Circuit() {
             metalness: 0,
             emissive: settings.color,
             emissiveIntensity: 1,
-            wireframe: true
           });
           child.castShadow = true;
           child.receiveShadow = true;
@@ -29,18 +37,7 @@ export default function Circuit() {
     });
     return (
         <>
-        <RigidBody colliders='ball' restitution={1}>
-          <mesh castShadow position={[5.5, 30, 0]}>
-            <sphereGeometry/>
-            <meshStandardMaterial color={'#ffffff'} metalness={0} roughness={1} emissive={'#fff'} emissiveIntensity={1}/>
-          </mesh>
-        </RigidBody>
-        <RigidBody type='fixed' colliders='trimesh' restitution={0.2}>
-          <mesh rotation={[Math.PI/2, 0, 0]}>
-            <planeGeometry args={[400, 400]}/>
-            <meshStandardMaterial color={'#ffffff'} transparent />
-          </mesh>
-        </RigidBody>
+        <Plane/>
         <Clone object={scene} />
         </>
       )

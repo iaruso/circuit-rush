@@ -8,15 +8,15 @@ const root = ReactDOM.createRoot(document.querySelector('#root'))
 
 function App() {
   const settings = useControls({
-    bg: '#f4f4f4',
+    bg: '#f4f5f7',
   });
 
   return (
     <Canvas
-      shadows
+      shadows={'soft'}
       camera={{
         fov: 45,
-        near: 0.1,
+        near: 0.01,
         far: 1000,
         position: [4, 2, 6],
       }}
