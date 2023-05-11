@@ -19,10 +19,14 @@ function Plane(props) {
 export default function Circuit() {
   const { scene } = useGLTF('./circuit.glb');
     const settings = useControls({
-        color: '#ffffff'
+        color: '#ffffff',
+        terrain: '#ffffff',
+        test: '#ffffff',
+        track: '#ffffff',
     });
 
     scene.traverse((child) => {
+      console.log(child)
         if (child.isMesh) {
           child.material = new THREE.MeshStandardMaterial({
             color: settings.color,
@@ -33,6 +37,33 @@ export default function Circuit() {
           });
           child.castShadow = true;
           child.receiveShadow = true;
+          if (child.name === 'Plane') {
+            child.material = new THREE.MeshStandardMaterial({
+              color: settings.terrain,
+              roughness: 1,
+              metalness: 0,
+              emissive: settings.color,
+              emissiveIntensity: 1,
+            });
+          }
+          if (child.name === 'test') {
+            child.material = new THREE.MeshStandardMaterial({
+              color: settings.test,
+              roughness: 1,
+              metalness: 0,
+              emissive: settings.color,
+              emissiveIntensity: 0.4,
+            });
+          }
+          if (child.name === 'Track') {
+            child.material = new THREE.MeshStandardMaterial({
+              color: settings.track,
+              roughness: 1,
+              metalness: 0,
+              emissive: settings.color,
+              emissiveIntensity: 0.6,
+            });
+          }
         }
     });
     return (

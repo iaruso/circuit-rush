@@ -19,7 +19,6 @@ export default function PhysicsWorld(props) {
       }),
       useRef()
     )
-    console.log(nodes.BorderObject.geometry.attributes.position.array)
     return (
         <group
           ref={ref}

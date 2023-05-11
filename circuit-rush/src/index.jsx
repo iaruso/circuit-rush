@@ -1,6 +1,12 @@
 import './style.css'
 import ReactDOM from 'react-dom/client'
 import { Canvas } from '@react-three/fiber'
+// import { Pixelation, EffectComposer } from '@react-three/postprocessing'
+
+
+
+
+
 import Experience from './Experience.jsx'
 import { useControls } from 'leva'
 
