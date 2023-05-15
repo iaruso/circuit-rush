@@ -53,11 +53,15 @@ export default function Experience() {
         />
         <ambientLight intensity={ 1.2 } color={settings.light}/>
         <Physics gravity={[0, -9.81, 0]}>
-          {/* <Debug color="black" scale={1}> */}
+          <Debug color="black" scale={1}>
             <Circuit/>
-            <PhysicsWorld/>
+            <PhysicsWorld borderObjectName="BorderObject" />
+            <PhysicsWorld borderObjectName="StartObject" />
+            <PhysicsWorld borderObjectName="Checkpoint1Object" />
+            <PhysicsWorld borderObjectName="Checkpoint2Object" rotation={ [ 0, Math.PI / 4, 0 ] } />
+            <PhysicsWorld borderObjectName="ExteriorObject" />
             <Vehicle/>
-          {/* </Debug> */}
+          </Debug>
         </Physics>
     </>
 }

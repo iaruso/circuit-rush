@@ -23,6 +23,7 @@ export default function Circuit() {
         terrain: '#ffffff',
         test: '#ffffff',
         track: '#ffffff',
+        trafficLight: '#ff0000',
     });
 
     scene.traverse((child) => {
@@ -33,7 +34,7 @@ export default function Circuit() {
             roughness: 1,
             metalness: 0,
             emissive: settings.color,
-            emissiveIntensity: 1,
+            emissiveIntensity: 0.8,
           });
           child.castShadow = true;
           child.receiveShadow = true;
@@ -43,7 +44,7 @@ export default function Circuit() {
               roughness: 1,
               metalness: 0,
               emissive: settings.color,
-              emissiveIntensity: 1,
+              emissiveIntensity: 0.8,
             });
           }
           if (child.name === 'test') {
@@ -62,6 +63,15 @@ export default function Circuit() {
               metalness: 0,
               emissive: settings.color,
               emissiveIntensity: 0.6,
+            });
+          }
+          if (child.name.startsWith('TrafficLight')) {
+            child.material = new THREE.MeshStandardMaterial({
+              color: settings.trafficLight,
+              roughness: 0.5,
+              metalness: 0.2,
+              emissive: settings.color,
+              emissiveIntensity: 0.1,
             });
           }
         }
