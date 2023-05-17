@@ -8,11 +8,22 @@ import { useControls } from 'leva'
 import Vehicle from './Vehicle'
 import { Physics, Debug } from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
+import Objects from './Objects'
 
 
 export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
+
+  const cubeArray = [
+    { x: 0, y: 10, z: 0, rotation_y: 0 },
+    { x: 2, y: 1, z: -3, rotation_y: Math.PI / 2 },
+  ];
+
+  const sphereArray = [
+    { x: 1, y: 2, z: 0, rotation_y: Math.PI },
+    { x: -2, y: 10, z: 3, rotation_y: Math.PI / 4 },
+  ];
 
   const settings = useControls({
     light: '#d4e0ff'
@@ -53,15 +64,16 @@ export default function Experience() {
         />
         <ambientLight intensity={ 1.2 } color={settings.light}/>
         <Physics gravity={[0, -9.81, 0]}>
-          <Debug color="black" scale={1}>
+          {/* <Debug color="black" scale={1}> */}
             <Circuit/>
             <PhysicsWorld borderObjectName="BorderObject" />
             <PhysicsWorld borderObjectName="StartObject" />
             <PhysicsWorld borderObjectName="Checkpoint1Object" />
             <PhysicsWorld borderObjectName="Checkpoint2Object" rotation={ [ 0, Math.PI / 4, 0 ] } />
             <PhysicsWorld borderObjectName="ExteriorObject" />
+            <Objects cubeArray={cubeArray} sphereArray={sphereArray} />
             <Vehicle/>
-          </Debug>
+          {/* </Debug> */}
         </Physics>
     </>
 }
