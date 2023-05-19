@@ -7,10 +7,10 @@ import { useControls } from 'leva'
 import { usePlane } from '@react-three/cannon'
 
 function Plane(props) {
-  const [ref] = usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], ...props }))
+  const [ref] = usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], restitution: 0.9, friction: 0.1, ...props }))
   return (
     <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]}>
-            <planeGeometry args={[400, 400]}/>
+            <planeGeometry args={[400, 400]} />
             <meshStandardMaterial color={'#ffffff'} transparent={true} opacity={0} />
     </mesh>
   )

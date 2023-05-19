@@ -12,6 +12,7 @@ export default function PhysicsWorld({ borderObjectName, rotation, ...props }) {
         nodes[borderObjectName].geometry.index.array,
       ],
       mass: 0,
+      restitution: 0.2,
       rotation: rotation,
       ...props,
     }),

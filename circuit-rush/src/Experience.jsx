@@ -15,15 +15,18 @@ export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
 
-  const cubeArray = [
-    { x: 0, y: 10, z: 0, rotation_y: 0 },
-    { x: 2, y: 1, z: -3, rotation_y: Math.PI / 2 },
-  ];
-
-  const sphereArray = [
-    { x: 1, y: 2, z: 0, rotation_y: Math.PI },
-    { x: -2, y: 10, z: 3, rotation_y: Math.PI / 4 },
-  ];
+  const generateSpheres = () => {
+    const sphereArray = [];
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * 20 - 10; // Random x between -10 and 10
+      const y = Math.random() * 9 + 0.5; // Random y between 0.5 and 9.5
+      const z = Math.random() * 20 - 10; // Random z between -10 and 10
+      sphereArray.push({ x, y, z });
+    }
+    return sphereArray;
+  };
+  
+  const sphereArray = generateSpheres();
 
   const settings = useControls({
     light: '#d4e0ff'
@@ -64,16 +67,16 @@ export default function Experience() {
         />
         <ambientLight intensity={ 1.2 } color={settings.light}/>
         <Physics gravity={[0, -9.81, 0]}>
-          {/* <Debug color="black" scale={1}> */}
-            <Circuit/>
+          <Debug color="black" scale={1}>
+            <Circuit />
             <PhysicsWorld borderObjectName="BorderObject" />
             <PhysicsWorld borderObjectName="StartObject" />
             <PhysicsWorld borderObjectName="Checkpoint1Object" />
             <PhysicsWorld borderObjectName="Checkpoint2Object" rotation={ [ 0, Math.PI / 4, 0 ] } />
             <PhysicsWorld borderObjectName="ExteriorObject" />
-            <Objects cubeArray={cubeArray} sphereArray={sphereArray} />
+            <Objects sphereArray={sphereArray} />
             <Vehicle/>
-          {/* </Debug> */}
+          </Debug>
         </Physics>
     </>
 }

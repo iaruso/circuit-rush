@@ -1,41 +1,25 @@
-import { Physics, useBox, useSphere } from '@react-three/cannon';
-import { useRef } from 'react';
+import { useSphere } from '@react-three/cannon';
+import { Instances } from '@react-three/drei';
 
-export default function Objects({ cubeArray, sphereArray }) {
-  const cubeRef = useRef();
-  const sphereRef = useRef();
-
+export default function Objects({ sphereArray }) {
   return (
     <group>
-        {/* Cubes */}
-        {cubeArray.map((cube, index) => {
-          const [cubeRef] = useBox(() => ({
-            mass: 1,
-            position: [cube.x, cube.y, cube.z],
-            rotation: [0, cube.rotation_y, 0],
-          }));
-
-          return (
-            <mesh ref={cubeRef} key={`cube-${index}`}>
-              <boxBufferGeometry args={[1, 1, 1]} />
-              <meshStandardMaterial color="red" />
-            </mesh>
-          );
-        })}
-
-        {/* Spheres */}
         {sphereArray.map((sphere, index) => {
           const [sphereRef] = useSphere(() => ({
             mass: 1,
+            args: [0.5],
             position: [sphere.x, sphere.y, sphere.z],
-            rotation: [0, sphere.rotation_y, 0],
+            restitution: 0.9,
+            friction: 0.1
           }));
 
           return (
-            <mesh ref={sphereRef} key={`sphere-${index}`}>
-              <sphereBufferGeometry args={[0.5, 32, 32]} />
-              <meshStandardMaterial color="blue" />
-            </mesh>
+            <Instances limit={1000} range={1000}>
+              
+                <sphereBufferGeometry args={[0.5, 32, 32]} />
+                <meshStandardMaterial color={"#fff"} roughness={1} metalness={0} emissive={"#fff"} emissiveIntensity={0.8}/>
+              
+            </Instances>
           );
         })}
     </group>
