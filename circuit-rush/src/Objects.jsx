@@ -1,27 +1,25 @@
-import { useSphere } from '@react-three/cannon';
+import { SphereBufferGeometry, MeshStandardMaterial } from 'three';
 import { Instances } from '@react-three/drei';
+import Ball from './Ball';
 
-export default function Objects({ sphereArray }) {
+const material = new MeshStandardMaterial({
+  color: "#fff",
+  roughness: 1,
+  metalness: 0,
+  emissive: "#fff",
+  emissiveIntensity: 0.8,
+});
+
+const geometry = new SphereBufferGeometry(0.5, 32, 32);
+
+export default function Objects({ data, count }) {
   return (
-    <group>
-        {sphereArray.map((sphere, index) => {
-          const [sphereRef] = useSphere(() => ({
-            mass: 1,
-            args: [0.5],
-            position: [sphere.x, sphere.y, sphere.z],
-            restitution: 0.9,
-            friction: 0.1
-          }));
-
-          return (
-            <Instances limit={1000} range={1000}>
-              
-                <sphereBufferGeometry args={[0.5, 32, 32]} />
-                <meshStandardMaterial color={"#fff"} roughness={1} metalness={0} emissive={"#fff"} emissiveIntensity={0.8}/>
-              
-            </Instances>
-          );
-        })}
-    </group>
+    <Instances range={count} material={material} geometry={geometry} castShadow={true} receiveShadow={true}>
+      <group position={[0, 0, 0]}>
+        {data.map((props, i) => (
+          <Ball key={i} {...props} />
+        ))}
+      </group>
+    </Instances>
   );
 }
