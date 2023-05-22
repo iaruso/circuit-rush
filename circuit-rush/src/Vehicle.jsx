@@ -4,51 +4,52 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { useTexture, Clone, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { useControls } from 'leva'
+import { useControls } from 'leva' 
 
-// function Wheel() {
-//   const wheelRef = useRef();
-//   return (
-//     <RigidBody ref={wheelRef} colliders="trimesh" restitution={0}>
-//       <mesh castShadow position={[-1, 0.6, 1.5]} rotation={[0, 0, -Math.PI/2]}>
-//         <cylinderGeometry args={[0.3, 0.3, 0.25, 64]} />
-//         <meshStandardMaterial color={'#ff0000'} metalness={0} roughness={1} emissive={'#fff'} emissiveIntensity={1} />
-//       </mesh>
-//     </RigidBody>
-//   );
-// }
 
 export default function Vehicle() {
-
-
-  // const joint = useRevoluteJoint(vehicle, leftFrontWheel, [[-1, 0.5, 1.5], [0, 0, 0], [-1, 0.5, 1.5]]);
-  
-  return (
-    <>
-      
-    </>
-  );
+  {/* 3D model source: https://sketchfab.com/3d-models/low-poly-rally-cars-pack-aa5eb26008474c88a04d0ea6a3c424a2 with minor changes (Renault R5) */}
+  const { scene } = useGLTF('./car.glb');
+    scene.traverse((child) => {
+      console.log(child)
+        if (child.isMesh) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: '#ffffff',
+            roughness: 1,
+            metalness: 0,
+            emissive: '#ffffff',
+            emissiveIntensity: 0.2
+          });
+          child.castShadow = true;
+          child.receiveShadow = true;
+          if (child.name === 'Backlights') {
+            child.material = new THREE.MeshStandardMaterial({
+              color: '#ff0000',
+              roughness: 1,
+              metalness: 0,
+              emissive: '#000000',
+              emissiveIntensity: 1,
+            });
+          }
+          if (child.name === 'Frontlights') {
+            child.material = new THREE.MeshStandardMaterial({
+              color: 'yellow',
+              roughness: 1,
+              metalness: 0
+            });
+          }
+          if (child.name === 'RFW' || child.name === 'RRW' || child.name === 'LRW' || child.name === 'LFW') {
+            child.material = new THREE.MeshStandardMaterial({
+              color: '#eeeeee',
+              roughness: 1,
+              metalness: 0
+            });
+          }
+        }
+    });
+    return (
+        <>
+          <Clone object={scene} />
+        </>
+      )
 }
-
-
-
-/*
-
-<mesh castShadow position={[-1, 0.5, 1.5]} rotation={[0, 0, -Math.PI/2]}>
-        <cylinderGeometry args={[0.3,0.3,0.25,64]}/>
-        <meshStandardMaterial color={'#ff0000'} metalness={0} roughness={1} emissive={'#fff'} emissiveIntensity={1}/>
-      </mesh>
-      <mesh castShadow position={[1, 0.5, 1.5]} rotation={[0, 0, -Math.PI/2]}>
-        <cylinderGeometry args={[0.3,0.3,0.25,64]} />
-        <meshStandardMaterial color={'#ff0000'} metalness={0} roughness={1} emissive={'#fff'} emissiveIntensity={1}/>
-      </mesh>
-      <mesh castShadow position={[-1, 0.5, -1.5]} rotation={[0, 0, -Math.PI/2]}>
-        <cylinderGeometry args={[0.3,0.3,0.25,64]}/>
-        <meshStandardMaterial color={'#ff0000'} metalness={0} roughness={1} emissive={'#fff'} emissiveIntensity={1}/>
-      </mesh>
-      <mesh castShadow position={[1, 0.5,-1.5]} rotation={[0, 0, -Math.PI/2]}>
-        <cylinderGeometry args={[0.3,0.3,0.25,64]}/>
-        <meshStandardMaterial color={'#ff0000'} metalness={0} roughness={1} emissive={'#fff'} emissiveIntensity={1}/>
-      </mesh>
-
-*/

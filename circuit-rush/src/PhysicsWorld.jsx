@@ -19,18 +19,20 @@ export default function PhysicsWorld({ borderObjectName, rotation, ...props }) {
     useRef()
   )
   return (
-    <group
-      ref={ref}
-      {...props}
-      dispose={null}
-    >
-      <mesh
-        geometry={nodes[borderObjectName].geometry}
-        material={new THREE.MeshStandardMaterial({
-          transparent: true,
-          opacity: 0
-        })}
-      />
-    </group>
+    <>
+      <group
+        ref={ref}
+        {...props}
+        dispose={null}
+      >
+        <mesh
+          geometry={nodes[borderObjectName].geometry}
+          material={new THREE.MeshStandardMaterial({
+            transparent: true,
+            opacity: 0
+          })}
+        />
+      </group>
+    </>
   )
 }

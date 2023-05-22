@@ -6,27 +6,64 @@ import * as THREE from 'three'
 import Circuit from './Circuit'
 import { useControls } from 'leva'
 import Vehicle from './Vehicle'
-import { Physics, Debug } from '@react-three/cannon'
+import { Physics, Debug, usePlane, } from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
+
+function Plane(props) {
+  const [ref] = usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], restitution: 0.9, friction: 0.1, ...props }))
+  return (
+    <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]}>
+            <planeGeometry args={[400, 400]} />
+            <meshStandardMaterial color={'#ffffff'} transparent={true} opacity={0} />
+    </mesh>
+  )
+}
 
 export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
-  const count = 40;
+  const count = 200;
 
-  const generateSpheres = () => {
-    const sphereArray = [];
+  const { gX } = useControls({
+    gX: {
+      value: 0,
+      min: -10,
+      max: 10,
+      step: 0.01,
+    },
+  })
+
+  const { gY } = useControls({
+    gY: {
+      value: -9.81,
+      min: -10,
+      max: 10,
+      step: 0.01,
+    },
+  })
+
+  const { gZ } = useControls({
+    gZ: {
+      value: 0,
+      min: -10,
+      max: 10,
+      step: 0.01,
+    },
+  })
+
+  const generatePositions = () => {
+    const positionsArray = [];
     for (let i = 0; i < count; i++) {
-      const x = Math.random() * 20 - 10; // Random x between -10 and 10
-      const y = Math.random() * 9 + 0.5; // Random y between 0.5 and 9.5
-      const z = Math.random() * 20 - 10; // Random z between -10 and 10
-      sphereArray.push({ x, y, z });
+      const x = Math.random() * 40 - 20;
+      const y = Math.random() * 9 + 0.5;
+      const z = Math.random() * 40 - 20;
+      positionsArray.push({ x, y, z });
     }
-    return sphereArray;
+    return positionsArray;
   };
   
-  const sphereArray = generateSpheres();
+  const positionsArray = generatePositions();
 
   const settings = useControls({
     light: '#d4e0ff'
@@ -66,17 +103,18 @@ export default function Experience() {
           shadow-camera={shadowCamera}
         />
         <ambientLight intensity={ 1.2 } color={settings.light}/>
-        <Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
-          {/* <Debug color="black" scale={1}> */}
-            <Circuit />
-            <PhysicsWorld borderObjectName="BorderObject" />
+        <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'}>
+          <Debug color="black" scale={1}>
             <PhysicsWorld borderObjectName="StartObject" />
             <PhysicsWorld borderObjectName="Checkpoint1Object" />
             <PhysicsWorld borderObjectName="Checkpoint2Object" rotation={ [ 0, Math.PI / 4, 0 ] } />
             <PhysicsWorld borderObjectName="ExteriorObject" />
-            <Objects data={sphereArray} count={count}/>
-            <Vehicle/>
-          {/* </Debug> */}
+            <PhysicsWorld borderObjectName="BorderObject" />
+            <Plane />
+            <Objects data={positionsArray} count={count}/>
+          </Debug>
         </Physics>
+        <Vehicle/>
+        <Circuit />
     </>
 }
