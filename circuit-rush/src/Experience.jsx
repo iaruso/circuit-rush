@@ -6,16 +6,16 @@ import * as THREE from 'three'
 import Circuit from './Circuit'
 import { useControls } from 'leva'
 import Vehicle from './Vehicle'
-import { Physics, Debug, usePlane, } from '@react-three/cannon'
+import { Physics, Debug, usePlane, useTrimesh} from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
 
 function Plane(props) {
   const [ref] = usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], restitution: 0.9, friction: 0.1, ...props }))
   return (
-    <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]}>
-            <planeGeometry args={[400, 400]} />
-            <meshStandardMaterial color={'#ffffff'} transparent={true} opacity={0} />
+    <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]} receiveShadow={true} >
+            <planeGeometry args={[200, 200]} />
+            <meshStandardMaterial color={'#fff'} roughness={1} metalness={0} emissive={'#fff'} emissiveIntensity={1}/>
     </mesh>
   )
 }
@@ -23,7 +23,7 @@ function Plane(props) {
 export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
-  const count = 200;
+  const count = 400;
 
   const { gX } = useControls({
     gX: {
@@ -87,8 +87,7 @@ export default function Experience() {
     light.current.shadow.mapSize.width = 4096
     light.current.shadow.mapSize.height = 4096
   }, [light, shadowCamera, scene])
-
- 
+  
     return <>
 
         <Perf position="top-left" />
@@ -104,15 +103,15 @@ export default function Experience() {
         />
         <ambientLight intensity={ 1.2 } color={settings.light}/>
         <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'}>
-          <Debug color="black" scale={1}>
-            <PhysicsWorld borderObjectName="StartObject" />
+          {/* <Debug color="black" scale={1}> */}
+            {/* <PhysicsWorld borderObjectName="StartObject" />
             <PhysicsWorld borderObjectName="Checkpoint1Object" />
             <PhysicsWorld borderObjectName="Checkpoint2Object" rotation={ [ 0, Math.PI / 4, 0 ] } />
             <PhysicsWorld borderObjectName="ExteriorObject" />
-            <PhysicsWorld borderObjectName="BorderObject" />
-            <Plane />
+            <PhysicsWorld borderObjectName="BorderObject" /> */}
             <Objects data={positionsArray} count={count}/>
-          </Debug>
+            <Plane />
+          {/* </Debug> */}
         </Physics>
         <Vehicle/>
         <Circuit />

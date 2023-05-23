@@ -13,10 +13,10 @@ export default function PhysicsWorld({ borderObjectName, rotation, ...props }) {
       ],
       mass: 0,
       restitution: 0.2,
+      friction: 0.1,
       rotation: rotation,
       ...props,
     }),
-    useRef()
   )
   return (
     <>
