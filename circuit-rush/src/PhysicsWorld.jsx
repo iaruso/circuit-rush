@@ -1,38 +1,32 @@
-import { useGLTF } from '@react-three/drei'
-import * as THREE from 'three'
-import { useTrimesh } from '@react-three/cannon'
-import { useRef } from 'react'
+import * as THREE from 'three';
+import { useBox } from '@react-three/cannon';
+import { useRef } from 'react';
+import physics from '../public/physics';
 
-export default function PhysicsWorld({ borderObjectName, rotation, ...props }) {
-  const { nodes } = useGLTF('./circuit-physics.glb');
-  const [ref, api] = useTrimesh(
-    () => ({
-      args: [
-        nodes[borderObjectName].geometry.attributes.position.array,
-        nodes[borderObjectName].geometry.index.array,
-      ],
-      mass: 0,
-      restitution: 0.2,
-      friction: 0.1,
-      rotation: rotation,
-      ...props,
-    }),
-  )
+export default function PhysicsWorld() {
+  const cubesArray = physics;
   return (
     <>
-      <group
-        ref={ref}
-        {...props}
-        dispose={null}
-      >
-        <mesh
-          geometry={nodes[borderObjectName].geometry}
-          material={new THREE.MeshStandardMaterial({
-            transparent: true,
-            opacity: 0
-          })}
-        />
-      </group>
+      {cubesArray.map((cubeParams, index) => (
+        <Cube key={index} position={cubeParams.slice(0, 3)} size={cubeParams.slice(3)} />
+      ))}
     </>
-  )
+  );
+}
+
+function Cube({ position, size }) {
+  const [ref, api] = useBox(() => ({
+    mass: 0,
+    position,
+    args: size,
+    restitution: 0.5,
+    friction: 0.5
+  }));
+
+  return (
+    <mesh ref={ref}>
+      <boxGeometry args={size} />
+      <meshStandardMaterial transparent={true} opacity={0} />
+    </mesh>
+  );
 }

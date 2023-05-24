@@ -6,14 +6,14 @@ import Cube from './Cube';
 export default function Objects({ data, count }) {
   const { nodes } = useGLTF('./cube.glb');
 
-  const colors = ["#4285F4", "#DB4437", "#F4B400", "#0F9D58"];
+  const colors = ["#1778F2"];
 
   const material = new THREE.MeshStandardMaterial({
     color: "#fff",
-    roughness: 0.6,
-    metalness: 0.1
+    roughness: 1,
+    metalness: 0.0
   });
-  const [ref] = useSphere(() => ({ mass: 1, position: [0, 5, 0] }))
+
 
   return (
     <>
@@ -26,9 +26,6 @@ export default function Objects({ data, count }) {
           ))}
         </group>
       </Instances>
-      <mesh ref={ref}>
-        <sphereGeometry />
-      </mesh>
     </>
   );
 }

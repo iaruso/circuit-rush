@@ -5,11 +5,11 @@ import { useControls } from 'leva'
 export default function Circuit() {
   const { scene } = useGLTF('./circuit.glb');
     const settings = useControls({
-      color: '#ffffff',
+      color: '#efefef',
+      plane: '#fff'
     });
 
     scene.traverse((child) => {
-      console.log(child)
         if (child.isMesh) {
           child.material = new THREE.MeshStandardMaterial({
             color: settings.color,
@@ -21,10 +21,19 @@ export default function Circuit() {
           child.castShadow = true;
           child.receiveShadow = true;
         }
+        if (child.name === 'Plane') {
+          child.material = new THREE.MeshStandardMaterial({
+            color: settings.plane,
+            roughness: 1,
+            metalness: 0,
+            emissive: settings.plane,
+            emissiveIntensity: 1,
+          });
+        }
     });
     return (
         <>
-          <Clone object={scene} />
+          <Clone object={scene} position={[0, 0, 0]}/>
         </>
       )
 }

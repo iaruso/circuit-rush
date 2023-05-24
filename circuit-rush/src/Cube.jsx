@@ -5,7 +5,7 @@ import * as THREE from 'three'
 
 export default function Cube({ i, x, y, z, color}) {
   const [cubeRef] = useBox(() => ({
-    mass: 1,
+    mass: 0.01,
     args: [1, 1, 1],
     position: [x, y, z],
     restitution: 0.9,
@@ -14,7 +14,7 @@ export default function Cube({ i, x, y, z, color}) {
 
   return (
     <>
-      <Instance ref={cubeRef} key={`cube-${i}`} color={color} emissive="green" emissiveIntensity={1} />
+      <Instance ref={cubeRef} key={`cube-${i}`} color={color} />
     </>
   );
 }

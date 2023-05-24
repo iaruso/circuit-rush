@@ -9,13 +9,14 @@ import Vehicle from './Vehicle'
 import { Physics, Debug, usePlane, useTrimesh} from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
+import Effects from './Effects'
 
 function Plane(props) {
-  const [ref] = usePlane(() => ({ rotation: [-Math.PI / 2, 0, 0], restitution: 0.9, friction: 0.1, ...props }))
+  const [ref] = usePlane(() => ({ type: 'Static', rotation: [-Math.PI / 2, 0, 0], restitution: 0.9, friction: 0.1, ...props }))
   return (
-    <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]} receiveShadow={true} >
-            <planeGeometry args={[200, 200]} />
-            <meshStandardMaterial color={'#fff'} roughness={1} metalness={0} emissive={'#fff'} emissiveIntensity={1}/>
+    <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]}>
+            <planeGeometry args={[100, 110]} />
+            <meshStandardMaterial color={'#fff'} transparent={true} opacity={0}/>
     </mesh>
   )
 }
@@ -23,7 +24,7 @@ function Plane(props) {
 export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
-  const count = 400;
+  const count = 500;
 
   const { gX } = useControls({
     gX: {
@@ -55,9 +56,9 @@ export default function Experience() {
   const generatePositions = () => {
     const positionsArray = [];
     for (let i = 0; i < count; i++) {
-      const x = Math.random() * 40 - 20;
+      const x = Math.random() * 100 - 50;
       const y = Math.random() * 9 + 0.5;
-      const z = Math.random() * 40 - 20;
+      const z = Math.random() * 100 - 50;
       positionsArray.push({ x, y, z });
     }
     return positionsArray;
@@ -84,8 +85,8 @@ export default function Experience() {
     light.current.shadowCameraVisible = true;
     light.current.shadow.camera = shadowCamera
     light.current.shadow.bias = 0.0001
-    light.current.shadow.mapSize.width = 4096
-    light.current.shadow.mapSize.height = 4096
+    light.current.shadow.mapSize.width = 4096*2
+    light.current.shadow.mapSize.height = 4096*2
   }, [light, shadowCamera, scene])
   
     return <>
@@ -98,22 +99,19 @@ export default function Experience() {
           ref={light} 
           castShadow 
           position={ [ -100, 100, -100 ] }
-          intensity={ 1 }
+          intensity={ 2 }
           shadow-camera={shadowCamera}
         />
-        <ambientLight intensity={ 1.2 } color={settings.light}/>
+        <ambientLight intensity={ 1 } color={settings.light}/>
         <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'}>
           {/* <Debug color="black" scale={1}> */}
-            {/* <PhysicsWorld borderObjectName="StartObject" />
-            <PhysicsWorld borderObjectName="Checkpoint1Object" />
-            <PhysicsWorld borderObjectName="Checkpoint2Object" rotation={ [ 0, Math.PI / 4, 0 ] } />
-            <PhysicsWorld borderObjectName="ExteriorObject" />
-            <PhysicsWorld borderObjectName="BorderObject" /> */}
+            <PhysicsWorld />
             <Objects data={positionsArray} count={count}/>
             <Plane />
+            <Vehicle/>
           {/* </Debug> */}
         </Physics>
-        <Vehicle/>
+        {/* <Effects /> */}
         <Circuit />
     </>
 }
