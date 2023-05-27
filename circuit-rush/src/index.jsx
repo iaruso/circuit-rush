@@ -22,7 +22,8 @@ function App() {
       }}
       style={{ backgroundColor: settings.bg }}
     >
-        <Experience />
+      <color attach={"background"} args={['#f4f5f7']}/>
+      <Experience />
     </Canvas>
   );
 }

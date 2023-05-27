@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useThree } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Environment } from '@react-three/drei'
+import { EffectComposer, Noise, N8AO, SMAA, SSR, DepthOfField } from "@react-three/postprocessing"
 import { Perf } from 'r3f-perf'
 import * as THREE from 'three'
 import Circuit from './Circuit'
@@ -10,12 +11,13 @@ import { Physics, Debug, usePlane, useTrimesh} from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
 import Effects from './Effects'
+import objects from '../public/objects'
 
 function Plane(props) {
   const [ref] = usePlane(() => ({ type: 'Static', rotation: [-Math.PI / 2, 0, 0], restitution: 0.9, friction: 0.1, ...props }))
   return (
     <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]}>
-            <planeGeometry args={[100, 110]} />
+            <planeGeometry args={[200, 200]} />
             <meshStandardMaterial color={'#fff'} transparent={true} opacity={0}/>
     </mesh>
   )
@@ -24,7 +26,7 @@ function Plane(props) {
 export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
-  const count = 500;
+  const count = 300;
 
   const { gX } = useControls({
     gX: {
@@ -53,19 +55,8 @@ export default function Experience() {
     },
   })
 
-  const generatePositions = () => {
-    const positionsArray = [];
-    for (let i = 0; i < count; i++) {
-      const x = Math.random() * 100 - 50;
-      const y = Math.random() * 9 + 0.5;
-      const z = Math.random() * 100 - 50;
-      positionsArray.push({ x, y, z });
-    }
-    return positionsArray;
-  };
+  const objectsArray = objects;
   
-  const positionsArray = generatePositions();
-
   const settings = useControls({
     light: '#d4e0ff'
   });
@@ -103,15 +94,16 @@ export default function Experience() {
           shadow-camera={shadowCamera}
         />
         <ambientLight intensity={ 1 } color={settings.light}/>
-        <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'}>
+        <Environment files={'adamsbridge.hdr'} />
+        <Effects />
+        <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true}>
           {/* <Debug color="black" scale={1}> */}
             <PhysicsWorld />
-            <Objects data={positionsArray} count={count}/>
+            <Objects data={objectsArray} count={objectsArray.length}/>
             <Plane />
             <Vehicle/>
           {/* </Debug> */}
         </Physics>
-        {/* <Effects /> */}
         <Circuit />
     </>
 }

@@ -17,6 +17,7 @@
     "@react-three/fiber": "^8.9.2",
     "@react-three/postprocessing": "^2.12.3",
     "@react-three/rapier": "^0.15.1",
+    "gsap": "^3.11.5",
     "leva": "^0.9.34",
     "r3f-perf": "^6.6.3",
     "react": "18.2",

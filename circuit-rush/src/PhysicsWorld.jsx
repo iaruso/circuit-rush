@@ -8,16 +8,17 @@ export default function PhysicsWorld() {
   return (
     <>
       {cubesArray.map((cubeParams, index) => (
-        <Cube key={index} position={cubeParams.slice(0, 3)} size={cubeParams.slice(3)} />
+        <Cube key={index} position={cubeParams.slice(0,3)} rotation={[0, (cubeParams[3] * Math.PI) / 180, 0]} size={cubeParams.slice(4)} />
       ))}
     </>
   );
 }
 
-function Cube({ position, size }) {
+function Cube({ position, size, rotation}) {
   const [ref, api] = useBox(() => ({
     mass: 0,
     position,
+    rotation,
     args: size,
     restitution: 0.5,
     friction: 0.5
@@ -26,7 +27,7 @@ function Cube({ position, size }) {
   return (
     <mesh ref={ref}>
       <boxGeometry args={size} />
-      <meshStandardMaterial transparent={true} opacity={0} />
+      <meshStandardMaterial transparent={true} opacity={0}/>
     </mesh>
   );
 }
