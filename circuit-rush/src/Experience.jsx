@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useThree } from '@react-three/fiber'
-import { OrbitControls, Environment } from '@react-three/drei'
+import { OrbitControls, Environment, PerspectiveCamera } from '@react-three/drei'
 import { EffectComposer, Noise, N8AO, SMAA, SSR, DepthOfField } from "@react-three/postprocessing"
 import { Perf } from 'r3f-perf'
 import * as THREE from 'three'
@@ -71,6 +71,10 @@ export default function Experience() {
     500
   )
 
+    
+  const [thirdPerson, setThirdPerson] = useState(true);
+  const [cameraPosition, setCameraPosition] = useState([-6, 3.9, 6.21]);
+
   useEffect(() => {
     if (!light.current) return
     light.current.shadowCameraVisible = true;
@@ -79,12 +83,24 @@ export default function Experience() {
     light.current.shadow.mapSize.width = 4096*2
     light.current.shadow.mapSize.height = 4096*2
   }, [light, shadowCamera, scene])
-  
+
+  useEffect(() => {
+    function keydownHandler(e) {
+      if (e.key == "k") {
+        // random is necessary to trigger a state change
+        if(thirdPerson) setCameraPosition([-6, 3.9, 6.21 + Math.random() * 0.01]);
+        setThirdPerson(!thirdPerson); 
+      }
+    }
+
+    window.addEventListener("keydown", keydownHandler);
+    return () => window.removeEventListener("keydown", keydownHandler);
+  }, [thirdPerson]);
     return <>
 
         <Perf position="top-left" />
 
-        <OrbitControls makeDefault />
+        {/* <OrbitControls makeDefault /> */}
 
         <directionalLight 
           ref={light} 
@@ -95,13 +111,17 @@ export default function Experience() {
         />
         <ambientLight intensity={ 1 } color={settings.light}/>
         <Environment files={'adamsbridge.hdr'} />
-        <Effects />
-        <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true}>
+        <PerspectiveCamera makeDefault position={cameraPosition} fov={50} />
+      {!thirdPerson && (
+        <OrbitControls target={[0, 0, 0]} />
+      )}
+        {/* <Effects /> */}
+        <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true} timeStep="vary">
           {/* <Debug color="black" scale={1}> */}
             <PhysicsWorld />
             <Objects data={objectsArray} count={objectsArray.length}/>
             <Plane />
-            <Vehicle/>
+            <Vehicle thirdPerson={thirdPerson}/>
           {/* </Debug> */}
         </Physics>
         <Circuit />

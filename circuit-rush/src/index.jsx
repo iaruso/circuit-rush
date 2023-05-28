@@ -1,10 +1,10 @@
-import './style.css'
-import ReactDOM from 'react-dom/client'
-import { Canvas } from '@react-three/fiber'
-import Experience from './Experience.jsx'
-import { useControls } from 'leva'
+import './style.css';
+import ReactDOM from 'react-dom';
+import { Canvas } from '@react-three/fiber';
+import Experience from './Experience.jsx';
+import { useControls } from 'leva';
 
-const root = ReactDOM.createRoot(document.querySelector('#root'))
+const root = ReactDOM.createRoot(document.querySelector('#root'));
 
 function App() {
   const settings = useControls({
@@ -22,7 +22,7 @@ function App() {
       }}
       style={{ backgroundColor: settings.bg }}
     >
-      <color attach={"background"} args={['#f4f5f7']}/>
+      <color attach="background" args={['#f4f5f7']} />
       <Experience />
     </Canvas>
   );

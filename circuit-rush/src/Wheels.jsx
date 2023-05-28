@@ -23,16 +23,6 @@ export const Wheels = (width, height, front, radius) => {
   const wheelInfos = [
     {
       ...wheelInfo,
-      chassisConnectionPointLocal: [-width * 0.65,  - 0.2, front],
-      isFrontWheel: true,
-    },
-    {
-      ...wheelInfo,
-      chassisConnectionPointLocal: [width * 0.65, - 0.2, front],
-      isFrontWheel: true,
-    },
-    {
-      ...wheelInfo,
       chassisConnectionPointLocal: [-width * 0.65,  - 0.2, -front],
       isFrontWheel: false,
     },
@@ -41,6 +31,16 @@ export const Wheels = (width, height, front, radius) => {
       chassisConnectionPointLocal: [width * 0.65, - 0.2, -front],
       isFrontWheel: false,
     },
+    {
+      ...wheelInfo,
+      chassisConnectionPointLocal: [-width * 0.65,  - 0.2, front],
+      isFrontWheel: true,
+    },
+    {
+      ...wheelInfo,
+      chassisConnectionPointLocal: [width * 0.65, - 0.2, front],
+      isFrontWheel: true,
+    },
   ];
 
   const propsFunc = () => ({
@@ -48,7 +48,7 @@ export const Wheels = (width, height, front, radius) => {
     mass: 1,
     shapes: [
       {
-        args: [wheelInfo.radius, wheelInfo.radius, 0.015, 16],
+        args: [wheelInfo.radius, wheelInfo.radius, 0.5, 16],
         rotation: [0, 0, -Math.PI / 2],
         type: "Cylinder",
       },

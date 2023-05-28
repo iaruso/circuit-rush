@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useGLTF, Instances } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSphere } from '@react-three/cannon';
@@ -6,75 +7,61 @@ import gsap from 'gsap';
 
 export default function Objects({ data, count }) {
   const { nodes } = useGLTF('./cube.glb');
-
-  const colors = ["#ff0000"];
+  const colors = ["#fff"];
 
   const material = new THREE.MeshStandardMaterial({
     color: "#fff",
     roughness: 0.8,
     metalness: 0.2,
-    emissive: "#fff",
-    emissiveIntensity: 1,
     // transparent: true,
-    // opacity: 1
-  });
-  gsap.to(material.emissiveIntensity, {
-    value: 10,
-    duration: 1,
-    yoyo: true,
-    repeat: -1,
-  });
-  gsap.to(material.emissive, {
-    r: 1,
-    g: 0,
-    b: 0,
-    duration: 1,
-    yoyo: true,
-    repeat: -1,
+    // opacity: 0.5,
+    // emissive: "#fff",
+    // emissiveIntensity: 1,
   });
 
+  const cubeInstanceRefs = useRef([]);
 
+  const handleCollide = (e, index) => {
+    console.log(cubeInstanceRefs.current[index]);
+    if (e.body.userData.name === 'cube') {
+      const cubeMaterial = cubeInstanceRefs.current[index].color;
+      gsap.to(cubeMaterial, {
+        r: 1,
+        g: 0,
+        b: 0,
+        duration: 1,
+        onComplete: () => {
+          gsap.to(cubeMaterial, {
+            r: 1,
+            g: 1,
+            b: 1,
+            duration: 1,
+          });
+        },
+      });
+      
+    }
+  };
 
-    return (
-      <>
-        <Instances range={count} material={material} geometry={nodes.Cube.geometry} castShadow receiveShadow>
-          <group position={[0, 0, 0]}>
-            {data.map((props, i) => (
-              <group key={i}>
-                <Cube key={i} position={[props[0], 0.5, -props[1]]} rotation={[0, props[2], 0]} color={colors[i % colors.length]} />
-              </group>
-            ))}
-          </group>
-        </Instances>
-      </>
-    );
-
-  
+  return (
+    <>
+      <Instances range={count} material={material} geometry={nodes.Cube.geometry} castShadow receiveShadow>
+        <group position={[0, 0, 0]}>
+          {data.map((props, i) => (
+            <group key={i}>
+              <Cube
+                position={[props[0], 0.5, -props[1]]}
+                rotation={[0, props[2], 0]}
+                color={colors[i % colors.length]}
+                onCollide={(e) => handleCollide(e, i)}
+                cubeInstanceRefs={cubeInstanceRefs}
+                index={i}
+              />
+            </group>
+          ))}
+        </group>
+      </Instances>
+    </>
+  );
 }
-
-// import { SphereBufferGeometry, MeshStandardMaterial } from 'three';
-// import { Instances } from '@react-three/drei';
-// import Ball from './Ball';
-
-// const material = new MeshStandardMaterial({
-//   color: "#fff",
-//   roughness: 1,
-//   metalness: 0,
-//   emissive: "#fff",
-//   emissiveIntensity: 0.8,
-// });
-
-// const geometry = new SphereBufferGeometry(0.5, 32, 32);
-
-// export default function Objects({ data, count }) {
-//   return (
-//     <Instances range={count} material={material} geometry={geometry} castShadow={true} receiveShadow={true}>
-//       <group position={[0, 0, 0]}>
-//         {data.map((props, i) => (
-//           <Ball key={i} {...props} />
-//         ))}
-//       </group>
-//     </Instances>
-//   );
-// }
 

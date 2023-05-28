@@ -25,7 +25,7 @@ function Cube({ position, size, rotation}) {
   }));
 
   return (
-    <mesh ref={ref}>
+    <mesh ref={ref} visible={false}>
       <boxGeometry args={size} />
       <meshStandardMaterial transparent={true} opacity={0}/>
     </mesh>
