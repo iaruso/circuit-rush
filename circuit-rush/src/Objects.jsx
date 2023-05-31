@@ -22,7 +22,6 @@ export default function Objects({ data, count }) {
   const cubeInstanceRefs = useRef([]);
 
   const handleCollide = (e, index) => {
-    console.log(cubeInstanceRefs.current[index]);
     if (e.body.userData.name === 'cube') {
       const cubeMaterial = cubeInstanceRefs.current[index].color;
       gsap.to(cubeMaterial, {

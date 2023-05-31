@@ -111,18 +111,18 @@ export default function Experience() {
         />
         <ambientLight intensity={ 1 } color={settings.light}/>
         <Environment files={'adamsbridge.hdr'} />
-        <PerspectiveCamera makeDefault position={cameraPosition} fov={50} />
+        <PerspectiveCamera makeDefault position={cameraPosition} fov={50}></PerspectiveCamera>
       {!thirdPerson && (
         <OrbitControls target={[0, 0, 0]} />
       )}
         {/* <Effects /> */}
         <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true} timeStep="vary">
-          {/* <Debug color="black" scale={1}> */}
+          <Debug color="black" scale={1}>
             <PhysicsWorld />
             <Objects data={objectsArray} count={objectsArray.length}/>
             <Plane />
             <Vehicle thirdPerson={thirdPerson}/>
-          {/* </Debug> */}
+          </Debug>
         </Physics>
         <Circuit />
     </>

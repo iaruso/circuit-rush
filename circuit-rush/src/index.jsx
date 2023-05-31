@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom';
 import { Canvas } from '@react-three/fiber';
 import Experience from './Experience.jsx';
 import { useControls } from 'leva';
+import { Physics } from '@react-three/cannon';
 
 const root = ReactDOM.createRoot(document.querySelector('#root'));
-
 function App() {
   const settings = useControls({
     bg: '#f4f5f7',
   });
-
+  
   return (
     <Canvas
       shadows={'soft'}

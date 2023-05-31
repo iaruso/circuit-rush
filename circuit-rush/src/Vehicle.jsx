@@ -1,20 +1,20 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { useTexture, Clone, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { useControls } from 'leva'
-import { useBox, useRaycastVehicle } from '@react-three/cannon'; 
+import { useControls } from 'leva';
+import { useBox, useRaycastVehicle, Physics } from '@react-three/cannon';
 import { Wheels } from './Wheels';
 import { Wheel } from './Wheel';
 import { Controls } from './Controls';
 
-export default function Vehicle({thirdPerson}) {
-
+export default function Vehicle({ thirdPerson }) {
   const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath('/draco-gltf/');
-
+  const [ smoothedCameraPosition ] = useState(() => new THREE.Vector3(10, 10, 10))
+  const [ smoothedCameraTarget ] = useState(() => new THREE.Vector3())
   const gltf = useLoader(GLTFLoader, './car.glb', (loader) => {
     loader.setDRACOLoader(dracoLoader);
   });
@@ -24,15 +24,20 @@ export default function Vehicle({thirdPerson}) {
     if (child.isMesh) {
       const materialParams = {
         roughness: 1,
-        metalness: 0
+        metalness: 0,
       };
       if (child.name === 'Backlights') {
         materialParams.color = '#ff0000';
         materialParams.emissive = '#000000';
         materialParams.emissiveIntensity = 1;
-      } else if (child.name === 'Frontlights') {
+      } else if (child.name === 'Headlights') {
         materialParams.color = 'yellow';
-      } else if (child.name === 'RFW' || child.name === 'RRW' || child.name === 'LRW' || child.name === 'LFW') {
+      } else if (
+        child.name === 'RFW' ||
+        child.name === 'RRW' ||
+        child.name === 'LRW' ||
+        child.name === 'LFW'
+      ) {
         materialParams.color = '#eeeeee';
       } else {
         materialParams.color = '#ffffff';
@@ -46,10 +51,10 @@ export default function Vehicle({thirdPerson}) {
   });
 
   const position = [5, 10, 5];
-  const width = 2;
+  const width = 1.7;
   const height = 1;
-  const front = 2;
-  const radius = 0.5;
+  const front = 1.85;
+  const radius = 0.25;
 
   const pivotRef = useRef();
 
@@ -61,7 +66,7 @@ export default function Vehicle({thirdPerson}) {
     position,
     userData: {
       name: 'vehicle',
-    }
+    },
   }), useRef(null));
 
   const [wheels, wheelInfos] = Wheels(width, height, front, radius);
@@ -81,49 +86,54 @@ export default function Vehicle({thirdPerson}) {
     mesh.scale.set(1, 1, 1);
   }, [mesh]);
 
+  const speed = useRef();
+
+  useEffect(() => {
+    const unsubscribe = chassisApi.velocity.subscribe((v) => (speed.current = v));
+    return unsubscribe;
+  }, []);
+
   useFrame((state, delta) => {
-    if(!thirdPerson) return;
+    if (!thirdPerson) return;
 
-    let position = new THREE.Vector3(0,0,0);
+    let position = new THREE.Vector3(0, 0, 0);
     position.setFromMatrixPosition(chassisBody.current.matrixWorld);
-
 
     let quaternion = new THREE.Quaternion(0, 0, 0, 0);
     quaternion.setFromRotationMatrix(chassisBody.current.matrixWorld);
 
-    let wDir = new THREE.Vector3(0,0,-1);
+    let wDir = new THREE.Vector3(0, 0, -1);
     wDir.applyQuaternion(quaternion);
     wDir.normalize();
 
-    let position2 = new THREE.Vector3(0,0,0);
+    let position2 = new THREE.Vector3(0, 0, 0);
     position2.setFromMatrixPosition(pivotRef.current.matrixWorld);
 
-    let cameraPosition = position2.clone().add(wDir.clone().multiplyScalar(1).add(new THREE.Vector3(0, 1, 0)));
-    cameraPosition.setY(2);
+    let cameraPosition = position2.clone().add(wDir.clone().multiplyScalar(1).add(new THREE.Vector3(0, 0.2, 0)));
+    cameraPosition.setY(40);
+    // cameraPosition.setX(0);
+    // cameraPosition.setZ(0);
 
     wDir.add(new THREE.Vector3(0, 0.2, 0));
-    state.camera.position.copy(cameraPosition);
-    state.camera.lookAt(position);
+    smoothedCameraPosition.lerp(cameraPosition, 5 * delta)
+    smoothedCameraTarget.lerp(position, 5 * delta)
+    state.camera.position.copy(smoothedCameraPosition);
+    state.camera.lookAt(smoothedCameraTarget);
   });
-  
-  
+
   return (
-      <group ref={vehicle} name='vehicle'>
-        {/* <group ref={chassisBody} name='chassisBody'>
-          <primitive object={mesh} position={[0, -0.7, 0]} />
-        </group> */}
-        <group ref={chassisBody}>
-        <primitive object={mesh} position={[0, -0.7, 0]} />
-          <mesh ref={pivotRef} position={[0,2,-4]} visible={false}>
-            <meshBasicMaterial transparent={true} opacity={0.3} />
-            <boxGeometry args={[2,2,2]} />
-          </mesh>
-        </group>
-        <Wheel wheelRef={wheels[0]} radius={radius} />
-        <Wheel wheelRef={wheels[1]} radius={radius} />
-        <Wheel wheelRef={wheels[2]} radius={radius} />
-        <Wheel wheelRef={wheels[3]} radius={radius} />
-        {/* <Clone object={scene} /> */}
+    <group ref={vehicle} name='vehicle'>
+      <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
+        <primitive object={mesh} position={[0, -0.7, -0.1]} />
+        <mesh ref={pivotRef} position={[0, 5, -10]} visible={false}>
+          <meshBasicMaterial transparent={true} opacity={0.3} />
+          <boxGeometry args={[2, 2, 2]} />
+        </mesh>
       </group>
-    )
+      <Wheel wheelRef={wheels[0]} radius={radius} />
+      <Wheel wheelRef={wheels[1]} radius={radius} />
+      <Wheel wheelRef={wheels[2]} radius={radius} />
+      <Wheel wheelRef={wheels[3]} radius={radius} />
+    </group>
+  );
 }
