@@ -3,12 +3,15 @@ import { useFrame, useLoader } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { useTexture, Clone, useGLTF } from '@react-three/drei';
+import { PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import { useControls } from 'leva';
+import * as CANNON from 'cannon-es';
 import { useBox, useRaycastVehicle, Physics } from '@react-three/cannon';
 import { Wheels } from './Wheels';
 import { Wheel } from './Wheel';
 import { Controls } from './Controls';
+import Camera from './Camera';
 
 export default function Vehicle({ thirdPerson }) {
   const dracoLoader = new DRACOLoader();
@@ -86,12 +89,23 @@ export default function Vehicle({ thirdPerson }) {
     mesh.scale.set(1, 1, 1);
   }, [mesh]);
 
-  const speed = useRef();
-
-  useEffect(() => {
-    const unsubscribe = chassisApi.velocity.subscribe((v) => (speed.current = v));
-    return unsubscribe;
-  }, []);
+  var speed = useRef();
+  var direction = useRef();
+  var rotation = useRef();
+  const v = new THREE.Vector3();
+  const v2 = new THREE.Vector3();
+  useEffect(() =>
+      chassisApi.velocity.subscribe((velocity) => {
+        speed = v.set(...velocity).length()
+        var uua = new CANNON.Vec3(0, 0, 1);
+        direction = v.set(...velocity).dot(uua)
+        
+      }),
+      // chassisApi.rotation.subscribe((rotation) => {
+      //  rotation = v2.set(...rotation).length()
+      //   console.log(rotation)
+      // }),
+      [])
 
   useFrame((state, delta) => {
     if (!thirdPerson) return;
@@ -111,8 +125,6 @@ export default function Vehicle({ thirdPerson }) {
 
     let cameraPosition = position2.clone().add(wDir.clone().multiplyScalar(1).add(new THREE.Vector3(0, 0.2, 0)));
     cameraPosition.setY(40);
-    // cameraPosition.setX(0);
-    // cameraPosition.setZ(0);
 
     wDir.add(new THREE.Vector3(0, 0.2, 0));
     smoothedCameraPosition.lerp(cameraPosition, 5 * delta)
@@ -125,10 +137,9 @@ export default function Vehicle({ thirdPerson }) {
     <group ref={vehicle} name='vehicle'>
       <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
         <primitive object={mesh} position={[0, -0.7, -0.1]} />
-        <mesh ref={pivotRef} position={[0, 5, -10]} visible={false}>
-          <meshBasicMaterial transparent={true} opacity={0.3} />
-          <boxGeometry args={[2, 2, 2]} />
-        </mesh>
+        <object3D ref={pivotRef} position={[0, 5, -10]}>
+          <Camera />
+        </object3D>
       </group>
       <Wheel wheelRef={wheels[0]} radius={radius} />
       <Wheel wheelRef={wheels[1]} radius={radius} />

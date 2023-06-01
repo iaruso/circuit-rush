@@ -4,33 +4,36 @@ import * as THREE from 'three';
 import { useSphere } from '@react-three/cannon';
 import Cube from './Cube';
 import gsap from 'gsap';
+import { useControls } from 'leva';
 
 export default function Objects({ data, count }) {
   const { nodes } = useGLTF('./cube.glb');
-  const colors = ["#fff"];
+  const settings = useControls({
+    color2: '#fff'
+  });
+  const colors = [settings.color2];
+
 
   const material = new THREE.MeshStandardMaterial({
     color: "#fff",
-    roughness: 0.8,
-    metalness: 0.2,
-    // transparent: true,
-    // opacity: 0.5,
-    // emissive: "#fff",
-    // emissiveIntensity: 1,
+    roughness: 1,
+    metalness: 0.1,
+    transparent: true,
+    opacity: 0.8
   });
 
   const cubeInstanceRefs = useRef([]);
 
   const handleCollide = (e, index) => {
     if (e.body.userData.name === 'cube') {
-      const cubeMaterial = cubeInstanceRefs.current[index].color;
-      gsap.to(cubeMaterial, {
+      const cubeColor = cubeInstanceRefs.current[index].color;
+      gsap.to(cubeColor, {
         r: 1,
         g: 0,
         b: 0,
         duration: 1,
         onComplete: () => {
-          gsap.to(cubeMaterial, {
+          gsap.to(cubeColor, {
             r: 1,
             g: 1,
             b: 1,
@@ -38,7 +41,6 @@ export default function Objects({ data, count }) {
           });
         },
       });
-      
     }
   };
 

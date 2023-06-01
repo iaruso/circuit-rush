@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 export const Controls = (vehicleApi, chassisApi) => {
   let [controls, setControls] = useState({ });
 
@@ -29,7 +28,7 @@ export const Controls = (vehicleApi, chassisApi) => {
     } else if (controls.s) {
       vehicleApi.applyEngineForce(150, 2);
       vehicleApi.applyEngineForce(150, 3);
-    } else if (controls.l) {
+    } else if (controls.spacebar) {
       vehicleApi.applyEngineForce(150*4, 2);
       vehicleApi.applyEngineForce(150*4, 3);
     } else {

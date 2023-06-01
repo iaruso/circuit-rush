@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { useBox } from '@react-three/cannon';
 import { Instance } from '@react-three/drei';
+import { Selection, Select, EffectComposer, Outline } from '@react-three/postprocessing'
 
 export default function Cube({ position, rotation, color, onCollide, cubeInstanceRefs, index }) {
   const [cubeRef] = useBox(() => ({
