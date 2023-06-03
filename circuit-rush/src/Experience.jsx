@@ -9,7 +9,9 @@ import Vehicle from './Vehicle'
 import { Physics, Debug, usePlane, useTrimesh} from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
-import objects from '../public/objects'
+import cubes from '../public/cubes'
+import waypoints from '../public/waypoints'
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 
 function Plane(props) {
   const [ref] = usePlane(() => ({ type: 'Static', rotation: [-Math.PI / 2, 0, 0], restitution: 0.9, friction: 0.1, ...props }))
@@ -24,7 +26,7 @@ export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
   const count = 300;
-
+	const [cameraPosition, setCameraPosition] = useState([-6, 3.9, 6.21]);
   const { gX } = useControls({
     gX: {
       value: 0,
@@ -52,10 +54,18 @@ export default function Experience() {
     },
   })
 
-  const objectsArray = objects;
+  const cubesArray = cubes;
+	const waypointsArray = waypoints;
   
   const settings = useControls({
-    light: '#4e0ff'
+    ambientLight: '#fff',
+		directionalLight: '#fff',
+		intensity: {
+			value: 2,
+			min: 0,
+			max: 100,
+			step: 1,
+		}
   });
 
   const shadowCameraSize = 200
@@ -83,7 +93,6 @@ export default function Experience() {
   useEffect(() => {
     function keydownHandler(e) {
       if (e.key == "k") {
-        // random is necessary to trigger a state change
         if(thirdPerson) setCameraPosition([-6, 3.9, 6.21 + Math.random() * 0.01]);
         setThirdPerson(!thirdPerson); 
       }
@@ -98,15 +107,20 @@ export default function Experience() {
           ref={light} 
           castShadow 
           position={ [ -100, 100, -100 ] }
-          intensity={ 2 }
+          intensity={ settings.intensity }
           shadow-camera={shadowCamera}
+					color={settings.directionalLight}
         />
-        <ambientLight intensity={ 1 } color={settings.light}/>
+        <PerspectiveCamera makeDefault position={cameraPosition} fov={50}></PerspectiveCamera>
+				{!thirdPerson && (
+					<OrbitControls target={[0, 0, 0]} />
+				)}
+        <ambientLight intensity={ 1 } color={settings.ambientLight}/>
         <Environment files={'adamsbridge.hdr'} />
         <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true} timeStep="vary">
           {/* <Debug color="black" scale={1}> */}
             <PhysicsWorld />
-            <Objects data={objectsArray} count={objectsArray.length}/>
+            <Objects cubesData={cubesArray} cubesCount={cubesArray.length} waypointsData={waypointsArray} waypointsCount={waypointsArray.length}/>
             <Plane />
             <Vehicle thirdPerson={thirdPerson}/>
           {/* </Debug> */}

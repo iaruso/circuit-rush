@@ -19,7 +19,7 @@ export default function Circuit() {
         roughness: 1,
         metalness: 0,
         emissive: settings.color,
-        emissiveIntensity: 0.8,
+        emissiveIntensity: 1,
       });
       child.castShadow = true;
       child.receiveShadow = true;

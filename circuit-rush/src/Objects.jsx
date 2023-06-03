@@ -1,25 +1,31 @@
 import { useRef } from 'react';
-import { useGLTF, Instances } from '@react-three/drei';
+import { Instances, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { useSphere } from '@react-three/cannon';
 import Cube from './Cube';
 import gsap from 'gsap';
 import { useControls } from 'leva';
+import Waypoint from './Waypoint';
 
-export default function Objects({ data, count }) {
-  const { nodes } = useGLTF('./cube.glb');
+export default function Objects({ cubesData, cubesCount, waypointsData, waypointsCount }) {
+  const { nodes: cube } = useGLTF('./cube.glb');
+	const { nodes: waypoint } = useGLTF('./waypoint.glb');
+
+
+	console.log(waypoint);
   const settings = useControls({
     color2: '#fff'
   });
   const colors = [settings.color2];
+	const scale = [1, 1, 1];
 
 
   const material = new THREE.MeshStandardMaterial({
     color: "#fff",
     roughness: 1,
-    metalness: 0.1,
+    metalness: 0,
     transparent: true,
-    opacity: 0.8
+    opacity: 0.9
   });
 
   const cubeInstanceRefs = useRef([]);
@@ -46,16 +52,30 @@ export default function Objects({ data, count }) {
 
   return (
     <>
-      <Instances range={count} material={material} geometry={nodes.Cube.geometry} castShadow receiveShadow>
+      <Instances range={cubesCount} material={material} geometry={cube.Cube.geometry} castShadow receiveShadow>
         <group position={[0, 0, 0]}>
-          {data.map((props, i) => (
+          {cubesData.map((props, i) => (
             <group key={i}>
               <Cube
                 position={[props[0], 0.5, -props[1]]}
                 rotation={[0, props[2], 0]}
+								args={scale}
                 color={colors[i % colors.length]}
                 onCollide={(e) => handleCollide(e, i)}
                 cubeInstanceRefs={cubeInstanceRefs}
+                index={i}
+              />
+            </group>
+          ))}
+        </group>
+      </Instances>
+			<Instances range={waypointsCount} material={material} geometry={waypoint.Waypoint.geometry} castShadow receiveShadow>
+        <group position={[0, 0, 0]}>
+          {waypointsData.map((props, i) => (
+            <group key={i}>
+              <Waypoint
+                position={[props[0], 1, -props[1]]}
+                rotation={[0, (props[2] * Math.PI) / 180, 0]}
                 index={i}
               />
             </group>

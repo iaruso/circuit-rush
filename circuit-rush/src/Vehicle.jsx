@@ -124,11 +124,11 @@ export default function Vehicle({ thirdPerson }) {
     position2.setFromMatrixPosition(pivotRef.current.matrixWorld);
 
     let cameraPosition = position2.clone().add(wDir.clone().multiplyScalar(1).add(new THREE.Vector3(0, 0.2, 0)));
-    cameraPosition.setY(40);
+    cameraPosition.setY(30);
 
     wDir.add(new THREE.Vector3(0, 0.2, 0));
-    smoothedCameraPosition.lerp(cameraPosition, 5 * delta)
-    smoothedCameraTarget.lerp(position, 5 * delta)
+    smoothedCameraPosition.lerp(cameraPosition, 2 * delta)
+    smoothedCameraTarget.lerp(position, 6 * delta)
     state.camera.position.copy(smoothedCameraPosition);
     state.camera.lookAt(smoothedCameraTarget);
   });
@@ -138,7 +138,7 @@ export default function Vehicle({ thirdPerson }) {
       <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
         <primitive object={mesh} position={[0, -0.7, -0.1]} />
         <object3D ref={pivotRef} position={[0, 5, -10]}>
-          <Camera />
+          {/* <Camera /> */}
         </object3D>
       </group>
       <Wheel wheelRef={wheels[0]} radius={radius} />

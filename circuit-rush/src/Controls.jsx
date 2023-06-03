@@ -50,10 +50,10 @@ export const Controls = (vehicleApi, chassisApi) => {
     }
 
     if (controls.r) {
-      chassisApi.position.set(10.5, 2, 3);
+      chassisApi.position.set(44, 2, 3);
       chassisApi.velocity.set(0, 0, 0);
       chassisApi.angularVelocity.set(0, 0, 0);
-      chassisApi.rotation.set(0, 0, 0);
+      chassisApi.rotation.set(0, Math.PI, 0);
     }
   }, [controls, vehicleApi, chassisApi]);
 
