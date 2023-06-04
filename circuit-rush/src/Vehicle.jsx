@@ -137,7 +137,7 @@ export default function Vehicle({ thirdPerson }) {
     <group ref={vehicle} name='vehicle'>
       <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
         <primitive object={mesh} position={[0, -0.7, -0.1]} />
-        <object3D ref={pivotRef} position={[0, 5, -10]}>
+        <object3D ref={pivotRef} position={[0, 5, -20]}>
           {/* <Camera /> */}
         </object3D>
       </group>

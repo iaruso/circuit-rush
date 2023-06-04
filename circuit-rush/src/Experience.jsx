@@ -10,7 +10,8 @@ import { Physics, Debug, usePlane, useTrimesh} from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
 import cubes from '../public/cubes'
-import waypoints from '../public/waypoints'
+import waypointsLeft from '../public/waypoints-left'
+import waypointsRight from '../public/waypoints-right'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 
 function Plane(props) {
@@ -25,8 +26,10 @@ function Plane(props) {
 export default function Experience() {
   const { scene } = useThree()
   const light = useRef()
-  const count = 300;
 	const [cameraPosition, setCameraPosition] = useState([-6, 3.9, 6.21]);
+	 const cubesArray = cubes;
+	const waypointsLeftArray = waypointsLeft;
+	const waypointsRightArray = waypointsRight;
   const { gX } = useControls({
     gX: {
       value: 0,
@@ -53,9 +56,6 @@ export default function Experience() {
       step: 0.01,
     },
   })
-
-  const cubesArray = cubes;
-	const waypointsArray = waypoints;
   
   const settings = useControls({
     ambientLight: '#fff',
@@ -111,7 +111,7 @@ export default function Experience() {
           shadow-camera={shadowCamera}
 					color={settings.directionalLight}
         />
-        <PerspectiveCamera makeDefault position={cameraPosition} fov={50}></PerspectiveCamera>
+        <PerspectiveCamera makeDefault position={cameraPosition} fov={40}></PerspectiveCamera>
 				{!thirdPerson && (
 					<OrbitControls target={[0, 0, 0]} />
 				)}
@@ -120,7 +120,7 @@ export default function Experience() {
         <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true} timeStep="vary">
           {/* <Debug color="black" scale={1}> */}
             <PhysicsWorld />
-            <Objects cubesData={cubesArray} cubesCount={cubesArray.length} waypointsData={waypointsArray} waypointsCount={waypointsArray.length}/>
+            <Objects cubesData={cubesArray} cubesCount={cubesArray.length} waypointsRightData={waypointsRightArray} waypointsRightCount={waypointsRightArray.length} waypointsLeftData={waypointsLeftArray} waypointsLeftCount={waypointsLeft.length}/>
             <Plane />
             <Vehicle thirdPerson={thirdPerson}/>
           {/* </Debug> */}
