@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { useTexture, Clone, useGLTF } from '@react-three/drei';
@@ -16,8 +16,9 @@ import Camera from './Camera';
 export default function Vehicle({ thirdPerson }) {
   const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath('/draco-gltf/');
-  const [ smoothedCameraPosition ] = useState(() => new THREE.Vector3(10, 10, 10))
-  const [ smoothedCameraTarget ] = useState(() => new THREE.Vector3())
+  const smoothedCameraPosition = useRef(new THREE.Vector3(10, 10, 10))
+	const smoothedCameraQuaternion = useRef(new THREE.Quaternion())
+  const smoothedCameraTarget = useRef(new THREE.Vector3())
   const gltf = useLoader(GLTFLoader, './car.glb', (loader) => {
     loader.setDRACOLoader(dracoLoader);
   });
@@ -53,6 +54,8 @@ export default function Vehicle({ thirdPerson }) {
     }
   });
 
+const camera = useThree((state) => state.camera)
+
   const position = [5, 10, 5];
   const width = 1.7;
   const height = 1;
@@ -60,6 +63,8 @@ export default function Vehicle({ thirdPerson }) {
   const radius = 0.25;
 
   const pivotRef = useRef();
+	const lookRef = useRef();
+	const cameraRef = useRef();
 
   const chassisBodyArgs = [width, height, front * 2];
   const [chassisBody, chassisApi] = useBox(() => ({
@@ -106,40 +111,57 @@ export default function Vehicle({ thirdPerson }) {
       //   console.log(rotation)
       // }),
       [])
-
+	let view = new THREE.Vector3();
   useFrame((state, delta) => {
     if (!thirdPerson) return;
 
-    let position = new THREE.Vector3(0, 0, 0);
+    const position = new THREE.Vector3(0, 0, 0);
     position.setFromMatrixPosition(chassisBody.current.matrixWorld);
 
-    let quaternion = new THREE.Quaternion(0, 0, 0, 0);
+    const quaternion = new THREE.Quaternion(0, 0, 0, 0);
     quaternion.setFromRotationMatrix(chassisBody.current.matrixWorld);
 
-    let wDir = new THREE.Vector3(0, 0, -1);
-    wDir.applyQuaternion(quaternion);
-    wDir.normalize();
+    // let wDir = new THREE.Vector3(0, 0, -1);
+    // wDir.applyQuaternion(quaternion);
+    // wDir.normalize();
 
-    let position2 = new THREE.Vector3(0, 0, 0);
+    const position2 = new THREE.Vector3(0, 0, 0);
     position2.setFromMatrixPosition(pivotRef.current.matrixWorld);
+		const position3 = new THREE.Vector3(0, 0, 0);
+    position3.setFromMatrixPosition(lookRef.current.matrixWorld);
 
-    let cameraPosition = position2.clone().add(wDir.clone().multiplyScalar(1).add(new THREE.Vector3(0, 0.2, 0)));
-    cameraPosition.setY(30);
+		const quaternion2 = new THREE.Quaternion(0, 0, 0, 0);
+    quaternion2.setFromRotationMatrix(pivotRef.current.matrixWorld);
 
-    wDir.add(new THREE.Vector3(0, 0.2, 0));
-    smoothedCameraPosition.lerp(cameraPosition, 2 * delta)
-    smoothedCameraTarget.lerp(position, 6 * delta)
-    state.camera.position.copy(smoothedCameraPosition);
-    state.camera.lookAt(smoothedCameraTarget);
+		const offset = new THREE.Vector3(0, 20, -20);
+		offset.applyQuaternion(quaternion);
+		offset.add(position);
+
+		const lookAt = new THREE.Vector3(0, 1, 2);
+		lookAt.applyQuaternion(quaternion);
+		lookAt.add(position3);
+
+    // let cameraPosition = position2.clone().add(wDir.clone().multiplyScalar(1).add(new THREE.Vector3(0, 0.2, 0)));
+    // cameraPosition.setY(30);
+
+    // wDir.add(new THREE.Vector3(0, 0.2, 0));
+
+		const t = 1.0 - Math.pow(0.01, delta)
+		pivotRef.current.getWorldPosition(view)
+		camera.quaternion.copy(quaternion);
+    camera.position.copy(pivotRef.current.position);
+    camera.lookAt(position);
+		console.log(lookRef.current.position)
   });
 
   return (
     <group ref={vehicle} name='vehicle'>
       <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
         <primitive object={mesh} position={[0, -0.7, -0.1]} />
-        <object3D ref={pivotRef} position={[0, 5, -20]}>
-          {/* <Camera /> */}
+        <object3D ref={pivotRef} position={[0, 30, -20]}>
+          <Camera cameraRef={cameraRef}/>
         </object3D>
+				<object3D ref={lookRef} position={[0, 1, 2]}/>
       </group>
       <Wheel wheelRef={wheels[0]} radius={radius} />
       <Wheel wheelRef={wheels[1]} radius={radius} />

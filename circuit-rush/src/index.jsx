@@ -18,7 +18,7 @@ function App() {
         fov: 45,
         near: 0.01,
         far: 1000,
-        position: [4, 2, 6],
+        position: [0,0,0],
       }}
       style={{ backgroundColor: settings.bg }}
     >

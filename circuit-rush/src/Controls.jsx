@@ -23,8 +23,8 @@ export const Controls = (vehicleApi, chassisApi) => {
     if(!vehicleApi || !chassisApi) return;
 
     if (controls.w) {
-      vehicleApi.applyEngineForce(-150*2.5, 2);
-      vehicleApi.applyEngineForce(-150*2.5, 3);
+      vehicleApi.applyEngineForce(-150*3, 2);
+      vehicleApi.applyEngineForce(-150*3, 3);
     } else if (controls.s) {
       vehicleApi.applyEngineForce(150, 2);
       vehicleApi.applyEngineForce(150, 3);

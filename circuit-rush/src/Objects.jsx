@@ -10,15 +10,15 @@ import Arrow from './Arrow';
 const cubeMaterial = new THREE.MeshStandardMaterial({
 	color: "#fff",
 	roughness: 1,
-	metalness: 0,
-	transparent: true,
-	opacity: 0.9
+	metalness: 0
 });
 
 const waypointMaterial = new THREE.MeshStandardMaterial({
 	color: "#fff",
 	roughness: 1,
-	metalness: 0
+	metalness: 0,
+	emissive: "#fff",
+	emissiveIntensity: 0.1,
 });
 
 export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsRightCount, waypointsLeftData, waypointsLeftCount}) {

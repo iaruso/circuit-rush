@@ -89,7 +89,7 @@ export default function Experience() {
     light.current.shadow.mapSize.width = 4096*2
     light.current.shadow.mapSize.height = 4096*2
   }, [light, shadowCamera, scene])
-
+	const cameraRef = useRef();
   useEffect(() => {
     function keydownHandler(e) {
       if (e.key == "k") {
@@ -111,10 +111,8 @@ export default function Experience() {
           shadow-camera={shadowCamera}
 					color={settings.directionalLight}
         />
-        <PerspectiveCamera makeDefault position={cameraPosition} fov={40}></PerspectiveCamera>
-				{!thirdPerson && (
-					<OrbitControls target={[0, 0, 0]} />
-				)}
+        {/* <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} ref={cameraRef} />*/}
+      	<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} />
         <ambientLight intensity={ 1 } color={settings.ambientLight}/>
         <Environment files={'adamsbridge.hdr'} />
         <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true} timeStep="vary">
