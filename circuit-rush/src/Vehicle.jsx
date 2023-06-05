@@ -121,44 +121,24 @@ const camera = useThree((state) => state.camera)
     const quaternion = new THREE.Quaternion(0, 0, 0, 0);
     quaternion.setFromRotationMatrix(chassisBody.current.matrixWorld);
 
-    // let wDir = new THREE.Vector3(0, 0, -1);
-    // wDir.applyQuaternion(quaternion);
-    // wDir.normalize();
-
     const position2 = new THREE.Vector3(0, 0, 0);
     position2.setFromMatrixPosition(pivotRef.current.matrixWorld);
-		const position3 = new THREE.Vector3(0, 0, 0);
-    position3.setFromMatrixPosition(lookRef.current.matrixWorld);
-
-		const quaternion2 = new THREE.Quaternion(0, 0, 0, 0);
-    quaternion2.setFromRotationMatrix(pivotRef.current.matrixWorld);
 
 		const offset = new THREE.Vector3(0, 20, -20);
 		offset.applyQuaternion(quaternion);
 		offset.add(position);
 
-		const lookAt = new THREE.Vector3(0, 1, 2);
-		lookAt.applyQuaternion(quaternion);
-		lookAt.add(position3);
-
-    // let cameraPosition = position2.clone().add(wDir.clone().multiplyScalar(1).add(new THREE.Vector3(0, 0.2, 0)));
-    // cameraPosition.setY(30);
-
-    // wDir.add(new THREE.Vector3(0, 0.2, 0));
-
-		const t = 1.0 - Math.pow(0.01, delta)
 		pivotRef.current.getWorldPosition(view)
 		camera.quaternion.copy(quaternion);
     camera.position.copy(pivotRef.current.position);
     camera.lookAt(position);
-		console.log(lookRef.current.position)
   });
 
   return (
     <group ref={vehicle} name='vehicle'>
       <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
         <primitive object={mesh} position={[0, -0.7, -0.1]} />
-        <object3D ref={pivotRef} position={[0, 30, -20]}>
+        <object3D ref={pivotRef} position={[0, 30, -30]}>
           <Camera cameraRef={cameraRef}/>
         </object3D>
 				<object3D ref={lookRef} position={[0, 1, 2]}/>
