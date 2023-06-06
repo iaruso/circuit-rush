@@ -110,12 +110,13 @@ export default function Experience() {
           intensity={ settings.intensity }
           shadow-camera={shadowCamera}
 					color={settings.directionalLight}
+					radius={10}
+					blurSamples={20}
         />
-        {/* <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} ref={cameraRef} />*/}
-      	<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} />
+      	<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
         <ambientLight intensity={ 1 } color={settings.ambientLight}/>
-        <Environment files={'adamsbridge.hdr'} />
-        <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true} timeStep="vary">
+        <Environment files={'studio.hdr'} />
+        <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true} timeStep={0}>
           {/* <Debug color="black" scale={1}> */}
             <PhysicsWorld />
             <Objects cubesData={cubesArray} cubesCount={cubesArray.length} waypointsRightData={waypointsRightArray} waypointsRightCount={waypointsRightArray.length} waypointsLeftData={waypointsLeftArray} waypointsLeftCount={waypointsLeft.length}/>

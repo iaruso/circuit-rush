@@ -1,5 +1,6 @@
 import { useCompoundBody } from "@react-three/cannon";
 import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 
 export const Wheels = (width, height, front, radius) => {
   const wheels = [useRef(null), useRef(null), useRef(null), useRef(null)];
@@ -9,36 +10,36 @@ export const Wheels = (width, height, front, radius) => {
     directionLocal: [0, -1, 0],
     axleLocal: [-1, 0, 0],
     suspensionStiffness: 50,
-    suspensionRestLength: 0.1,
+    suspensionRestLength: 0.5,
     frictionSlip: 5,
     dampingRelaxation: 2.5,
     dampingCompression: 5,
-    maxSuspensionForce: 100000,
-    rollInfluence: 0.1,
-    maxSuspensionTravel: 0.1,
-    customSlidingRotationalSpeed: -50,
+    maxSuspensionForce: 200000,
+    rollInfluence: 0.01,
+    maxSuspensionTravel: 0.25,
+    customSlidingRotationalSpeed: -5,
     useCustomSlidingRotationalSpeed: true,
   };
 
   const wheelInfos = [
     {
       ...wheelInfo,
-      chassisConnectionPointLocal: [-0.7,  - 0.35, -front + 0.65],
+      chassisConnectionPointLocal: [-0.7, 0.05, -front + 0.65],
       isFrontWheel: false,
     },
     {
       ...wheelInfo,
-      chassisConnectionPointLocal: [0.7, - 0.35, -front + 0.65],
+      chassisConnectionPointLocal: [0.7, 0.05, -front + 0.65],
       isFrontWheel: false,
     },
     {
       ...wheelInfo,
-      chassisConnectionPointLocal: [-0.7,  - 0.35, front - 0.65],
+      chassisConnectionPointLocal: [-0.7, 0.05, front - 0.65],
       isFrontWheel: true,
     },
     {
       ...wheelInfo,
-      chassisConnectionPointLocal: [0.7, - 0.35, front - 0.65],
+      chassisConnectionPointLocal: [0.7, 0.05, front - 0.65],
       isFrontWheel: true,
     },
   ];
@@ -61,5 +62,8 @@ export const Wheels = (width, height, front, radius) => {
   useCompoundBody(propsFunc, wheels[2]);
   useCompoundBody(propsFunc, wheels[3]);
 
+	useFrame((state, delta) => {
+		// console.log(wheels[0].current)
+	});
   return [wheels, wheelInfos];
 };

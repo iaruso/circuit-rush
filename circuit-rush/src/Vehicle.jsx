@@ -14,11 +14,12 @@ import { Controls } from './Controls';
 import Camera from './Camera';
 
 export default function Vehicle({ thirdPerson }) {
+	const camera = useThree((state) => state.camera)
+	const cameraRef = useRef();
+  const lookRef = useRef();
+
   const dracoLoader = new DRACOLoader();
   dracoLoader.setDecoderPath('/draco-gltf/');
-  const smoothedCameraPosition = useRef(new THREE.Vector3(10, 10, 10))
-	const smoothedCameraQuaternion = useRef(new THREE.Quaternion())
-  const smoothedCameraTarget = useRef(new THREE.Vector3())
   const gltf = useLoader(GLTFLoader, './car.glb', (loader) => {
     loader.setDRACOLoader(dracoLoader);
   });
@@ -54,23 +55,17 @@ export default function Vehicle({ thirdPerson }) {
     }
   });
 
-const camera = useThree((state) => state.camera)
-
   const position = [5, 10, 5];
   const width = 1.7;
   const height = 1;
   const front = 1.85;
   const radius = 0.25;
 
-  const pivotRef = useRef();
-	const lookRef = useRef();
-	const cameraRef = useRef();
-
   const chassisBodyArgs = [width, height, front * 2];
   const [chassisBody, chassisApi] = useBox(() => ({
     allowSleep: false,
     args: chassisBodyArgs,
-    mass: 100,
+    mass: 400,
     position,
     userData: {
       name: 'vehicle',
@@ -111,37 +106,28 @@ const camera = useThree((state) => state.camera)
       //   console.log(rotation)
       // }),
       [])
-	let view = new THREE.Vector3();
+
   useFrame((state, delta) => {
-    if (!thirdPerson) return;
+  if (!thirdPerson) return;
 
-    const position = new THREE.Vector3(0, 0, 0);
-    position.setFromMatrixPosition(chassisBody.current.matrixWorld);
+  const position = new THREE.Vector3(0, 0, 0);
+  position.setFromMatrixPosition(lookRef.current.matrixWorld); // Add (0, 2, -5) to the position vector
 
-    const quaternion = new THREE.Quaternion(0, 0, 0, 0);
-    quaternion.setFromRotationMatrix(chassisBody.current.matrixWorld);
+  const currentCamera = new THREE.Vector3(0, 0, 0);
+  currentCamera.setFromMatrixPosition(camera.matrixWorld);
 
-    const position2 = new THREE.Vector3(0, 0, 0);
-    position2.setFromMatrixPosition(pivotRef.current.matrixWorld);
+  camera.lookAt(position);
+});
 
-		const offset = new THREE.Vector3(0, 20, -20);
-		offset.applyQuaternion(quaternion);
-		offset.add(position);
-
-		pivotRef.current.getWorldPosition(view)
-		camera.quaternion.copy(quaternion);
-    camera.position.copy(pivotRef.current.position);
-    camera.lookAt(position);
-  });
 
   return (
     <group ref={vehicle} name='vehicle'>
       <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
         <primitive object={mesh} position={[0, -0.7, -0.1]} />
-        <object3D ref={pivotRef} position={[0, 30, -30]}>
-          <Camera cameraRef={cameraRef}/>
-        </object3D>
-				<object3D ref={lookRef} position={[0, 1, 2]}/>
+				<object3D ref={lookRef} position={[0, 2, 0]}>
+					<Camera ref={cameraRef} cameraRef={cameraRef} position={[0, 20, -24]}/>
+				</object3D>
+				
       </group>
       <Wheel wheelRef={wheels[0]} radius={radius} />
       <Wheel wheelRef={wheels[1]} radius={radius} />

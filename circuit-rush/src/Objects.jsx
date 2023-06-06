@@ -18,7 +18,7 @@ const waypointMaterial = new THREE.MeshStandardMaterial({
 	roughness: 1,
 	metalness: 0,
 	emissive: "#fff",
-	emissiveIntensity: 0.1,
+	emissiveIntensity: 0.1
 });
 
 export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsRightCount, waypointsLeftData, waypointsLeftCount}) {
@@ -38,25 +38,37 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
 	const arrowRightInstanceRefs = useRef([]);
 	const arrowLeftInstanceRefs = useRef([]);
 
-  const handleCollide = (e, index) => {
-    if (e.body.userData.name === 'cube') {
-      const cubeColor = cubeInstanceRefs.current[index].color;
-      gsap.to(cubeColor, {
-        r: 1,
-        g: 0,
-        b: 0,
-        duration: 1,
-        onComplete: () => {
-          gsap.to(cubeColor, {
-            r: 1,
-            g: 1,
-            b: 1,
-            duration: 1,
-          });
-        },
-      });
-    }
-  };
+  let enableCollisionHandling = false;
+
+	setTimeout(() => {
+		enableCollisionHandling = true;
+	}, 1000);
+
+	const handleCollide = (e, index) => {
+		if (!enableCollisionHandling) {
+			return;
+		}
+
+		const cubeColor = cubeInstanceRefs.current[index].color;
+		animateColor(cubeColor, { r: 1, g: 0, b: 0 }, { r: 1, g: 1, b: 1 });
+	};
+
+	const animateColor = (color, startColor, endColor) => {
+		gsap.to(color, {
+			r: startColor.r,
+			g: startColor.g,
+			b: startColor.b,
+			duration: 1,
+			onComplete: () => {
+				gsap.to(color, {
+					r: endColor.r,
+					g: endColor.g,
+					b: endColor.b,
+					duration: 1,
+				});
+			},
+		});
+	};
 
   return (
     <>

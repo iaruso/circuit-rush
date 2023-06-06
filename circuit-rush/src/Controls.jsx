@@ -15,8 +15,8 @@ export const Controls = (vehicleApi, chassisApi) => {
 
     if (forward && !isForwardPressed) {
       setIsForwardPressed(true);
-      vehicleApi.applyEngineForce(-150 * 3, 2);
-      vehicleApi.applyEngineForce(-150 * 3, 3);
+      vehicleApi.applyEngineForce(-500 * 3, 2);
+      vehicleApi.applyEngineForce(-500 * 3, 3);
     } else if (!forward && isForwardPressed) {
       setIsForwardPressed(false);
       vehicleApi.applyEngineForce(0, 2);
@@ -25,8 +25,8 @@ export const Controls = (vehicleApi, chassisApi) => {
 
     if (backward && !isBackwardPressed) {
       setIsBackwardPressed(true);
-      vehicleApi.applyEngineForce(150, 2);
-      vehicleApi.applyEngineForce(150, 3);
+      vehicleApi.applyEngineForce(300, 2);
+      vehicleApi.applyEngineForce(300, 3);
     } else if (!backward && isBackwardPressed) {
       setIsBackwardPressed(false);
       vehicleApi.applyEngineForce(0, 2);
@@ -35,12 +35,12 @@ export const Controls = (vehicleApi, chassisApi) => {
 
     if (brake && !isBrakePressed) {
       setIsBrakePressed(true);
-      vehicleApi.applyEngineForce(150 * 4, 2);
-      vehicleApi.applyEngineForce(150 * 4, 3);
+      vehicleApi.setBrake(20, 2);
+      vehicleApi.setBrake(20, 3);
     } else if (!brake && isBrakePressed) {
       setIsBrakePressed(false);
-      vehicleApi.applyEngineForce(0, 2);
-      vehicleApi.applyEngineForce(0, 3);
+      vehicleApi.setBrake(0, 2);
+      vehicleApi.setBrake(0, 3);
     }
 
 		if (leftward) {
@@ -56,7 +56,7 @@ export const Controls = (vehicleApi, chassisApi) => {
     }
 
 		if (reset) {
-      chassisApi.position.set(44, 2, 3);
+      chassisApi.position.set(44, 0.49, 2);
       chassisApi.velocity.set(0, 0, 0);
       chassisApi.angularVelocity.set(0, 0, 0);
       chassisApi.rotation.set(0, Math.PI, 0);
