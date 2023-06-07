@@ -4,71 +4,41 @@ import { Environment } from '@react-three/drei'
 import { Perf } from 'r3f-perf'
 import * as THREE from 'three'
 import Circuit from './Circuit'
-import { useControls } from 'leva'
 import Vehicle from './Vehicle'
-import { Physics, Debug, usePlane, useTrimesh} from '@react-three/cannon'
+import { Physics, Debug, usePlane } from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
 import cubes from '../public/cubes'
 import waypointsLeft from '../public/waypoints-left'
 import waypointsRight from '../public/waypoints-right'
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 
 function Plane(props) {
-  const [ref] = usePlane(() => ({ type: 'Static', rotation: [-Math.PI / 2, 0, 0], restitution: 0.9, friction: 0.1, ...props }))
+  const [ref] = usePlane(() => ({
+    type: 'Static',
+    rotation: [-Math.PI / 2, 0, 0],
+    restitution: 0.9,
+    friction: 0.1,
+    ...props,
+  }));
+
   return (
-    <mesh ref={ref} rotation={[-Math.PI/2, 0, 0]} visible={false}>
+    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
       <planeGeometry args={[200, 200]} />
     </mesh>
-  )
+  );
 }
 
 export default function Experience() {
-  const { scene } = useThree()
-  const light = useRef()
-	const [cameraPosition, setCameraPosition] = useState([-6, 3.9, 6.21]);
-	 const cubesArray = cubes;
-	const waypointsLeftArray = waypointsLeft;
-	const waypointsRightArray = waypointsRight;
-  const { gX } = useControls({
-    gX: {
-      value: 0,
-      min: -10,
-      max: 10,
-      step: 0.01,
-    },
-  })
+  const { scene } = useThree();
+  const light = useRef();
+  const cameraRef = useRef();
+  const [cameraPosition, setCameraPosition] = useState([-6, 3.9, 6.21]);
+  const cubesArray = cubes;
+  const waypointsLeftArray = waypointsLeft;
+  const waypointsRightArray = waypointsRight;
 
-  const { gY } = useControls({
-    gY: {
-      value: -9.81,
-      min: -10,
-      max: 10,
-      step: 0.01,
-    },
-  })
-
-  const { gZ } = useControls({
-    gZ: {
-      value: 0,
-      min: -10,
-      max: 10,
-      step: 0.01,
-    },
-  })
-  
-  const settings = useControls({
-    ambientLight: '#fff',
-		directionalLight: '#fff',
-		intensity: {
-			value: 2,
-			min: 0,
-			max: 100,
-			step: 1,
-		}
-  });
-
-  const shadowCameraSize = 200
+  const shadowCameraSize = 200;
   const shadowCamera = new THREE.OrthographicCamera(
     -shadowCameraSize,
     shadowCameraSize,
@@ -76,54 +46,61 @@ export default function Experience() {
     -shadowCameraSize,
     2,
     500
-  )
+  );
 
-    
   const [thirdPerson, setThirdPerson] = useState(true);
 
   useEffect(() => {
-    if (!light.current) return
+    if (!light.current) return;
     light.current.shadowCameraVisible = true;
-    light.current.shadow.camera = shadowCamera
-    light.current.shadow.bias = 0.01
-    light.current.shadow.mapSize.width = 4096*2
-    light.current.shadow.mapSize.height = 4096*2
-  }, [light, shadowCamera, scene])
-	const cameraRef = useRef();
+    light.current.shadow.camera = shadowCamera;
+    light.current.shadow.bias = 0.0001;
+    light.current.shadow.mapSize.width = 4096/4;
+    light.current.shadow.mapSize.height = 4096/4;
+  }, [light, shadowCamera, scene]);
+
   useEffect(() => {
     function keydownHandler(e) {
-      if (e.key == "k") {
-        if(thirdPerson) setCameraPosition([-6, 3.9, 6.21 + Math.random() * 0.01]);
-        setThirdPerson(!thirdPerson); 
+      if (e.key === 'k') {
+        if (thirdPerson) setCameraPosition([-6, 3.9, 6.21 + Math.random() * 0.01]);
+        setThirdPerson(!thirdPerson);
       }
     }
 
-    window.addEventListener("keydown", keydownHandler);
-    return () => window.removeEventListener("keydown", keydownHandler);
+    window.addEventListener('keydown', keydownHandler);
+    return () => window.removeEventListener('keydown', keydownHandler);
   }, [thirdPerson]);
-    return <>
-        <Perf position="top-left" />
-        <directionalLight 
-          ref={light} 
-          castShadow 
-          position={ [ -100, 100, -100 ] }
-          intensity={ settings.intensity }
-          shadow-camera={shadowCamera}
-					color={settings.directionalLight}
-					radius={10}
-					blurSamples={20}
+
+  return (
+    <>
+      <directionalLight
+        ref={light}
+        castShadow
+        position={[-100, 100, -100]}
+        intensity={2}
+        shadow-camera={shadowCamera}
+        color={'#fff'}
+        radius={10}
+        blurSamples={20}
+      />
+      <OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
+      <ambientLight intensity={1} color={'#fff'} />
+      <Environment files={'studio.hdr'} />
+      <Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
+        <PhysicsWorld />
+        <Objects
+          cubesData={cubesArray}
+          cubesCount={cubesArray.length}
+          waypointsRightData={waypointsRightArray}
+          waypointsRightCount={waypointsRightArray.length}
+          waypointsLeftData={waypointsLeftArray}
+          waypointsLeftCount={waypointsLeft.length}
         />
-      	<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
-        <ambientLight intensity={ 1 } color={settings.ambientLight}/>
-        <Environment files={'studio.hdr'} />
-        <Physics gravity={[gX, gY, gZ]} broadphase={'SAP'} allowSleep={true} timeStep={0}>
-          {/* <Debug color="black" scale={1}> */}
-            <PhysicsWorld />
-            <Objects cubesData={cubesArray} cubesCount={cubesArray.length} waypointsRightData={waypointsRightArray} waypointsRightCount={waypointsRightArray.length} waypointsLeftData={waypointsLeftArray} waypointsLeftCount={waypointsLeft.length}/>
-            <Plane />
-            <Vehicle thirdPerson={thirdPerson}/>
-          {/* </Debug> */}
-        </Physics>
-        <Circuit />
+        <Plane />
+        <Vehicle thirdPerson={thirdPerson} />
+      </Physics>
+      <Perf position="top-right" minimal={true} overClock antialias />
+      <Circuit />
     </>
+  );
 }

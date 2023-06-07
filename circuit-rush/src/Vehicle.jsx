@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { useTexture, Clone, useGLTF } from '@react-three/drei';
+import { useGLTF } from '@react-three/drei';
 import { PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import { useControls } from 'leva';
@@ -14,22 +14,24 @@ import { Controls } from './Controls';
 import Camera from './Camera';
 
 export default function Vehicle({ thirdPerson }) {
-	const camera = useThree((state) => state.camera)
-	const cameraRef = useRef();
+  const camera = useThree((state) => state.camera);
+  const cameraRef = useRef();
   const lookRef = useRef();
 
-  const dracoLoader = new DRACOLoader();
-  dracoLoader.setDecoderPath('/draco-gltf/');
-  const gltf = useLoader(GLTFLoader, './car.glb', (loader) => {
-    loader.setDRACOLoader(dracoLoader);
-  });
-  const mesh = gltf.scene;
+	const dracoLoader = new DRACOLoader();
+	dracoLoader.setDecoderPath('/draco-gltf/');
+	const gltf = useLoader(GLTFLoader, './car.glb', (loader) => {
+		loader.setDRACOLoader(dracoLoader);
+	});
+	const mesh = gltf.scene;
 
   mesh.traverse((child) => {
     if (child.isMesh) {
       const materialParams = {
         roughness: 1,
         metalness: 0,
+        emissive: "#fff",
+        emissiveIntensity: 1
       };
       if (child.name === 'Backlights') {
         materialParams.color = '#ff0000';
@@ -81,53 +83,50 @@ export default function Vehicle({ thirdPerson }) {
       wheels,
     }),
     useRef(null),
-  );;
+  );
 
-  Controls(vehicleApi, chassisApi)
+  Controls(vehicleApi, chassisApi);
 
   useEffect(() => {
     mesh.scale.set(1, 1, 1);
   }, [mesh]);
 
-  var speed = useRef();
-  var direction = useRef();
-  var rotation = useRef();
+  const speed = useRef();
+  const direction = useRef();
+  const rotation = useRef();
   const v = new THREE.Vector3();
   const v2 = new THREE.Vector3();
-  useEffect(() =>
-      chassisApi.velocity.subscribe((velocity) => {
-        speed = v.set(...velocity).length()
-        var uua = new CANNON.Vec3(0, 0, 1);
-        direction = v.set(...velocity).dot(uua)
-        
-      }),
-      // chassisApi.rotation.subscribe((rotation) => {
-      //  rotation = v2.set(...rotation).length()
-      //   console.log(rotation)
-      // }),
-      [])
+  useEffect(() => {
+    chassisApi.velocity.subscribe((velocity) => {
+      speed.current = v.set(...velocity).length();
+      const uua = new CANNON.Vec3(0, 0, 1);
+      direction.current = v.set(...velocity).dot(uua);
+    });
+    // chassisApi.rotation.subscribe((rotation) => {
+    //   rotation.current = v2.set(...rotation).length();
+    //   console.log(rotation);
+    // });
+  }, []);
 
   useFrame((state, delta) => {
-  if (!thirdPerson) return;
+    if (!thirdPerson) return;
 
-  const position = new THREE.Vector3(0, 0, 0);
-  position.setFromMatrixPosition(lookRef.current.matrixWorld); // Add (0, 2, -5) to the position vector
+    const position = new THREE.Vector3(0, 0, 0);
+    position.setFromMatrixPosition(lookRef.current.matrixWorld);
 
-  const currentCamera = new THREE.Vector3(0, 0, 0);
-  currentCamera.setFromMatrixPosition(camera.matrixWorld);
+    const currentCamera = new THREE.Vector3(0, 0, 0);
+    currentCamera.setFromMatrixPosition(camera.matrixWorld);
 
-  camera.lookAt(position);
-});
-
+    camera.lookAt(position);
+  });
 
   return (
     <group ref={vehicle} name='vehicle'>
       <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
         <primitive object={mesh} position={[0, -0.7, -0.1]} />
-				<object3D ref={lookRef} position={[0, 2, 0]}>
-					<Camera ref={cameraRef} cameraRef={cameraRef} position={[0, 20, -24]}/>
-				</object3D>
-				
+        <object3D ref={lookRef} position={[0, 2, 0]}>
+          <Camera ref={cameraRef} cameraRef={cameraRef} position={[0, 40, -10]} />
+        </object3D>
       </group>
       <Wheel wheelRef={wheels[0]} radius={radius} />
       <Wheel wheelRef={wheels[1]} radius={radius} />

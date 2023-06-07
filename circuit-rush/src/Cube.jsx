@@ -6,7 +6,7 @@ import gsap from 'gsap';
 
 export default function Cube({ position, rotation, color, args, onCollide, cubeInstanceRefs, index }) {
   const [cubeRef] = useBox(() => ({
-    mass: 0.1,
+    mass: 1,
     args,
     position,
     rotation,

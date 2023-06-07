@@ -2,15 +2,15 @@ import './style.css';
 import ReactDOM from 'react-dom';
 import { Canvas } from '@react-three/fiber';
 import Experience from './Experience.jsx';
-import { useControls } from 'leva';
+import useGame from './stores/Game.jsx'
+import Interface from './Interface.jsx'
 import UserControls from './UserControls';
+import { Perf, usePerf } from 'r3f-perf';
 
 const root = ReactDOM.createRoot(document.querySelector('#root'));
 function App() {
-  const settings = useControls({
-    bg: '#f4f5f7',
-  });
-  
+	const start = useGame((state) => state.start)
+  start()
   return (
 		<UserControls>
 			<Canvas
@@ -21,11 +21,13 @@ function App() {
 					far: 1000,
 					position: [0,0,0],
 				}}
-				style={{ backgroundColor: settings.bg }}
+				style={{ backgroundColor: '#f4f5f7' }}
 			>
 				<color attach="background" args={['#f4f5f7']} />
 				<Experience />
+				<Perf position="top-right" minimal={true}/>
 			</Canvas>
+			<Interface/>
 		</UserControls>
   );
 }

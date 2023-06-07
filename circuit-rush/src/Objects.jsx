@@ -1,16 +1,17 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { Instances, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import Cube from './Cube';
 import gsap from 'gsap';
-import { useControls } from 'leva';
 import Waypoint from './Waypoint';
 import Arrow from './Arrow';
 
 const cubeMaterial = new THREE.MeshStandardMaterial({
 	color: "#fff",
 	roughness: 1,
-	metalness: 0
+	metalness: 0,
+	emissive: "#fff",
+	emissiveIntensity: 0.2
 });
 
 const waypointMaterial = new THREE.MeshStandardMaterial({
@@ -27,11 +28,8 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
 	const { nodes: arrowRight } = useGLTF('./arrow-right.glb');
 	const { nodes: waypointLeft } = useGLTF('./waypoint-left.glb');
 	const { nodes: arrowLeft } = useGLTF('./arrow-left.glb');
-  const settings = useControls({
-    color: '#fff',
-		arrow: '#cc8080'
-  });
-  const colors = [settings.color, settings.arrow];
+
+  const colors = ['#fff', '#cc8080'];
 	const scale = [1, 1, 1];
 
   const cubeInstanceRefs = useRef([]);
@@ -126,4 +124,3 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
     </>
   );
 }
-
