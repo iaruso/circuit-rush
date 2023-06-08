@@ -6,9 +6,12 @@ import useGame from './stores/Game.jsx'
 import Interface from './Interface.jsx'
 import UserControls from './UserControls';
 import { Perf, usePerf } from 'r3f-perf';
+import { useDetectGPU } from '@react-three/drei';
 
 const root = ReactDOM.createRoot(document.querySelector('#root'));
 function App() {
+	const GPUTier = useDetectGPU()
+	console.log(GPUTier)
 	const start = useGame((state) => state.start)
   start()
   return (

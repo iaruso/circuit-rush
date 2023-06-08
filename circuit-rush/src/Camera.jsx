@@ -1,7 +1,7 @@
 import { PerspectiveCamera } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { forwardRef } from 'react';
-import { EffectComposer, BrightnessContrast } from '@react-three/postprocessing';
+import { EffectComposer, BrightnessContrast, ColorDepth } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
 const Camera = forwardRef((props, ref) => {
@@ -12,10 +12,10 @@ const Camera = forwardRef((props, ref) => {
   });
 
   return <PerspectiveCamera makeDefault ref={ref} fov={32} {...props}>
-		<EffectComposer>
-
-			<BrightnessContrast brightness={-0.2} contrast={0.4} />
-		</EffectComposer>
+		{/* <EffectComposer>
+			<BrightnessContrast brightness={-0.2} contrast={0.4}/>
+			<ColorDepth bits={8} opacity={0.2}/>
+		</EffectComposer> */}
 	</PerspectiveCamera>;	
 });
 

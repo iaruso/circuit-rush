@@ -2,7 +2,7 @@ import { useCompoundBody } from "@react-three/cannon";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 
-export const Wheels = (width, height, front, radius) => {
+export const Wheels = (width, height, front, radius, speed) => {
   const wheels = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
   const wheelInfo = {

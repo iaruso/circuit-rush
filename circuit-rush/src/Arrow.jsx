@@ -11,9 +11,9 @@ export default function Arrow({ position, rotation, index, color, refs }) {
       const arrow = arrowRef.current.color;
       const delay = isFirstInteraction.current ? index * (1 / 7) : 1;
       gsap.to(arrow, {
-        r: 1,
-        g: 0,
-        b: 0,
+        r: 1.0,
+        g: 0.05,
+        b: 0.05,
         duration: 0.5,
         delay: delay,
         onComplete: () => {

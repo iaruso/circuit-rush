@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Instances, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import Cube from './Cube';
@@ -22,7 +22,7 @@ const waypointMaterial = new THREE.MeshStandardMaterial({
 	emissiveIntensity: 0.1
 });
 
-export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsRightCount, waypointsLeftData, waypointsLeftCount}) {
+export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsLeftData }) {
   const { nodes: cube } = useGLTF('./cube.glb');
 	const { nodes: waypointRight } = useGLTF('./waypoint-right.glb');
 	const { nodes: arrowRight } = useGLTF('./arrow-right.glb');
@@ -35,18 +35,22 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
   const cubeInstanceRefs = useRef([]);
 	const arrowRightInstanceRefs = useRef([]);
 	const arrowLeftInstanceRefs = useRef([]);
+	const enableCollisionHandlingRef = useRef(false);
 
-  let enableCollisionHandling = false;
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			enableCollisionHandlingRef.current = true;
+		}, 1000);
 
-	setTimeout(() => {
-		enableCollisionHandling = true;
-	}, 1000);
+		return () => {
+			clearTimeout(timeoutId);
+		};
+	}, []);
 
 	const handleCollide = (e, index) => {
-		if (!enableCollisionHandling) {
+		if (!enableCollisionHandlingRef.current) {
 			return;
 		}
-
 		const cubeColor = cubeInstanceRefs.current[index].color;
 		animateColor(cubeColor, { r: 1, g: 0, b: 0 }, { r: 1, g: 1, b: 1 });
 	};

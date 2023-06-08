@@ -29,6 +29,7 @@ html, body, #root {
 	background: #00000033;
 	padding-top: 5px;
 	text-align: center;
+	font-variant-numeric: tabular-nums;
 }
 
 .restart {

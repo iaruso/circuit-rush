@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useThree } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { Perf } from 'r3f-perf'
@@ -55,8 +55,8 @@ export default function Experience() {
     light.current.shadowCameraVisible = true;
     light.current.shadow.camera = shadowCamera;
     light.current.shadow.bias = 0.0001;
-    light.current.shadow.mapSize.width = 4096/4;
-    light.current.shadow.mapSize.height = 4096/4;
+    light.current.shadow.mapSize.width = 4096*2;
+    light.current.shadow.mapSize.height = 4096*2;
   }, [light, shadowCamera, scene]);
 
   useEffect(() => {
@@ -83,19 +83,26 @@ export default function Experience() {
         radius={10}
         blurSamples={20}
       />
+			<pointLight position={[100, 100, 100]} intensity={0.2} color={'#3865fc'} />
+			<pointLight position={[-100, 100, -100]} intensity={0.2} color={'#ff6f00'} />
       <OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
+			{!thirdPerson && (
+				<OrbitControls />
+			)}
       <ambientLight intensity={1} color={'#fff'} />
       <Environment files={'studio.hdr'} />
       <Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
         <PhysicsWorld />
-        <Objects
-          cubesData={cubesArray}
-          cubesCount={cubesArray.length}
-          waypointsRightData={waypointsRightArray}
-          waypointsRightCount={waypointsRightArray.length}
-          waypointsLeftData={waypointsLeftArray}
-          waypointsLeftCount={waypointsLeft.length}
-        />
+				<Suspense>
+					<Objects
+						cubesData={cubesArray}
+						cubesCount={cubesArray.length}
+						waypointsRightData={waypointsRightArray}
+						waypointsRightCount={waypointsRightArray.length}
+						waypointsLeftData={waypointsLeftArray}
+						waypointsLeftCount={waypointsLeft.length}
+					/>
+				</Suspense>
         <Plane />
         <Vehicle thirdPerson={thirdPerson} />
       </Physics>
