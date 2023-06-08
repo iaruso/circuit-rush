@@ -11,7 +11,7 @@ const Camera = forwardRef((props, ref) => {
     // console.log(position2);
   });
 
-  return <PerspectiveCamera makeDefault ref={ref} fov={32} {...props}>
+  return <PerspectiveCamera makeDefault ref={ref} fov={24} {...props}>
 		{/* <EffectComposer>
 			<BrightnessContrast brightness={-0.2} contrast={0.4}/>
 			<ColorDepth bits={8} opacity={0.2}/>

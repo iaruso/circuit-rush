@@ -8,7 +8,7 @@ import * as CANNON from 'cannon-es';
 import { useBox, useRaycastVehicle } from '@react-three/cannon';
 import { Wheels } from './Wheels';
 import { Wheel } from './Wheel';
-import { Controls } from './Controls';
+import { VehicleControls } from './VehicleControls';
 import Camera from './Camera';
 
 export default function Vehicle({ thirdPerson }) {
@@ -20,6 +20,7 @@ export default function Vehicle({ thirdPerson }) {
 	const [gear, setGear] = useState(0);
 	const [forcePower, setForce] = useState(0);
 	const [brakePower, setBrake] = useState(0);
+	const [reverseFlag, setReverseFlag] = useState(false);
   const v = new THREE.Vector3();
 
   const dracoLoader = new DRACOLoader();
@@ -94,10 +95,11 @@ export default function Vehicle({ thirdPerson }) {
     });
   }, []);
 
-	var engineForces = [2000, 1500, 1200, 1000, 800, 0]; 
-	var brakeForces = [20, 24, 32, 40, 56, 0];
-	var maxSpeeds = [10, 40, 60, 80, 100, 120];
+	const engineForces = [4000, 2000, 1500, 1200, 1000, 800, 0]; 
+	const brakeForces = [20, 20, 24, 32, 40, 56, 0];
+	const maxSpeeds = [1, 20, 40, 60, 80, 100, 120];
 	var currentGear = 0;
+	const gearPowerScale = 1;
 
   useFrame((state, delta) => {
     if (!thirdPerson) return;
@@ -108,9 +110,17 @@ export default function Vehicle({ thirdPerson }) {
 				break;
 			}
 		}
+		
+		const gearPowerScale = currentGear >= 1 && currentGear <= 2 ? 0.5 : 0.8;
+		const gearPowerRange = currentGear >= 1 && currentGear <= 2 ? 0.5 : 0.2;
+		const gearSpeedRange = currentGear === 0 ? maxSpeeds[currentGear] : maxSpeeds[currentGear] - maxSpeeds[currentGear - 1];
+		const speedWithinGearRange = currentGear === 0 ? speed : speed - maxSpeeds[currentGear - 1];
+		const gearProgress = speedWithinGearRange / gearSpeedRange;
+		const gearPower = gearPowerScale + gearPowerRange * gearProgress;
+		const scaledEngineForce = engineForces[currentGear] * gearPower;
 
 		setGear(currentGear);
-		setForce(engineForces[currentGear]);
+		setForce(scaledEngineForce);
 		setBrake(brakeForces[currentGear]);
 
     const position = new THREE.Vector3(0, 0, 0);
@@ -122,7 +132,7 @@ export default function Vehicle({ thirdPerson }) {
     camera.lookAt(position);
   });
 
-	Controls(vehicleApi, chassisApi, speed, gear, forcePower, brakePower);
+	VehicleControls(vehicleApi, chassisApi, speed, gear, forcePower, brakePower, setReverseFlag);
 
   return (
     <>
@@ -130,7 +140,7 @@ export default function Vehicle({ thirdPerson }) {
         <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
           <primitive object={mesh} position={[0, -0.7, -0.1]} />
           <object3D ref={lookRef} position={[0, 2, 0]}>
-            <Camera ref={cameraRef} cameraRef={cameraRef} position={[0, 40, -20]} />
+            <Camera ref={cameraRef} cameraRef={cameraRef} position={[0, 40, -40]} />
           </object3D>
         </group>
         <Wheel wheelRef={wheels[0]} radius={radius} />
@@ -142,7 +152,7 @@ export default function Vehicle({ thirdPerson }) {
         position={[0, 0, 0]} // Adjust the position as per your scene
         scaleFactor={10} // Adjust the scale factor for the text size
       >
-        <p style={{ color: 'red' }}>{speed} + G: {gear}</p>
+        <p style={{ color: 'red' }}>{speed} + G: {gear == 6? 5:gear} + {reverseFlag ? 1 : 0}</p>
       </Html>
     </>
   );
