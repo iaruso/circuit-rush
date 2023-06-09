@@ -21,6 +21,8 @@ export default function Vehicle({ thirdPerson }) {
 	const [forcePower, setForce] = useState(0);
 	const [brakePower, setBrake] = useState(0);
 	const [reverseFlag, setReverseFlag] = useState(false);
+	const [transmission, setTransmission] = useState('N');
+	const [gearProgressBar, setGearProgress] = useState(0);
   const v = new THREE.Vector3();
 
   const dracoLoader = new DRACOLoader();
@@ -95,11 +97,10 @@ export default function Vehicle({ thirdPerson }) {
     });
   }, []);
 
-	const engineForces = [4000, 2000, 1500, 1200, 1000, 800, 0]; 
+	const engineForces = [4000, 2400, 1800, 1600, 1400, 1200, 0]; 
 	const brakeForces = [20, 20, 24, 32, 40, 56, 0];
-	const maxSpeeds = [1, 20, 40, 60, 80, 100, 120];
+	const maxSpeeds = [1, 20, 36, 48, 72, 119, 150];
 	var currentGear = 0;
-	const gearPowerScale = 1;
 
   useFrame((state, delta) => {
     if (!thirdPerson) return;
@@ -122,6 +123,8 @@ export default function Vehicle({ thirdPerson }) {
 		setGear(currentGear);
 		setForce(scaledEngineForce);
 		setBrake(brakeForces[currentGear]);
+		setTransmission(reverseFlag ? 'R' : gear === 0 ? 1 : gear === 6 ? '5' : gear.toString());
+		setGearProgress(reverseFlag && speed === 1 ? 2.5 : (reverseFlag && speed > 20)  || speed >= 120 ? 100 : (speedWithinGearRange / gearSpeedRange) * 100);
 
     const position = new THREE.Vector3(0, 0, 0);
     position.setFromMatrixPosition(lookRef.current.matrixWorld);
@@ -130,6 +133,7 @@ export default function Vehicle({ thirdPerson }) {
     currentCamera.setFromMatrixPosition(camera.matrixWorld);
 
     camera.lookAt(position);
+		console.log(gearProgressBar)
   });
 
 	VehicleControls(vehicleApi, chassisApi, speed, gear, forcePower, brakePower, setReverseFlag);
@@ -148,11 +152,14 @@ export default function Vehicle({ thirdPerson }) {
         <Wheel wheelRef={wheels[2]} radius={radius} />
         <Wheel wheelRef={wheels[3]} radius={radius} />
       </group>
-      <Html
-        position={[0, 0, 0]} // Adjust the position as per your scene
-        scaleFactor={10} // Adjust the scale factor for the text size
-      >
-        <p style={{ color: 'red' }}>{speed} + G: {gear == 6? 5:gear} + {reverseFlag ? 1 : 0}</p>
+      <Html fullscreen className='vehicle-stats-overlay'>
+				<div className='vehicle-stats'>
+					<p className='vehicle-transmission'>{transmission}</p>
+					<div className='vehicle-gear-stats'>
+						<div className='vehicle-speed-bar' style={{ width: `${gearProgressBar}%` }}></div>
+					</div>
+					<p className='vehicle-speed'>{speed}</p>
+				</div>
       </Html>
     </>
   );

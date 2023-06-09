@@ -8,7 +8,6 @@ html, body, #root {
 	font-size: 16px;
 }
 
-
 .interface {
 	position: fixed;
 	top: 0;
@@ -26,51 +25,48 @@ html, body, #root {
 	width: 10rem;
 	color: #ffffff;
 	font-size: 2rem;
-	background: #00000033;
+	background: #00000020;
 	padding-top: 5px;
 	text-align: center;
 	font-variant-numeric: tabular-nums;
 }
 
-.restart {
-    display: flex;
-    justify-content: center;
-    position: absolute;
-    top: 40%;
-    left: 0;
-    width: 100%;
-    color: #ffffff;
-    font-size: 80px;
-    background: #00000033;
-    padding-top: 10px;
-    pointer-events: auto;
-    cursor: pointer;
+.vehicle-stats-overlay {
+ display: flex;
+	justify-content: center;
+}
+.vehicle-stats {
+	position: absolute;
+	bottom: 2rem;
+	display: flex;
+	height: 4rem;
+  background-color: #00000020;
+	font-family: 'Bebas Neue', cursive;
+	border-radius: 0.25rem;
 }
 
-.controls {
-    position: absolute;
-    bottom: 10%;
-    left: 0;
-    width: 100%;
+.vehicle-transmission, .vehicle-speed {
+	height: 4rem;
+  width: 4rem;
+	margin: 0rem;
+  display: flex;
+  justify-content: center;
+	align-items: center;
+	padding-top: 0.125rem;
+	color: #ffffff;
+  font-size: 2rem;
 }
 
-.controls .raw {
-    display: flex;
-    justify-content: center;
+.vehicle-gear-stats {
+	width: 8rem;
+  margin: 1rem 0;
+	border-radius: 0.25rem;
+	background-color: #ffffff33;
 }
 
-.controls .key {
-    width: 40px;
-    height: 40px;
-    margin: 4px;
-    border: 2px solid #ffffff;
-    background: #ffffff44;
-}
-
-.controls .key.large {
-    width: 144px;
-}
-
-.controls .key.active {
-    background: #ffffff99;
+.vehicle-speed-bar {
+	background-color: white;
+	height: 100%;
+	transition: width 0.05s ease-in-out;
+	border-radius: 0.25rem;
 }

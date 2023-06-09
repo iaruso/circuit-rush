@@ -14,6 +14,7 @@ function App() {
 	console.log(GPUTier)
 	const start = useGame((state) => state.start)
   start()
+	
   return (
 		<UserControls>
 			<Canvas

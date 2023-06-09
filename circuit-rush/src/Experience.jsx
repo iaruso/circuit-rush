@@ -30,6 +30,7 @@ function Plane(props) {
 }
 
 export default function Experience() {
+	const camera = useThree((state) => state.camera);
   const { scene } = useThree();
   const light = useRef();
   const cameraRef = useRef();
@@ -37,6 +38,21 @@ export default function Experience() {
   const cubesArray = cubes;
   const waypointsLeftArray = waypointsLeft;
   const waypointsRightArray = waypointsRight;
+
+	const audioListener = new THREE.AudioListener();
+	const audioLoader = new THREE.AudioLoader();
+	const audio = new THREE.Audio(audioListener);
+
+	audioLoader.load('music.mp3', function (buffer) {
+		audio.setBuffer(buffer);
+		audio.play();
+		audio.setLoop(true);
+		audio.setVolume(0.4);
+	});
+
+	// Add the audio listener to the camera or any object that represents the listener's position
+	camera.add(audioListener);
+
 
   const shadowCameraSize = 200;
   const shadowCamera = new THREE.OrthographicCamera(
