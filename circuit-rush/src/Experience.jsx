@@ -5,13 +5,14 @@ import { Perf } from 'r3f-perf'
 import * as THREE from 'three'
 import Circuit from './Circuit'
 import Vehicle from './Vehicle'
-import { Physics, Debug, usePlane } from '@react-three/cannon'
+import { Physics, Debug, usePlane, useBox } from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
 import cubes from '../public/cubes'
 import waypointsLeft from '../public/waypoints-left'
 import waypointsRight from '../public/waypoints-right'
 import { OrbitControls } from '@react-three/drei'
+import Checkpoints from './Checkpoints'
 
 function Plane(props) {
   const [ref] = usePlane(() => ({
@@ -19,7 +20,7 @@ function Plane(props) {
     rotation: [-Math.PI / 2, 0, 0],
     restitution: 0.9,
     friction: 0.1,
-    ...props,
+    ...props
   }));
 
   return (
@@ -39,20 +40,19 @@ export default function Experience() {
   const waypointsLeftArray = waypointsLeft;
   const waypointsRightArray = waypointsRight;
 
-	const audioListener = new THREE.AudioListener();
-	const audioLoader = new THREE.AudioLoader();
-	const audio = new THREE.Audio(audioListener);
+	// const audioListener = new THREE.AudioListener();
+	// const audioLoader = new THREE.AudioLoader();
+	// const audio = new THREE.Audio(audioListener);
 
-	audioLoader.load('music.mp3', function (buffer) {
-		audio.setBuffer(buffer);
-		audio.play();
-		audio.setLoop(true);
-		audio.setVolume(0.4);
-	});
+	// audioLoader.load('music.mp3', function (buffer) {
+	// 	audio.setBuffer(buffer);
+	// 	audio.play();
+	// 	audio.setLoop(true);
+	// 	audio.setVolume(0.4);
+	// });
 
 	// Add the audio listener to the camera or any object that represents the listener's position
-	camera.add(audioListener);
-
+	// camera.add(audioListener);
 
   const shadowCameraSize = 200;
   const shadowCamera = new THREE.OrthographicCamera(
@@ -106,7 +106,7 @@ export default function Experience() {
 				<OrbitControls />
 			)}
       <ambientLight intensity={1} color={'#fff'} />
-      <Environment files={'studio.hdr'} />
+      <Environment files={'adamsbridge.hdr'} />
       <Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
         <PhysicsWorld />
 				<Suspense>
@@ -121,6 +121,7 @@ export default function Experience() {
 				</Suspense>
         <Plane />
         <Vehicle thirdPerson={thirdPerson} />
+				<Checkpoints />
       </Physics>
       <Perf position="top-right" minimal={true} overClock antialias />
       <Circuit />

@@ -133,7 +133,6 @@ export default function Vehicle({ thirdPerson }) {
     currentCamera.setFromMatrixPosition(camera.matrixWorld);
 
     camera.lookAt(position);
-		console.log(gearProgressBar)
   });
 
 	VehicleControls(vehicleApi, chassisApi, speed, gear, forcePower, brakePower, setReverseFlag);

@@ -13,12 +13,7 @@ export default function Interface() {
       if (state.phase === 'playing') elapsedTime = Date.now() - state.startTime;
       else if (state.phase === 'ended') elapsedTime = state.endTime - state.startTime;
       elapsedTime /= 1000;
-      if (time.current) {
-        gsap.to(time.current, {
-          textContent: elapsedTime.toFixed(2),
-          duration: 1
-        });
-      }
+      time.current.textContent = elapsedTime.toFixed(3);
     });
 
     return () => {

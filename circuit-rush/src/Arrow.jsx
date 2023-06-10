@@ -49,4 +49,3 @@ export default function Arrow({ position, rotation, index, color, refs }) {
     </>
   );
 }
-

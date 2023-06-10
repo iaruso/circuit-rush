@@ -25,13 +25,12 @@ function App() {
 					far: 1000,
 					position: [0,0,0],
 				}}
-				style={{ backgroundColor: '#f4f5f7' }}
 			>
-				<color attach="background" args={['#f4f5f7']} />
+				<color attach="background" args={['#fbfbfb']} />
 				<Experience />
 				<Perf position="top-right" minimal={true}/>
 			</Canvas>
-			<Interface/>
+			{/* <Interface/> */}
 		</UserControls>
   );
 }
