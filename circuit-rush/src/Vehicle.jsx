@@ -11,7 +11,7 @@ import { Wheel } from './Wheel';
 import { VehicleControls } from './VehicleControls';
 import Camera from './Camera';
 
-export default function Vehicle({ thirdPerson }) {
+export default function Vehicle({ thirdPerson, checkpoint }) {
   const camera = useThree((state) => state.camera);
   const cameraRef = useRef();
   const lookRef = useRef();
@@ -124,7 +124,7 @@ export default function Vehicle({ thirdPerson }) {
 		setForce(scaledEngineForce);
 		setBrake(brakeForces[currentGear]);
 		setTransmission(reverseFlag ? 'R' : gear === 0 ? 1 : gear === 6 ? '5' : gear.toString());
-		setGearProgress(reverseFlag && speed === 1 ? 2.5 : (reverseFlag && speed > 20)  || speed >= 120 ? 100 : (speedWithinGearRange / gearSpeedRange) * 100);
+		setGearProgress(speed === 1 ? 2.5 : (reverseFlag && speed > 20)  || speed >= 120 ? 100 : (speedWithinGearRange / gearSpeedRange) * 100);
 
     const position = new THREE.Vector3(0, 0, 0);
     position.setFromMatrixPosition(lookRef.current.matrixWorld);
@@ -135,7 +135,7 @@ export default function Vehicle({ thirdPerson }) {
     camera.lookAt(position);
   });
 
-	VehicleControls(vehicleApi, chassisApi, speed, gear, forcePower, brakePower, setReverseFlag);
+	VehicleControls(vehicleApi, chassisApi, speed, gear, forcePower, brakePower, setReverseFlag, checkpoint);
 
   return (
     <>

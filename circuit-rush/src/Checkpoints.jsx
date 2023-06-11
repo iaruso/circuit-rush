@@ -3,52 +3,68 @@ import { useBox } from '@react-three/cannon';
 import { Html } from '@react-three/drei';
 import { addEffect } from '@react-three/fiber';
 import useGame from './stores/Game.jsx';
+import { useCallback } from 'react';
 
-export default function Checkpoints() {
+export default function Checkpoints({checkpoint, setCheckpoint}) {
   const positions = [[-24, 2, -12], [6, 2, 44], [44, 2, -9]];
   const args = [[2, 4, 10], [2, 4, 10], [10, 4, 2]];
-  var lap = 1;
-  var currentCheckpoint = 0;
-
+  const lapRef = useRef();
+	const timeRef = useRef();
+	var lap = 1;
+	var flag = false;
   const checkpoints = [];
 
-	for (let i = 0; i < positions.length; i++) {
-		const [checkpoint] = useBox(() => ({
-			args: args[i],
-			position: positions[i],
-			isTrigger: true,
-			onCollide: handleCollide(i),
-		}), useRef(null));
-		checkpoints.push(checkpoint);
-	}
+  for (let i = 0; i < positions.length; i++) {
+    const [checkpoint] = useBox(() => ({
+      args: args[i],
+      position: positions[i],
+      isTrigger: true,
+      onCollide: handleCollide(i),
+    }), useRef(null));
+    checkpoints.push(checkpoint);
+  }
 
-  const handleCollide = (id) => {
-    return (e) => {
+  var checkpoint2 = checkpoint;
+
+  const handleCollide = useCallback(
+    (index) => (e) => {
       const { body } = e;
-      if (body.userData.name === 'vehicle' && id === currentCheckpoint) {
-				if (currentCheckpoint > 1) {
+
+      if (body.userData.name === 'vehicle' && index === checkpoint2 && !flag) {
+        if (checkpoint2 > 1 && lap < 3) {
           lap++;
-          if (lap === 4) {
-            console.log('Finish');
-          }
+          console.log('Lap ' + lap);
+        } else if (checkpoint2 > 1 && lap === 3) {
+          console.log('Finish');
+					flag = true;
         }
-				id != 2 ? currentCheckpoint = id + 1 : currentCheckpoint = 0;
-				console.log(lap + '-' + currentCheckpoint);
+        index !== 2 ? setCheckpoint(index + 1) : setCheckpoint(0);
+				index !== 2 ? checkpoint2 = index + 1 : checkpoint2 = 0;
+        console.log(checkpoint2);
       }
-    };
-  };
-
-	const time = useRef();
-
+    },
+    [checkpoint, setCheckpoint]
+  );
   useEffect(() => {
     const unsubscribeEffect = addEffect(() => {
       const state = useGame.getState();
       let elapsedTime = 0;
       if (state.phase === 'playing') elapsedTime = Date.now() - state.startTime;
       else if (state.phase === 'ended') elapsedTime = state.endTime - state.startTime;
-      elapsedTime /= 1000;
-      time.current.textContent = elapsedTime.toFixed(3);
+
+      const minutes = Math.floor((elapsedTime / 60000) % 60);
+      const seconds = Math.floor((elapsedTime / 1000) % 60);
+      const milliseconds = elapsedTime % 1000;
+
+      const formattedTime = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+      timeRef.current.textContent = formattedTime;
+			lapRef.current.textContent = 'Lap ' + lap + '/3';
     });
+
+    function padWithZero(number, width = 2) {
+      const paddedNumber = String(number);
+      return paddedNumber.padStart(width, '0');
+    }
 
     return () => {
       unsubscribeEffect();
@@ -56,17 +72,18 @@ export default function Checkpoints() {
   }, []);
 
   return (
-		<>
-			<group>
-				{checkpoints.map((checkpoint, index) => (
-					<mesh key={index} ref={checkpoint} visible={false}></mesh>
-				))}
-			</group>
-			<Html fullscreen className='vehicle-stats-overlay'>
-				<div className="interface">
-					<div ref={time} className="time">0.00</div>
-				</div>
-			</Html>
-		</>
+    <>
+      <group>
+        {checkpoints.map((checkpoint, index) => (
+          <mesh key={index} ref={checkpoint} visible={false}></mesh>
+        ))}
+      </group>
+      <group>
+        <Html wrapperClass={'circuit-stats-overlay'} className='circuit-stats'>
+          <div ref={lapRef} className="circuit-lap"></div>
+          <div ref={timeRef} className="circuit-time"></div>
+        </Html>
+      </group>
+    </>
   );
 }

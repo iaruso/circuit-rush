@@ -39,6 +39,7 @@ export default function Experience() {
   const cubesArray = cubes;
   const waypointsLeftArray = waypointsLeft;
   const waypointsRightArray = waypointsRight;
+	const [checkpoint, setCheckpoint] = useState(0);
 
 	// const audioListener = new THREE.AudioListener();
 	// const audioLoader = new THREE.AudioLoader();
@@ -120,8 +121,8 @@ export default function Experience() {
 					/>
 				</Suspense>
         <Plane />
-        <Vehicle thirdPerson={thirdPerson} />
-				<Checkpoints />
+        <Vehicle thirdPerson={thirdPerson} checkpoint={checkpoint} />
+				<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
       </Physics>
       <Perf position="top-right" minimal={true} overClock antialias />
       <Circuit />

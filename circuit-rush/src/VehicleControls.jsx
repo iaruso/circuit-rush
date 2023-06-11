@@ -2,13 +2,16 @@ import { useEffect, useState } from "react";
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
-export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower, brakePower, setReverseFlag) => {
+export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower, brakePower, setReverseFlag, checkpoint) => {
 	const [controls, setControls] = useState({});
 	const [subscribeKeys, getKeys] = useKeyboardControls();
 	const [isBrakePressed, setIsBrakePressed] = useState(false);
+	const positions = [[44, 0.49, -6], [-27, 0.49, -12], [3, 0.49, 44]];
+	const rotations = [[0, Math.PI, 0], [0, Math.PI/2, 0], [0, Math.PI/2, 0]];
 
 	var rearForce = 0;
 	useFrame((state, delta) => {
+		console.log(checkpoint);
 		if (!vehicleApi || !chassisApi) return;
 		const { forward, backward, leftward, rightward, brake, reset } = getKeys();
 		if (forward) {
@@ -52,12 +55,12 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 		}
 
 		if (reset) {
-			chassisApi.position.set(44, 0.49, 2);
+			chassisApi.position.set(...positions[checkpoint]);
 			chassisApi.velocity.set(0, 0, 0);
 			chassisApi.angularVelocity.set(0, 0, 0);
-			chassisApi.rotation.set(0, Math.PI, 0);
+			chassisApi.rotation.set(...rotations[checkpoint]);
 		}
-	}, [controls, vehicleApi, chassisApi]);
+	}, [controls, vehicleApi, chassisApi, checkpoint]);
 
 	return controls;
 };

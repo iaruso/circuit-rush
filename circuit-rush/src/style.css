@@ -28,12 +28,12 @@ html, body, #root {
 	background: #00000020;
 	padding-top: 5px;
 	text-align: center;
-	font-variant-numeric: tabular-nums;
 }
 
 .vehicle-stats-overlay {
- display: flex;
+	display: flex;
 	justify-content: center;
+	font-variant-numeric: tabular-nums;
 }
 .vehicle-stats {
 	position: absolute;
@@ -69,4 +69,36 @@ html, body, #root {
 	height: 100%;
 	transition: width 0.05s ease-in-out;
 	border-radius: 0.25rem;
+}
+
+.circuit-stats-overlay {
+	transform: none !important;
+  width: 100%;
+	display: flex;
+	justify-content: center;
+	font-variant-numeric: tabular-nums;
+}
+
+.circuit-stats {
+	position: relative;
+	top: 2rem;
+	display: flex;
+	justify-content: space-between;
+	width: 16rem;
+	padding: 0 1.5rem;
+	height: 4rem;
+  background-color: #00000020;
+	font-family: 'Bebas Neue', cursive;
+	border-radius: 0.25rem;
+}
+
+.circuit-lap, .circuit-time {
+	height: 4rem;
+	margin: 0rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding-top: 0.125rem;
+	color: #ffffff;
+	font-size: 2rem;
 }
