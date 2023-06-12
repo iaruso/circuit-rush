@@ -57,7 +57,7 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
     }
   });
 
-  const position = [5, 10, 5];
+  const position = [44, 1, -6];
   const width = 1.7;
   const height = 1;
   const front = 1.85;
@@ -69,6 +69,7 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
     args: chassisBodyArgs,
     mass: 400,
     position,
+		rotation: [0, Math.PI, 0],
     userData: {
       name: 'vehicle',
     },

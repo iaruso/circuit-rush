@@ -57,8 +57,8 @@ export default function Checkpoints({checkpoint, setCheckpoint}) {
       const milliseconds = elapsedTime % 1000;
 
       const formattedTime = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-      timeRef.current.textContent = formattedTime;
-			lapRef.current.textContent = 'Lap ' + lap + '/3';
+      timeRef.current ? timeRef.current.textContent = formattedTime : null;
+			lapRef.current ? lapRef.current.textContent = 'Lap ' + lap + '/3' : null;
     });
 
     function padWithZero(number, width = 2) {

@@ -8,6 +8,80 @@ html, body, #root {
 	font-size: 16px;
 }
 
+.background-image {
+  background-image: url('cover.jpg');
+  background-size: cover;
+  background-position: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+.menu {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+	flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+	width: 12rem;
+}
+
+.menu button { 
+	font-family: 'Bebas Neue', cursive;
+	font-size: 1.5rem;
+	cursor: pointer;
+	outline: none;
+}
+
+.play-button {
+	margin-bottom: 1rem;
+}
+
+.play-button, .settings-button {
+	height: 4rem;
+	width: 100%;
+	border-radius: 0.25rem;
+	background-color: #ffffff50;
+	border: none;
+	color: #E37B7C;
+}
+
+.audio-options {
+	margin-top: 1rem;
+	width: 12rem;
+	display: flex;
+	justify-content: space-between;
+}
+
+.sound-button, .music-button {
+	height: 4rem;
+	width: 5.5rem;
+	border-radius: 0.25rem;
+	background-color: #ffffff50;
+	border: none;
+	fill: #808080; /* #E37B7C */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.play-button:focus, .play-button:hover, .settings-button:focus, .settings-button:hover {
+	color: #913f40;
+	background-color: #00000004;
+}
+
+.sound-button:focus, .sound-button:hover, .music-button:focus, .music-button:hover {
+	fill: #606060;
+	background-color: #00000004;
+}
+
 .interface {
 	position: fixed;
 	top: 0;
@@ -20,13 +94,11 @@ html, body, #root {
 
 .time {
 	position: absolute;
-	top: 15%;
 	right: 0;
 	width: 10rem;
 	color: #ffffff;
 	font-size: 2rem;
 	background: #00000020;
-	padding-top: 5px;
 	text-align: center;
 }
 
