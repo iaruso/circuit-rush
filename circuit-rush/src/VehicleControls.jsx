@@ -11,7 +11,6 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 
 	var rearForce = 0;
 	useFrame((state, delta) => {
-		console.log(checkpoint);
 		if (!vehicleApi || !chassisApi) return;
 		const { forward, backward, leftward, rightward, brake, reset } = getKeys();
 		if (forward) {
