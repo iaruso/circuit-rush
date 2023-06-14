@@ -67,7 +67,7 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
   const [chassisBody, chassisApi] = useBox(() => ({
     allowSleep: false,
     args: chassisBodyArgs,
-    mass: 400,
+    mass: 300,
     position,
 		rotation: [0, Math.PI, 0],
     userData: {
@@ -99,7 +99,7 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
   }, []);
 
 	const engineForces = [4000, 2400, 1800, 1600, 1400, 1200, 0]; 
-	const brakeForces = [20, 20, 24, 32, 40, 56, 0];
+	const brakeForces = [10, 15, 20, 25, 30, 35, 0];
 	const maxSpeeds = [1, 20, 36, 48, 72, 119, 150];
 	var currentGear = 0;
 

@@ -1,10 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import Lottie from 'lottie-react';
+import keyboardAnimation from '../public/keyboard.json';
 import useGame from './stores/Game';
 
 const MainMenu = () => {
   const textRef = useRef(null);
+	const loadingRef = useRef(null);
+  const lottieRef = useRef(null);
   const [loadingStatus, setLoadingStatus] = useState(false);
+  const [playAnimation, setPlayAnimation] = useState(false);
   const start = useGame((state) => state.startGame);
   const loading = useGame((state) => state.startLoading);
 
@@ -38,6 +43,20 @@ const MainMenu = () => {
     };
   }, []);
 
+	useEffect(() => {
+    const textElement = loadingRef.current;
+
+    const animation = gsap.fromTo(
+      textElement,
+      { opacity: 0 },
+      { opacity: 1, yoyo: true, repeat: -1, duration: 1 }
+    );
+
+    return () => {
+      animation.kill();
+    };
+  }, [loadingStatus]);
+
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
@@ -45,10 +64,42 @@ const MainMenu = () => {
     };
   }, [loadingStatus]);
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setPlayAnimation(true);
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (lottieRef.current) {
+      if (playAnimation) {
+        lottieRef.current.play();
+      } else {
+        lottieRef.current.pause();
+      }
+    }
+  }, [playAnimation]);
+
   return (
-    <div>
+    <div className="main-screen">
       {loadingStatus ? (
-        <div>Loading...</div>
+				<>
+					<div className="keyboard-controls">
+						<Lottie
+							animationData={keyboardAnimation}
+							loop={true}
+							autoplay={false}
+							lottieRef={lottieRef}
+						/>
+					</div>
+					<div ref={loadingRef} className="loading-info">
+						PRESS<span> ENTER </span> TO PLAY
+					</div>
+				</>
       ) : (
         <>
           <div className="background-image"></div>

@@ -1,7 +1,7 @@
 {
-  "name": "threejs-journey-exercise",
+  "name": "circuit-rush",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,7 @@
     "vite": "^4.3.9"
   },
   "dependencies": {
+    "@dotlottie/player-component": "^1.4.1",
     "@react-three/cannon": "^6.5.2",
     "@react-three/drei": "9.50",
     "@react-three/fiber": "^8.9.2",
@@ -20,6 +21,7 @@
     "cannon-es": "^0.20.0",
     "gsap": "^3.11.5",
     "leva": "^0.9.34",
+    "lottie-react": "^2.4.0",
     "r3f-perf": "^6.6.3",
     "react": "18.2",
     "react-dom": "18.2",

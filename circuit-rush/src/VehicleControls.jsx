@@ -15,14 +15,20 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 		const { forward, backward, leftward, rightward, brake, reset } = getKeys();
 		if (forward) {
 			if (gear == 0) setReverseFlag(false)
+			vehicleApi.applyEngineForce(-forcePower/2, 0);
+			vehicleApi.applyEngineForce(-forcePower/2, 1);
 			vehicleApi.applyEngineForce(-forcePower, 2);
 			vehicleApi.applyEngineForce(-forcePower, 3);
 		} else if (backward) {
 			speed > 20 ? rearForce = forcePower/10 : rearForce = forcePower/2;
 			if (gear == 0) setReverseFlag(true)
+			vehicleApi.applyEngineForce(rearForce/2, 0);
+			vehicleApi.applyEngineForce(rearForce/2, 1);
 			vehicleApi.applyEngineForce(rearForce, 2);
 			vehicleApi.applyEngineForce(rearForce, 3);
 		} else {
+			vehicleApi.applyEngineForce(0, 0);
+			vehicleApi.applyEngineForce(0, 1);
 			vehicleApi.applyEngineForce(0, 2);
 			vehicleApi.applyEngineForce(0, 3);
 		}
@@ -31,8 +37,8 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 			setIsBrakePressed(true);
 			vehicleApi.setBrake(brakePower, 0);
 			vehicleApi.setBrake(brakePower, 1);
-			vehicleApi.setBrake(brakePower, 2);
-			vehicleApi.setBrake(brakePower, 3);
+			vehicleApi.setBrake(brakePower/2, 2);
+			vehicleApi.setBrake(brakePower/2, 3);
 		} else if (!brake && isBrakePressed) {
 			setIsBrakePressed(false);
 			vehicleApi.setBrake(0, 0);
@@ -42,11 +48,11 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 		}
 
 		if (leftward) {
-			vehicleApi.setSteeringValue(0.35, 2);
-			vehicleApi.setSteeringValue(0.35, 3);
+			vehicleApi.setSteeringValue(0.4, 2);
+			vehicleApi.setSteeringValue(0.4, 3);
 		} else if (rightward) {
-			vehicleApi.setSteeringValue(-0.35, 2);
-			vehicleApi.setSteeringValue(-0.35, 3);
+			vehicleApi.setSteeringValue(-0.4, 2);
+			vehicleApi.setSteeringValue(-0.4, 3);
 		} else {
 			for(let i = 0; i < 4; i++) {
 				vehicleApi.setSteeringValue(0, i);

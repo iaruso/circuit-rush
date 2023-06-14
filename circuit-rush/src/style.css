@@ -1,3 +1,6 @@
+:root {
+	font-size: max(calc(12px + (32 - 12) * (100vw - 1920px) / (3840 - 480)), 12px)
+}
 html, body, #root {
 	position: fixed;
 	top: 0;
@@ -5,7 +8,10 @@ html, body, #root {
 	width: 100%;
 	height: 100%;
 	background: #fbfafa;
-	font-size: 16px;
+}
+
+.main-screen {
+	height: 100%;
 }
 
 .background-image {
@@ -32,10 +38,25 @@ html, body, #root {
   margin-bottom: 6rem;
 }
 
-.start-info {
+.start-info, .loading-info {
 	font-family: 'Bebas Neue', cursive;
 	font-size: 3rem;
 	color: #E37B7C;
+}
+
+.loading-info {
+	position: fixed;
+	bottom: 6rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.keyboard-controls {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
 
 .interface {

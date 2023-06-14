@@ -109,20 +109,22 @@ export default function Experience() {
       <ambientLight intensity={1} color={'#fff'} />
       <Environment files={'adamsbridge.hdr'} />
       <Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
-        <PhysicsWorld />
-				<Suspense>
-					<Objects
-						cubesData={cubesArray}
-						cubesCount={cubesArray.length}
-						waypointsRightData={waypointsRightArray}
-						waypointsRightCount={waypointsRightArray.length}
-						waypointsLeftData={waypointsLeftArray}
-						waypointsLeftCount={waypointsLeft.length}
-					/>
-				</Suspense>
-        <Plane />
-        <Vehicle thirdPerson={thirdPerson} checkpoint={checkpoint} />
-				<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
+				{/* <Debug scale={1} color={'#ff0000'}> */}
+					<PhysicsWorld />
+					<Suspense>
+						<Objects
+							cubesData={cubesArray}
+							cubesCount={cubesArray.length}
+							waypointsRightData={waypointsRightArray}
+							waypointsRightCount={waypointsRightArray.length}
+							waypointsLeftData={waypointsLeftArray}
+							waypointsLeftCount={waypointsLeft.length}
+						/>
+					</Suspense>
+					<Plane />
+					<Vehicle thirdPerson={thirdPerson} checkpoint={checkpoint} />
+					<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
+				{/* </Debug> */}
       </Physics>
       <Perf position="top-right" minimal={true} overClock antialias />
       <Circuit />
