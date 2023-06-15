@@ -22,9 +22,16 @@ const waypointMaterial = new MeshStandardMaterial({
 	emissiveIntensity: 0.1
 });
 
-export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsLeftData }) {
-  const { nodes: cube } = useGLTF('./static/cube.glb');
-	const { nodes: cube_min } = useGLTF('./static/cube-min.glb');
+export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsLeftData, objectsMin}) {
+	let cube;
+
+	if (objectsMin) {
+		const { nodes: cubeNodes } = useGLTF('./static/cube-min.glb');
+		cube = cubeNodes;
+	} else {
+		const { nodes: cubeNodes } = useGLTF('./static/cube.glb');
+		cube = cubeNodes;
+	}
   const { nodes: waypointRight } = useGLTF('./static/waypoint-right.glb');
   const { nodes: arrowRight } = useGLTF('./static/arrow-right.glb');
   const { nodes: waypointLeft } = useGLTF('./static/waypoint-left.glb');
@@ -73,7 +80,7 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
     });
   };
 
-  const memoizedCubeGeometry = useMemo(() => cube_min?.Cube?.geometry, [cube_min]);
+  const memoizedCubeGeometry = useMemo(() => cube?.Cube?.geometry, [cube]);
   const memoizedWaypointRightGeometry = useMemo(() => waypointRight?.Waypoint?.geometry, [waypointRight]);
   const memoizedWaypointLeftGeometry = useMemo(() => waypointLeft?.Waypoint?.geometry, [waypointLeft]);
   const memoizedArrowRightGeometry = useMemo(() => arrowRight?.Arrow?.geometry, [arrowRight]);

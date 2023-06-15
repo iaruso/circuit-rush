@@ -30,6 +30,7 @@ function Plane(props) {
 }
 
 export default function Experience({ perfomanceMode }) {
+	console.log(perfomanceMode);
   const { scene } = useThree();
   const light = useRef();
   const cameraRef = useRef();
@@ -37,6 +38,7 @@ export default function Experience({ perfomanceMode }) {
   const waypointsLeftArray = waypointsLeft;
   const waypointsRightArray = waypointsRight;
 	const [checkpoint, setCheckpoint] = useState(0);
+	const objectsMin = perfomanceMode;
 
   const shadowCameraSize = 200;
   const shadowCamera = new OrthographicCamera(
@@ -85,6 +87,7 @@ export default function Experience({ perfomanceMode }) {
 							waypointsRightCount={waypointsRightArray.length}
 							waypointsLeftData={waypointsLeftArray}
 							waypointsLeftCount={waypointsLeft.length}
+							objectsMin={objectsMin}
 						/>
 					</Suspense>
 					<Plane />

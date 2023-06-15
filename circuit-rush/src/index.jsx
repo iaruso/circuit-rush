@@ -40,7 +40,7 @@ function App() {
           >
             <color attach="background" args={['#fbfbfb']} />
             <Experience perfomanceMode={perfomanceMode}/>
-            <Perf position="top-right" minimal={true} />
+            <Perf position="top-right" minimal={true} overClock/>
           </Canvas>
           {/* <Interface/> */}
         </UserControls>
