@@ -10,11 +10,12 @@ const UserControls = ({ children }) => {
         { name: 'leftward', keys: ['ArrowLeft', 'KeyA'] },
         { name: 'rightward', keys: ['ArrowRight', 'KeyD'] },
         { name: 'brake', keys: ['Space'] },
-        { name: 'honk', keys: ['KeyH'] },
-        { name: 'camera', keys: ['KeyC'] },
+        { name: 'horn', keys: ['KeyH'] },
+        { name: 'changeCamera', keys: ['KeyC'] },
         { name: 'reset', keys: ['KeyR'] },
-        { name: 'pause', keys: ['KeyP', 'Escape'] },
-        { name: 'mute', keys: ['KeyM'] }
+        { name: 'pause', keys: ['KeyP'] },
+        { name: 'mute', keys: ['KeyM'] },
+				{ name: 'quit', keys: ['Escape'] }
       ]}
     >
       {children}

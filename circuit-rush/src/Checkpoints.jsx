@@ -33,14 +33,11 @@ export default function Checkpoints({checkpoint, setCheckpoint}) {
       if (body.userData.name === 'vehicle' && index === checkpoint2 && !flag) {
         if (checkpoint2 > 1 && lap < 3) {
           lap++;
-          console.log('Lap ' + lap);
         } else if (checkpoint2 > 1 && lap === 3) {
-          console.log('Finish');
 					flag = true;
         }
         index !== 2 ? setCheckpoint(index + 1) : setCheckpoint(0);
 				index !== 2 ? checkpoint2 = index + 1 : checkpoint2 = 0;
-        console.log(checkpoint2);
       }
     },
     [checkpoint, setCheckpoint]

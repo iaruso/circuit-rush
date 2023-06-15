@@ -22,10 +22,10 @@ const waypointMaterial = new MeshStandardMaterial({
 	emissiveIntensity: 0.1
 });
 
-export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsLeftData, objectsMin}) {
+export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsLeftData, perfomanceMode}) {
 	let cube;
 
-	if (objectsMin) {
+	if (perfomanceMode) {
 		const { nodes: cubeNodes } = useGLTF('./static/cube-min.glb');
 		cube = cubeNodes;
 	} else {
