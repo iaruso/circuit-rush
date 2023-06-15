@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import Lottie from 'lottie-react';
-import keyboardAnimation from '../public/keyboard.json';
+import keyboardAnimation from '../public/static/keyboard.json';
 import useGame from './stores/Game';
 
 const MainMenu = () => {
@@ -62,7 +62,7 @@ const MainMenu = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [loadingStatus]);
+  }, [loadingStatus, playAnimation]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {

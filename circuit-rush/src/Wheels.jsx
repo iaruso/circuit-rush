@@ -1,8 +1,7 @@
 import { useCompoundBody } from "@react-three/cannon";
 import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
 
-export const Wheels = (width, height, front, radius, speed) => {
+export const Wheels = (front, radius) => {
   const wheels = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
   const wheelInfo = {
@@ -62,8 +61,5 @@ export const Wheels = (width, height, front, radius, speed) => {
   useCompoundBody(propsFunc, wheels[2]);
   useCompoundBody(propsFunc, wheels[3]);
 
-	useFrame((state, delta) => {
-		// console.log(wheels[0].current)
-	});
   return [wheels, wheelInfos];
 };

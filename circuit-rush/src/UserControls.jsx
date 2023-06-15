@@ -14,8 +14,7 @@ const UserControls = ({ children }) => {
         { name: 'camera', keys: ['KeyC'] },
         { name: 'reset', keys: ['KeyR'] },
         { name: 'pause', keys: ['KeyP', 'Escape'] },
-        { name: 'mute', keys: ['KeyM'] },
-        { name: 'info', keys: ['KeyI'] },
+        { name: 'mute', keys: ['KeyM'] }
       ]}
     >
       {children}

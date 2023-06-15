@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { Instance, useGLTF } from '@react-three/drei';
+import { Instance } from '@react-three/drei';
 import gsap from 'gsap';
 
 export default function Arrow({ position, rotation, index, color, refs }) {

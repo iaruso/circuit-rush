@@ -1,7 +1,6 @@
 import useGame from './stores/Game.jsx';
 import { useEffect, useRef } from 'react';
 import { addEffect } from '@react-three/fiber';
-import { gsap } from 'gsap';
 
 export default function Interface() {
   const time = useRef();

@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Experience from './Experience.jsx';
 import useGame from './stores/Game.jsx'
-import Interface from './Interface.jsx'
 import UserControls from './UserControls';
-import { Perf, usePerf } from 'r3f-perf';
+import { Perf } from 'r3f-perf';
 import { useDetectGPU } from '@react-three/drei';
 import MainMenu from './MainMenu.jsx';
 
@@ -15,7 +14,10 @@ const root = ReactDOM.createRoot(document.querySelector('#root'));
 function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const GPUTier = useDetectGPU();
-	console.log(GPUTier);
+	const [perfomanceMode, setPerfomanceMode] = useState(true);
+	useEffect(() => {
+		GPUTier.fps > 60 ? setPerfomanceMode(false) : setPerfomanceMode(true);
+	}, [perfomanceMode]);
   const gamePhase = useGame((state) => state.phase);
   if (gamePhase === 'playing' && !gameStarted) {
     setGameStarted(true);
@@ -37,7 +39,7 @@ function App() {
             }}
           >
             <color attach="background" args={['#fbfbfb']} />
-            <Experience />
+            <Experience perfomanceMode={perfomanceMode}/>
             <Perf position="top-right" minimal={true} />
           </Canvas>
           {/* <Interface/> */}

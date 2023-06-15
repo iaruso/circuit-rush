@@ -3,18 +3,18 @@ import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Html } from '@react-three/drei';
-import * as THREE from 'three';
-import * as CANNON from 'cannon-es';
+import { MeshStandardMaterial, Vector3 }from 'three';
 import { useBox, useRaycastVehicle } from '@react-three/cannon';
 import { Wheels } from './Wheels';
 import { Wheel } from './Wheel';
 import { VehicleControls } from './VehicleControls';
 import Camera from './Camera';
 
-export default function Vehicle({ thirdPerson, checkpoint }) {
+export default function Vehicle({ checkpoint }) {
   const camera = useThree((state) => state.camera);
   const cameraRef = useRef();
   const lookRef = useRef();
+	const [alternativeCamera, setAlternativeCamera] = useState(false);
 
   const [speed, setSpeed] = useState(0);
 	const [gear, setGear] = useState(0);
@@ -23,11 +23,11 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
 	const [reverseFlag, setReverseFlag] = useState(false);
 	const [transmission, setTransmission] = useState('N');
 	const [gearProgressBar, setGearProgress] = useState(0);
-  const v = new THREE.Vector3();
+  const v = new Vector3();
 
   const dracoLoader = new DRACOLoader();
-  dracoLoader.setDecoderPath('/draco-gltf/');
-  const gltf = useLoader(GLTFLoader, './car.glb', (loader) => {
+  dracoLoader.setDecoderPath('./draco-gltf/');
+  const gltf = useLoader(GLTFLoader, './static/car.glb', (loader) => {
     loader.setDRACOLoader(dracoLoader);
   });
   const mesh = gltf.scene;
@@ -51,7 +51,7 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
         materialParams.emissive = '#ffffff';
         materialParams.emissiveIntensity = 0.2;
       }
-      child.material = new THREE.MeshStandardMaterial(materialParams);
+      child.material = new MeshStandardMaterial(materialParams);
       child.castShadow = true;
       child.receiveShadow = true;
     }
@@ -75,7 +75,7 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
     },
   }), useRef(null));
 
-  const [wheels, wheelInfos] = Wheels(width, height, front, radius, speed);
+  const [wheels, wheelInfos] = Wheels(front, radius);
 
   const [vehicle, vehicleApi] = useRaycastVehicle(
     () => ({
@@ -98,14 +98,29 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
     });
   }, []);
 
+	useEffect(() => {
+		function keydownHandler(e) {
+			if (e.key === 'c') {
+				if (!alternativeCamera){
+					cameraRef.current.position.set(0, 20, -20);
+					setAlternativeCamera(true);
+				} else {
+					cameraRef.current.position.set(0, 40, -40);
+					setAlternativeCamera(false);
+				}
+			}
+		}
+
+		window.addEventListener('keydown', keydownHandler);
+		return () => window.removeEventListener('keydown', keydownHandler);
+	}, [alternativeCamera]);
+
 	const engineForces = [4000, 2400, 1800, 1600, 1400, 1200, 0]; 
 	const brakeForces = [10, 15, 20, 25, 30, 35, 0];
 	const maxSpeeds = [1, 20, 36, 48, 72, 119, 150];
 	var currentGear = 0;
 
   useFrame((state, delta) => {
-    if (!thirdPerson) return;
-
 		for (var i = 0; i < maxSpeeds.length + 1; i++) {
 			if (speed <= maxSpeeds[i]) {
 				currentGear = i;
@@ -127,10 +142,10 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
 		setTransmission(reverseFlag ? 'R' : gear === 0 ? 1 : gear === 6 ? '5' : gear.toString());
 		setGearProgress(speed === 1 ? 2.5 : (reverseFlag && speed > 20)  || speed >= 120 ? 100 : (speedWithinGearRange / gearSpeedRange) * 100);
 
-    const position = new THREE.Vector3(0, 0, 0);
+    const position = new Vector3(0, 0, 0);
     position.setFromMatrixPosition(lookRef.current.matrixWorld);
 
-    const currentCamera = new THREE.Vector3(0, 0, 0);
+    const currentCamera = new Vector3(0, 0, 0);
     currentCamera.setFromMatrixPosition(camera.matrixWorld);
 
     camera.lookAt(position);
@@ -147,10 +162,10 @@ export default function Vehicle({ thirdPerson, checkpoint }) {
             <Camera ref={cameraRef} cameraRef={cameraRef} position={[0, 40, -40]} />
           </object3D>
         </group>
-        <Wheel wheelRef={wheels[0]} radius={radius} />
-        <Wheel wheelRef={wheels[1]} radius={radius} />
-        <Wheel wheelRef={wheels[2]} radius={radius} />
-        <Wheel wheelRef={wheels[3]} radius={radius} />
+        <Wheel wheelRef={wheels[0]} />
+        <Wheel wheelRef={wheels[1]} />
+        <Wheel wheelRef={wheels[2]} />
+        <Wheel wheelRef={wheels[3]} />
       </group>
       <Html fullscreen className='vehicle-stats-overlay'>
 				<div className='vehicle-stats'>

@@ -15,7 +15,7 @@ html, body, #root {
 }
 
 .background-image {
-  background-image: url('cover.jpg');
+  background-image: url('../public/cover.webp');
   background-size: cover;
   background-position: center;
   position: fixed;
@@ -47,8 +47,7 @@ html, body, #root {
 .loading-info {
 	position: fixed;
 	bottom: 6rem;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 6rem;
 }
 
 .keyboard-controls {

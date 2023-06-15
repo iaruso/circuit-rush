@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
@@ -6,7 +6,7 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 	const [controls, setControls] = useState({});
 	const [subscribeKeys, getKeys] = useKeyboardControls();
 	const [isBrakePressed, setIsBrakePressed] = useState(false);
-	const positions = [[44, 0.49, -6], [-27, 0.49, -12], [3, 0.49, 44]];
+	const positions = [[44, 0.6, -6], [-27, 0.6, -12], [3, 0.6, 44]];
 	const rotations = [[0, Math.PI, 0], [0, Math.PI/2, 0], [0, Math.PI/2, 0]];
 
 	var rearForce = 0;

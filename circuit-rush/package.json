@@ -1,14 +1,18 @@
 {
   "name": "circuit-rush",
+  "homepage": "http://iaruso.github.io/circuit-rush",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "3.0",
+    "gh-pages": "^5.0.0",
+    "rollup-plugin-copy": "^3.4.0",
     "vite": "^4.3.9"
   },
   "dependencies": {
@@ -25,6 +29,7 @@
     "r3f-perf": "^6.6.3",
     "react": "18.2",
     "react-dom": "18.2",
-    "three": "^0.148.0"
+    "three": "^0.148.0",
+    "vite-plugin-compression": "^0.5.1"
   }
 }

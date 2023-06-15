@@ -1,8 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { useBox } from '@react-three/cannon';
 import { Instance } from '@react-three/drei';
-import { Selection, Select, EffectComposer, Outline } from '@react-three/postprocessing';
-import gsap from 'gsap';
 
 export default function Cube({ position, rotation, color, args, onCollide, cubeInstanceRefs, index }) {
   const [cubeRef] = useBox(() => ({
@@ -19,7 +17,7 @@ export default function Cube({ position, rotation, color, args, onCollide, cubeI
   }));
 
   const cubeInstanceRef = useRef();
-  const argsRef = useRef(args); // Store the args parameter separately
+  const argsRef = useRef(args);
 
   useEffect(() => {
     cubeInstanceRefs.current[index] = cubeInstanceRef.current;

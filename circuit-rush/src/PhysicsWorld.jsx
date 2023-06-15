@@ -1,7 +1,5 @@
-import * as THREE from 'three';
 import { useBox } from '@react-three/cannon';
-import { useRef } from 'react';
-import physics from '../public/physics';
+import physics from '../public/static/physics';
 
 export default function PhysicsWorld() {
   const cubesArray = physics;
