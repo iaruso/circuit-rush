@@ -6,6 +6,10 @@ import useGame from './stores/Game.jsx';
 import { useCallback } from 'react';
 
 export default function Checkpoints({checkpoint, setCheckpoint}) {
+	const end = useGame((state) => state.end);
+	const [checkpointSound] = useState(() => new Audio('./static/checkpoint.mp3'));
+	const [lapSound] = useState(() => new Audio('./static/lap.mp3'));
+	const [finishSound] = useState(() => new Audio('./static/finish.mp3'));
   const positions = [[-24, 2, -12], [6, 2, 44], [44, 2, -9]];
   const args = [[2, 4, 10], [2, 4, 10], [10, 4, 2]];
   const lapRef = useRef();
@@ -24,20 +28,41 @@ export default function Checkpoints({checkpoint, setCheckpoint}) {
     checkpoints.push(checkpoint);
   }
 
-  var checkpoint2 = checkpoint;
+  var currentCheckpoint = checkpoint;
+
+	const playCheckpointSound = () => {
+		checkpointSound.volume = 0.05;
+		checkpointSound.play();
+	};
+
+	const playLapSound = () => {
+		lapSound.volume = 0.5;
+		lapSound.play();
+	};
+
+	const playFinishSound = () => {
+		finishSound.volume = 0.05;
+		finishSound.play();
+	};
 
   const handleCollide = useCallback(
     (index) => (e) => {
       const { body } = e;
 
-      if (body.userData.name === 'vehicle' && index === checkpoint2 && !flag) {
-        if (checkpoint2 > 1 && lap < 3) {
+      if (body.userData.name === 'vehicle' && index === currentCheckpoint && !flag) {
+				if ( currentCheckpoint < 2) {
+					playCheckpointSound();
+				}
+        if (currentCheckpoint > 1 && lap < 3) {
+					playLapSound();
           lap++;
-        } else if (checkpoint2 > 1 && lap === 3) {
+        } else if (currentCheckpoint > 1 && lap === 3) {
 					flag = true;
+					playFinishSound();
+					end();
         }
         index !== 2 ? setCheckpoint(index + 1) : setCheckpoint(0);
-				index !== 2 ? checkpoint2 = index + 1 : checkpoint2 = 0;
+				index !== 2 ? currentCheckpoint = index + 1 : currentCheckpoint = 0;
       }
     },
     [checkpoint, setCheckpoint]

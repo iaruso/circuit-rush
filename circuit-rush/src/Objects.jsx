@@ -10,8 +10,8 @@ const cubeMaterial = new MeshStandardMaterial({
 	color: "#fff",
 	roughness: 1,
 	metalness: 0,
-	emissive: "#fff",
-	emissiveIntensity: 0.2
+	transparent: true,
+	opacity: 0.8,
 });
 
 const waypointMaterial = new MeshStandardMaterial({
@@ -88,7 +88,7 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
 
   return (
     <>
-      <Instances range={cubesCount} material={cubeMaterial} geometry={memoizedCubeGeometry} castShadow receiveShadow>
+      <Instances range={cubesCount} material={cubeMaterial} geometry={memoizedCubeGeometry} castShadow>
         <group position={[0, 0, 0]}>
           {cubesData.map((props, i) => (
             <Cube

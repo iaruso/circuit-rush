@@ -65,7 +65,6 @@ function App() {
             </PerformanceMonitor>
             <Perf position="top-right" minimal={true} overClock />
           </Canvas>
-          {/* <Interface/> */}
         </UserControls>
       )}
     </>

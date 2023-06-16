@@ -2,19 +2,25 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { Html } from '@react-three/drei';
+import { Html, useKeyboardControls } from '@react-three/drei';
 import { MeshStandardMaterial, Vector3 }from 'three';
+import { debounce } from 'lodash';
 import { useBox, useRaycastVehicle } from '@react-three/cannon';
 import { Wheels } from './Wheels';
 import { Wheel } from './Wheel';
 import { VehicleControls } from './VehicleControls';
+import useGame from './stores/Game.jsx'
 import Camera from './Camera';
+
+const cameraPositions = [[0, 40, -40], [0, 20, -25], [0, 4, -15]];
+const lookPositions = [[0, 0, 0], [0, 0, 0], [0, 1, 0]];
 
 export default function Vehicle({ checkpoint }) {
   const camera = useThree((state) => state.camera);
   const cameraRef = useRef();
   const lookRef = useRef();
-	const [alternativeCamera, setAlternativeCamera] = useState(false);
+	var alternativeCamera = 0;
+	const [subscribeKeys, getKeys] = useKeyboardControls();
 
   const [speed, setSpeed] = useState(0);
 	const [gear, setGear] = useState(0);
@@ -91,6 +97,30 @@ export default function Vehicle({ checkpoint }) {
     mesh.scale.set(1, 1, 1);
   }, [mesh]);
 
+	const handleCameraChange = () => {
+		console.log(alternativeCamera)
+		if (alternativeCamera == 0) {
+			cameraRef.current.position.set(...cameraPositions[1]);
+			lookRef.current.position.set(...lookPositions[1]);
+			alternativeCamera = 1;
+		} else if (alternativeCamera == 1) {
+			cameraRef.current.position.set(...cameraPositions[2]);
+			lookRef.current.position.set(...lookPositions[2]);
+			alternativeCamera = 2;
+		} else {
+			cameraRef.current.position.set(...cameraPositions[0]);
+			lookRef.current.position.set(...lookPositions[0]);
+			alternativeCamera = 0;
+		}
+	};
+	const debounceCameraChange = useRef(debounce(handleCameraChange, 50));	
+
+	useEffect(() => {
+    return () => {
+      debounceCameraChange.current.cancel();
+    };
+  }, [])
+
   useEffect(() => { 
     chassisApi.velocity.subscribe((velocity) => {
       const newSpeed = Math.round(v.set(...velocity).length() * 3.6);
@@ -98,29 +128,20 @@ export default function Vehicle({ checkpoint }) {
     });
   }, []);
 
-	useEffect(() => {
-		function keydownHandler(e) {
-			if (e.key === 'c') {
-				if (!alternativeCamera){
-					cameraRef.current.position.set(0, 20, -20);
-					setAlternativeCamera(true);
-				} else {
-					cameraRef.current.position.set(0, 40, -40);
-					setAlternativeCamera(false);
-				}
-			}
-		}
-
-		window.addEventListener('keydown', keydownHandler);
-		return () => window.removeEventListener('keydown', keydownHandler);
-	}, [alternativeCamera]);
-
 	const engineForces = [4000, 2400, 1800, 1600, 1400, 1200, 0]; 
 	const brakeForces = [10, 15, 20, 25, 30, 35, 0];
 	const maxSpeeds = [1, 20, 36, 48, 72, 119, 150];
 	var currentGear = 0;
 
   useFrame((state, delta) => {
+		const { changeCamera, quit } = getKeys();
+    if (changeCamera) {
+      debounceCameraChange.current();
+    }
+		if (quit) {
+			
+		}
+
 		for (var i = 0; i < maxSpeeds.length + 1; i++) {
 			if (speed <= maxSpeeds[i]) {
 				currentGear = i;
@@ -158,8 +179,8 @@ export default function Vehicle({ checkpoint }) {
       <group ref={vehicle} name="vehicle">
         <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
           <primitive object={mesh} position={[0, -0.7, -0.1]} />
-          <object3D ref={lookRef} position={[0, 2, 0]}>
-            <Camera ref={cameraRef} cameraRef={cameraRef} position={[0, 40, -40]} />
+          <object3D ref={lookRef} position={[...lookPositions[0]]}>
+            <Camera ref={cameraRef} cameraRef={cameraRef} position={[...cameraPositions[0]]} />
           </object3D>
         </group>
         <Wheel wheelRef={wheels[0]} />
@@ -167,14 +188,12 @@ export default function Vehicle({ checkpoint }) {
         <Wheel wheelRef={wheels[2]} />
         <Wheel wheelRef={wheels[3]} />
       </group>
-      <Html fullscreen className='vehicle-stats-overlay'>
-				<div className='vehicle-stats'>
-					<p className='vehicle-transmission'>{transmission}</p>
-					<div className='vehicle-gear-stats'>
-						<div className='vehicle-speed-bar' style={{ width: `${gearProgressBar}%` }}></div>
-					</div>
-					<p className='vehicle-speed'>{speed}</p>
+      <Html wrapperClass={'vehicle-stats-overlay'} className='vehicle-stats'>
+				<p className='vehicle-transmission'>{transmission}</p>
+				<div className='vehicle-gear-stats'>
+					<div className='vehicle-speed-bar' style={{ width: `${gearProgressBar}%` }}></div>
 				</div>
+				<p className='vehicle-speed'>{speed}</p>
       </Html>
     </>
   );

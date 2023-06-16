@@ -6,7 +6,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Circuit Rush</title>
 	<meta name="description" content="Circuit Rush is an exhilarating web-based racing game built with three.js. Take control of a car, navigate through a track, and avoid collision with obstacles. Immerse yourself in stunning graphics and dynamic gameplay as you strive to complete this race in record time. Are you ready to dominate the circuit and become the fastest racer? Play now!">
-	<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+	<link rel="preload" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap"></noscript>
 	<link rel="icon" href="../public/favicon.ico">
 	<meta property="og:url" content="https://iaruso.me/circuit-rush">
 	<meta property="og:type" content="website">
@@ -16,9 +17,51 @@
 	<meta property="og:image:width" content="1200">
 	<meta property="og:image:height" content="630">
 	<meta property="og:image:alt" content="Circuit Rush">
+	<style>
+		@font-face {
+			font-family: 'Bebas Neue';
+			src: url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+			font-display: swap;
+		}
+		body {
+			font-family: 'Bebas Neue', Arial, sans-serif;
+		}
+		#root {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		#loading-text {
+			font-size: 2rem;
+			color: #E37B7C;
+			animation: fadeAnimation 1s ease-in-out infinite;
+		}
+		@keyframes fadeAnimation {
+			0% {
+				opacity: 0;
+				transition: opacity 0.5s;
+			}
+			50% {
+				opacity: 1;
+				transition: opacity 0.5s;
+			}
+			100% {
+				opacity: 0;
+				transition: opacity 0.5s;
+			}
+		}
+	</style>
 </head>
 <body>
-	<div id="root"></div>
+	<div id="root">
+		<div id="loading-text">Loading...</div>
+	</div>
 	<script type="module" src="./index.jsx"></script>
 </body>
 </html>

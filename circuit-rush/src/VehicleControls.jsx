@@ -82,7 +82,7 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 
     if (horn && isHornClickable) {
       hornSound.currentTime = 0;
-      hornSound.volume = 0.5;
+      hornSound.volume = 0.05;
       hornSound.play();
       setIsHornClickable(false);
     }

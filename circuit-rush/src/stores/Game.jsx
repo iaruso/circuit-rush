@@ -36,6 +36,14 @@ export default create(subscribeWithSelector((set) => {
         return state;
       });
     },
+		quit: () => {
+			set((state) => {
+				if (state.phase === 'playing' || state.phase === 'ended') {
+					return { phase: 'ready' };
+				}
+				return state;
+			});
+		},
     startTime: 0,
     endTime: 0
   };
