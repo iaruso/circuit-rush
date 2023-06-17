@@ -43,7 +43,20 @@ html, body, #root {
 	color: #E37B7C;
 }
 
+.loading-screen {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #F7F6F5;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
 .loading-info {
+	opacity: 1;
 	position: fixed;
 	bottom: 6rem;
   right: 6rem;
@@ -83,6 +96,7 @@ html, body, #root {
 	display: flex !important;
 	justify-content: center;
 	font-variant-numeric: tabular-nums;
+	z-index: 1;
 }
 
 .vehicle-stats-overlay { 

@@ -48,7 +48,7 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       enableCollisionHandlingRef.current = true;
-    }, 1000);
+    }, 2000);
 
     return () => {
       clearTimeout(timeoutId);
