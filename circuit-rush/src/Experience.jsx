@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
-import { useThree } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { Environment, PerformanceMonitor } from '@react-three/drei'
 import { OrthographicCamera } from 'three'
 import Circuit from './Circuit'
@@ -12,6 +12,7 @@ import waypointsLeft from '../public/static/waypoints-left'
 import waypointsRight from '../public/static/waypoints-right'
 import { OrbitControls } from '@react-three/drei'
 import Checkpoints from './Checkpoints'
+import useGame from './stores/Game.jsx'
 
 function Plane(props) {
   const [ref] = usePlane(() => ({
@@ -37,6 +38,8 @@ export default function Experience({ perfomanceMode }) {
   const waypointsLeftArray = waypointsLeft;
   const waypointsRightArray = waypointsRight;
 	const [checkpoint, setCheckpoint] = useState(0);
+	const [gamePaused, setGamePaused] = useState(false);
+	const [gameFinished, setGameFinished] = useState(false);
 	const perfMode = perfomanceMode;
 	const shadowBiasArray = [1, 0.1, 0.01];
 	const shadowMapSizeWidthArray = [0, 1024, 2048];
@@ -57,6 +60,28 @@ export default function Experience({ perfomanceMode }) {
     light.current.shadow.camera = shadowCamera;
   }, [light, shadowCamera, scene]);
 
+	const { phase } = useGame((state) => state);
+	useEffect(() => { 
+		if (phase === "playing") {
+			setGamePaused(false);
+			setGameFinished(false);
+		} else if (phase === "paused") {
+			setGamePaused(true);
+		} else {
+			setGamePaused(false);
+		}
+		if (phase === "ended") {
+			setGameFinished(true);
+		}
+	}, [phase]);
+
+	useEffect(() => {
+		if (gameFinished) {
+			setTimeout(() => {
+				setGamePaused(true);
+			}, 1000);
+		}
+	}, [gameFinished, phase])
   return (
     <>
 			<PerformanceMonitor>
@@ -78,7 +103,7 @@ export default function Experience({ perfomanceMode }) {
 				<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
 				<ambientLight intensity={1} color={'#fff'} />
 				<Environment files={'static/adamsbridge.hdr'} />
-				<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
+				<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true} isPaused={gamePaused}>
 					{/* <Debug scale={1} color={'#ff0000'}> */}
 						<PhysicsWorld />
 						<Suspense>

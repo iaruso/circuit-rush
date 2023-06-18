@@ -7,35 +7,25 @@ import Waypoint from './Waypoint';
 import Arrow from './Arrow';
 
 const cubeMaterial = new MeshStandardMaterial({
-	color: "#fff",
-	roughness: 1,
-	metalness: 0,
-	transparent: true,
-	opacity: 0.8,
+  color: "#fff",
+  roughness: 1,
+  metalness: 0
 });
 
 const waypointMaterial = new MeshStandardMaterial({
-	color: "#fff",
-	roughness: 1,
-	metalness: 0,
-	emissive: "#fff",
-	emissiveIntensity: 0.1
+  color: "#fff",
+  roughness: 1,
+  metalness: 0,
+  emissive: "#fff",
+  emissiveIntensity: 0.1
 });
 
-export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsLeftData, perfomanceMode}) {
-	let cube;
-
-	if (perfomanceMode) {
-		const { nodes: cubeNodes } = useGLTF('./static/cube-min.glb');
-		cube = cubeNodes;
-	} else {
-		const { nodes: cubeNodes } = useGLTF('./static/cube.glb');
-		cube = cubeNodes;
-	}
+export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsLeftData, perfomanceMode }) {
+  const { nodes: cubeNodes } = useGLTF(perfomanceMode ? './static/cube-min.glb' : './static/cube.glb');
   const { nodes: waypointRight } = useGLTF('./static/waypoint-right.glb');
-  const { nodes: arrowRight } = useGLTF('./static/arrow-right.glb');
   const { nodes: waypointLeft } = useGLTF('./static/waypoint-left.glb');
-	const { nodes: arrowLeft } = useGLTF('./static/arrow-left.glb');
+  const { nodes: arrowRight } = useGLTF('./static/arrow-right.glb');
+  const { nodes: arrowLeft } = useGLTF('./static/arrow-left.glb');
 
   const colors = ['#fff', '#cc8080'];
   const scale = [1, 1, 1];
@@ -80,7 +70,7 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
     });
   };
 
-  const memoizedCubeGeometry = useMemo(() => cube?.Cube?.geometry, [cube]);
+  const memoizedCubeGeometry = useMemo(() => cubeNodes?.Cube?.geometry, [cubeNodes]);
   const memoizedWaypointRightGeometry = useMemo(() => waypointRight?.Waypoint?.geometry, [waypointRight]);
   const memoizedWaypointLeftGeometry = useMemo(() => waypointLeft?.Waypoint?.geometry, [waypointLeft]);
   const memoizedArrowRightGeometry = useMemo(() => arrowRight?.Arrow?.geometry, [arrowRight]);

@@ -16,7 +16,7 @@ export const Wheels = (front, radius) => {
     maxSuspensionForce: 200000,
     rollInfluence: 0.01,
     maxSuspensionTravel: 0.25,
-    customSlidingRotationalSpeed: -2,
+    customSlidingRotationalSpeed: -100000,
     useCustomSlidingRotationalSpeed: true,
   };
 

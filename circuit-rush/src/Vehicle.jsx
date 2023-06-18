@@ -4,13 +4,14 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Html, useKeyboardControls } from '@react-three/drei';
 import { MeshStandardMaterial, Vector3 }from 'three';
-import { debounce } from 'lodash';
+import { gsap } from 'gsap';
+import { debounce, set } from 'lodash';
 import { useBox, useRaycastVehicle } from '@react-three/cannon';
 import { Wheels } from './Wheels';
 import { Wheel } from './Wheel';
 import { VehicleControls } from './VehicleControls';
-import useGame from './stores/Game.jsx'
 import Camera from './Camera';
+import useGame from "./stores/Game.jsx";
 
 const cameraPositions = [[0, 40, -40], [0, 20, -25], [0, 4, -15]];
 const lookPositions = [[0, 0, 0], [0, 0, 0], [0, 1, 0]];
@@ -19,6 +20,9 @@ export default function Vehicle({ checkpoint }) {
   const camera = useThree((state) => state.camera);
   const cameraRef = useRef();
   const lookRef = useRef();
+	const [resetAlert, setResetAlert] = useState(false);
+	const resetAlertContent = useRef();
+	const resetAlertMessage = useRef();
 	var alternativeCamera = 0;
 	const [subscribeKeys, getKeys] = useKeyboardControls();
 
@@ -63,7 +67,7 @@ export default function Vehicle({ checkpoint }) {
     }
   });
 
-  const position = [44, 1, -6];
+  const position = [44, 0.7, -5];
   const width = 1.7;
   const height = 1;
   const front = 1.85;
@@ -73,7 +77,7 @@ export default function Vehicle({ checkpoint }) {
   const [chassisBody, chassisApi] = useBox(() => ({
     allowSleep: false,
     args: chassisBodyArgs,
-    mass: 300,
+    mass: 400,
     position,
 		rotation: [0, Math.PI, 0],
     userData: {
@@ -97,8 +101,19 @@ export default function Vehicle({ checkpoint }) {
     mesh.scale.set(1, 1, 1);
   }, [mesh]);
 
+	const { phase } = useGame((state) => state);
+	const vehicleStats = useRef();
+
+	useEffect(() => {
+		if (phase === "ended") {
+			gsap.to(vehicleStats.current, {
+				opacity: 0,
+				duration: 0.5,
+			});
+		}
+	}, [phase]);
+
 	const handleCameraChange = () => {
-		console.log(alternativeCamera)
 		if (alternativeCamera == 0) {
 			cameraRef.current.position.set(...cameraPositions[1]);
 			lookRef.current.position.set(...lookPositions[1]);
@@ -121,6 +136,34 @@ export default function Vehicle({ checkpoint }) {
     };
   }, [])
 
+	const handleKeyDown = (event) => {
+		if ((event.key === 'r' || event.key === 'R') && resetAlert) {
+			gsap.to(resetAlertContent.current, {
+				opacity: 0,
+				duration: 1,
+			});
+			setTimeout(() => { 
+				setResetAlert(false);
+			}, 1000);
+		}
+	};
+	
+	useEffect(() => {
+    if (resetAlert) {
+      setTimeout(() => {
+				gsap.fromTo(resetAlertMessage.current, {opacity: 0}, { opacity: 1, yoyo: true, repeat: -1, duration: 1 });
+			}, 500);
+    }
+	}, [resetAlert]);
+
+
+	useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [resetAlert]);
+
   useEffect(() => { 
     chassisApi.velocity.subscribe((velocity) => {
       const newSpeed = Math.round(v.set(...velocity).length() * 3.6);
@@ -128,19 +171,16 @@ export default function Vehicle({ checkpoint }) {
     });
   }, []);
 
-	const engineForces = [4000, 2400, 1800, 1600, 1400, 1200, 0]; 
+	const engineForces = [1200, 1800, 2400, 2000, 1800, 1200, 0]; 
 	const brakeForces = [10, 15, 20, 25, 30, 35, 0];
 	const maxSpeeds = [1, 20, 36, 48, 72, 119, 150];
 	var currentGear = 0;
 
   useFrame((state, delta) => {
-		const { changeCamera, quit } = getKeys();
+		const { changeCamera } = getKeys();
     if (changeCamera) {
       debounceCameraChange.current();
     }
-		if (quit) {
-			
-		}
 
 		for (var i = 0; i < maxSpeeds.length + 1; i++) {
 			if (speed <= maxSpeeds[i]) {
@@ -149,6 +189,14 @@ export default function Vehicle({ checkpoint }) {
 			}
 		}
 		
+		const cameraPosition = new Vector3(0, 0, 0);
+		cameraPosition.setFromMatrixPosition(cameraRef.current.matrixWorld);
+		if (cameraPosition.y < 2.5 && phase === "playing") { 
+			setResetAlert(true);
+		} else {
+			setResetAlert(false);
+		}
+
 		const gearPowerScale = currentGear >= 1 && currentGear <= 2 ? 0.5 : 0.8;
 		const gearPowerRange = currentGear >= 1 && currentGear <= 2 ? 0.5 : 0.2;
 		const gearSpeedRange = currentGear === 0 ? maxSpeeds[currentGear] : maxSpeeds[currentGear] - maxSpeeds[currentGear - 1];
@@ -188,13 +236,19 @@ export default function Vehicle({ checkpoint }) {
         <Wheel wheelRef={wheels[2]} />
         <Wheel wheelRef={wheels[3]} />
       </group>
-      <Html wrapperClass={'vehicle-stats-overlay'} className='vehicle-stats'>
+      <Html wrapperClass={'vehicle-stats-overlay'} className='vehicle-stats' ref={vehicleStats}>
 				<p className='vehicle-transmission'>{transmission}</p>
 				<div className='vehicle-gear-stats'>
 					<div className='vehicle-speed-bar' style={{ width: `${gearProgressBar}%` }}></div>
 				</div>
 				<p className='vehicle-speed'>{speed}</p>
       </Html>
+			{resetAlert ? 
+				<Html wrapperClass={'reset-alert-overlay'} className='reset-alert' ref={resetAlertContent}>
+					<div ref={resetAlertMessage} className="reset-message">PRESS R TO RESET CAR</div>
+				</Html>
+				: null
+			}
     </>
   );
 }

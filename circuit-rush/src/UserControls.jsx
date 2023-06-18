@@ -13,8 +13,6 @@ const UserControls = ({ children }) => {
         { name: 'horn', keys: ['KeyH'] },
         { name: 'changeCamera', keys: ['KeyC'] },
         { name: 'reset', keys: ['KeyR'] },
-        { name: 'pause', keys: ['KeyP'] },
-				{ name: 'quit', keys: ['Escape'] }
       ]}
     >
       {children}

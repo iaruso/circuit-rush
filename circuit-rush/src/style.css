@@ -1,6 +1,15 @@
 :root {
 	font-size: max(calc(12px + (32 - 12) * (100vw - 1920px) / (3840 - 480)), 12px)
 }
+
+p, a, div {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
 html, body, #root {
 	position: fixed;
 	top: 0;
@@ -43,6 +52,16 @@ html, body, #root {
 	color: #E37B7C;
 }
 
+.start-info {
+	text-align: center;
+}
+
+.start-info.mobile {
+	font-size: 1.5rem;
+	opacity: 1 !important;
+	color: #7a3334;
+}
+
 .loading-screen {
 	position: fixed;
 	top: 0;
@@ -64,6 +83,7 @@ html, body, #root {
 
 .keyboard-controls {
 	height: 100%;
+	width: 80%;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -80,25 +100,79 @@ html, body, #root {
 	font-family: 'Bebas Neue', cursive;
 }
 
-.time {
-	position: absolute;
-	right: 0;
-	width: 10rem;
-	color: #ffffff;
-	font-size: 2rem;
-	background: #00000020;
-	text-align: center;
+.countdown-value {
+	font-family: 'Bebas Neue', cursive;
+	font-size: 8rem;
+	color: #E37B7C;
+	margin-bottom: 10rem;
 }
 
-.vehicle-stats-overlay, .circuit-stats-overlay {
+.vehicle-stats-overlay, .circuit-stats-overlay, .countdown-overlay, .pause-overlay, .finish-overlay, .reset-alert-overlay {
 	transform: none !important;
   width: 100%;
 	display: flex !important;
 	justify-content: center;
 	font-variant-numeric: tabular-nums;
-	z-index: 1;
+	z-index: 1 !important;
 }
 
+.countdown-overlay, .pause-overlay, .finish-overlay, .reset-alert-overlay {
+  height: 100%;
+	align-items: center;
+	z-index: 2 !important;
+}
+
+.pause-stats, .finish-stats {
+	width: 16rem;
+	display: flex;
+	flex-direction: column;
+	background-color: #00000060;
+	opacity: 0.8;
+	border-radius: 0.25rem;
+	padding: 2rem;
+	border: 0.125rem solid #ffffff40;
+}
+
+.finish-stats {
+	opacity: 0;
+	text-align: center;
+	font-family: 'Bebas Neue', cursive;
+	font-size: 3rem;
+	color: #ffffff;
+}
+
+.pause-stats button, .finish-stats button {
+	background-color: #00000080;
+	border: none;
+	border-radius: 0.25rem;
+	height: 4rem;
+	font-family: 'Bebas Neue', cursive;
+	font-size: 2rem;
+	color: #fff;
+	cursor: pointer;
+	transition: all 0.4s ease-in-out;
+}
+
+.pause-stats > *:not(:last-child), .finish-stats > *:not(:last-child) {
+	margin-bottom: 1rem;
+}
+
+.worse-time, .better-time {
+	font-size: 2rem;
+}
+
+.worse-time {
+	color: #eeeeee;
+}
+
+.better-time {
+	color: #ffffff
+}
+
+.pause-stats button:hover, .pause-stats button:focus, .finish-stats button:hover, .finish-stats button:focus {
+	background-color: #00000050;
+}
+	
 .vehicle-stats-overlay { 
 	bottom: 0;
 }
@@ -108,9 +182,11 @@ html, body, #root {
 	bottom: 2rem;
 	display: flex;
 	height: 4rem;
-  background-color: #00000020;
+  background-color: #00000060;
+	opacity: 0.8;
 	font-family: 'Bebas Neue', cursive;
 	border-radius: 0.25rem;
+	border: 0.125rem solid #ffffff40;
 }
 
 .vehicle-transmission, .vehicle-speed {
@@ -129,11 +205,11 @@ html, body, #root {
 	width: 8rem;
   margin: 1rem 0;
 	border-radius: 0.25rem;
-	background-color: #ffffff33;
+	background-color: #00000030;
 }
 
 .vehicle-speed-bar {
-	background-color: white;
+	background-color: #ffffff;
 	height: 100%;
 	transition: width 0.05s ease-in-out;
 	border-radius: 0.25rem;
@@ -147,9 +223,11 @@ html, body, #root {
 	width: 16rem;
 	padding: 0 1.5rem;
 	height: 4rem;
-  background-color: #00000020;
+  background-color: #00000060;
+	opacity: 0.8;
 	font-family: 'Bebas Neue', cursive;
 	border-radius: 0.25rem;
+  border: 0.125rem solid #ffffff40;
 }
 
 .circuit-lap, .circuit-time {
@@ -162,3 +240,13 @@ html, body, #root {
 	color: #ffffff;
 	font-size: 2rem;
 }
+
+.reset-alert {
+	margin-bottom: 20% ;
+}
+
+.reset-message {
+	font-family: 'Bebas Neue', cursive;
+	font-size: 3rem;
+	color: #00000060;
+}	

@@ -1,20 +1,27 @@
 import './style.css';
-import ReactDOM from 'react-dom';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Experience from './Experience.jsx';
 import useGame from './stores/Game.jsx';
 import UserControls from './UserControls';
 import { Perf } from 'r3f-perf';
-import { useDetectGPU, PerformanceMonitor, useProgress } from '@react-three/drei';
+import { useDetectGPU, PerformanceMonitor, useProgress, Html } from '@react-three/drei';
 import MainMenu from './MainMenu.jsx';
 import Lottie from 'lottie-react';
 import keyboardAnimation from '../public/static/keyboard.json';
 import { gsap } from 'gsap';
 
-const root = ReactDOM.createRoot(document.querySelector('#root'));
+const rootElement = document.getElementById('root');
+const root = createRoot(rootElement);
 
 function App() {
+	const [mainSound] = useState(() => new Audio('./static/main-music.mp3'));
+	const [countdownSound] = useState(() => new Audio('./static/countdown.mp3'));
+  const [countdownStartSound] = useState(() => new Audio('./static/countdown-start.mp3'));
+	const [clickSound] = useState(() => new Audio('./static/click.mp3'));
+	const [mainSoundPlaying, setMainSoundPlaying] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const GPUTier = useDetectGPU();
   const [perfomanceMode, setPerfomanceMode] = useState(0);
@@ -24,21 +31,34 @@ function App() {
 	const lottieRef = useRef(null);
 	const lottieContent = useRef(null);
 	const loadingRef = useRef(null);
+	const countdownValue = useRef(null);
 	const [loadingStatus, setLoadingStatus] = useState(false);
 	const [gameLoaded, setGameLoaded] = useState(false);
+	const [gamePaused, setGamePaused] = useState(false);
+	const [pauseMenu, setPauseMenu] = useState(false);
+	const [finishStatus, setFinishStatus] = useState(false);
+	const finishStats = useRef(null);
+	const finishTime = useRef(null);
+	const pauseMenuRef = useRef(null);
 	const [contentLoaded, setContentLoaded] = useState(false);
+	const [countdownStatus, setCountdownStatus] = useState(false);
+	const [restartStatus, setRestartStatus] = useState(false);
+	const countdown = useGame((state) => state.countdown);
 	const start = useGame((state) => state.startGame);
+	const pause = useGame((state) => state.pause);
+	const resume = useGame((state) => state.resume);
+	const restart = useGame((state) => state.restart);
 
 	useEffect(() => {
 		GPUTier.fps > 60 ? setPerfomanceMode(2) : GPUTier.fps > 30 ? setPerfomanceMode(1) : setPerfomanceMode(0);
 		if (perfomanceMode == 2) {
 			setDpr(1);
-			setMinDpr(0.8);
-			setMaxDpr(1.2);
+			setMinDpr(0.5);
+			setMaxDpr(2);
 		} else if ( perfomanceMode == 1) {
 			setDpr(0.8);
-			setMinDpr(0.6);
-			setMaxDpr(1);
+			setMinDpr(0.5);
+			setMaxDpr(1.2);
 		} else {
 			setDpr(0.5);
 			setMinDpr(0.5);
@@ -47,26 +67,189 @@ function App() {
 	}, [perfomanceMode]);
 
   const gamePhase = useGame((state) => state.phase);
+	const { startTime, endTime } = useGame((state) => state);
+
+	if (gamePhase === 'ready') {
+		mainSoundPlaying ? null : setMainSoundPlaying(true);
+	}
   if (gamePhase === 'loading' && !gameStarted) {
+		console.log(GPUTier);
     setGameStarted(true);
   }
 	
 	const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      if (loadingStatus) {
+		if (event.key === 'Enter') {
+			if (loadingStatus) {
+				clickSound.volume = 0.05;
+				clickSound.play();
 				setGameLoaded(true);
 				setContentLoaded(false);
-				start();
-      }
+				countdown();
+				setMainSoundPlaying(false);
+			  setTimeout (() => {
+					setCountdownStatus(true);
+				}, 1000);
+			}
+		}
+		if (event.key === 'p') {
+			if (gamePhase === 'playing') {
+				setPauseMenu(true);
+				setGamePaused(true);
+			}
+		}
+	};
+
+	useEffect(() => { 
+		if (mainSoundPlaying) {
+			mainSound.volume = 0.01;
+			mainSound.play();
+		} else {
+			mainSound.pause();
+		}
+	}, [mainSoundPlaying]);
+	
+	const resumeButton = () => {
+		gsap.to(pauseMenuRef.current, {opacity: 0, duration: 0.8 });
+		setTimeout(() => {
+			setGamePaused(false);
+			setPauseMenu(false);
+		}, 500);
+	};
+
+	const restartButton = () => {
+		if (gamePhase === 'ended') {
+			setCountdownStatus(false);
+			setFinishStatus(false);
+			setTimeout(() => { 
+				setCountdownStatus(true);
+			}, 2000);
+		}
+		if (gamePhase === 'paused')  {
+			setTimeout(() => { 
+				setCountdownStatus(true);
+			}, 2000);
+		}
+		setPauseMenu(false);
+		setRestartStatus(true);
+		setTimeout(() => {
+			setRestartStatus(false);
+			setGamePaused(false);
+			restart();
+		}, 1000);
+	};
+
+	const quitButton = () => {
+		setTimeout(() => {
+    	window.location.reload();
+		}, 500);
+	};
+
+	useEffect(() => { 
+		if (gamePaused) {
+			pause();
+		} else {
+			resume();
+		}
+	}, [gamePaused]);
+
+	useEffect(() => { 
+    function padWithZero(number, width = 2) {
+			const paddedNumber = String(number);
+			return paddedNumber.padStart(width, '0');
     }
-  };
+    
+    if (gamePhase === 'ended') {
+			setFinishStatus(true);
+			let elapsedTime = 0;
+			elapsedTime = endTime - startTime;
+			const minutes = Math.floor((elapsedTime / 60000) % 60);
+			const seconds = Math.floor((elapsedTime / 1000) % 60);
+			const milliseconds = elapsedTime % 1000;
+
+			const formattedTime = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+			
+			let currentRecordTime = localStorage.getItem('currentRecordTime');
+			let timeDifference = 0;
+			if (!currentRecordTime) {
+				currentRecordTime = '';
+				localStorage.setItem('currentRecordTime', elapsedTime);
+				setTimeout(() => { 
+					finishTime.current.innerHTML = formattedTime;
+				}, 400);
+			} else if (currentRecordTime > elapsedTime) { 
+				localStorage.setItem('currentRecordTime', elapsedTime);
+				timeDifference = currentRecordTime - elapsedTime;
+				const minutes = Math.floor((timeDifference / 60000) % 60);
+				const seconds = Math.floor((timeDifference / 1000) % 60);
+				const milliseconds = timeDifference % 1000;
+
+				const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+				setTimeout(() => { 
+					finishTime.current.innerHTML = formattedTime + '<br><span class="better-time">(-' + formattedTimeDifference + ')</span>';
+				}, 400);
+			} else if (currentRecordTime < elapsedTime) { 
+				timeDifference =  elapsedTime - currentRecordTime;
+				const minutes = Math.floor((timeDifference / 60000) % 60);
+				const seconds = Math.floor((timeDifference / 1000) % 60);
+				const milliseconds = timeDifference % 1000;
+				const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+				setTimeout(() => { 
+					finishTime.current.innerHTML = formattedTime + '<br><span class="worse-time">(+' + formattedTimeDifference + ')</span>';
+				}, 400);
+			} else {
+				setTimeout(() => { 
+					finishTime.current.innerHTML = formattedTime;
+				}, 400);
+			}
+			setTimeout(() => {
+				gsap.to(finishStats.current, {opacity: 1, duration: 1.5 });
+			}, 200);
+		}
+	}, [gamePhase]);
+
+
+
+	useEffect(() => {
+		let timer;
+		const countdown = async () => {
+			for (let count = 3; count >= 1; count--) {
+				countdownValue.current.textContent = count;
+				gsap.fromTo(countdownValue.current, { opacity: 1 }, { opacity: 0, duration: 0.6, delay: 0.4 });
+				countdownSound.volume = 0.1;
+				countdownSound.play();
+				await delay(1000);
+			}
+			countdownValue.current.textContent = 'GO';
+			gsap.fromTo(countdownValue.current, { opacity: 1 }, { opacity: 0, duration: 0.6, delay: 0.4 });
+			countdownStartSound.volume = 0.1;
+			countdownStartSound.play();
+			setTimeout(() => {
+				setCountdownStatus(false);
+			}, 1000);
+			setTimeout(() => { 
+				start();
+			}, 200);
+		};
+
+		const delay = (ms) => {
+			return new Promise((resolve) => setTimeout(resolve, ms));
+		};
+
+		if (countdownStatus) {
+			timer = setTimeout(countdown, 500);
+		}
+
+		return () => {
+			clearTimeout(timer);
+		};
+	}, [countdownStatus]);
 
 	useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [gameStarted, gameLoaded, loadingStatus, contentLoaded]);
+  }, [gameStarted, gameLoaded, loadingStatus, contentLoaded, gamePhase]);
 
 	useEffect(() => {
     if (lottieRef.current) {
@@ -87,24 +270,24 @@ function App() {
   }, [gameStarted, lottieRef]);
 
 	useEffect(() => {
-  if (loadingStatus) {
-    const textElement = loadingRef.current;
-    const animation = gsap.fromTo(
-      textElement,
-      { opacity: 0 },
-      { opacity: 1, yoyo: true, repeat: -1, duration: 1 }
-    );
-    return () => {
-      animation.kill();
-    };
-  }
-}, [loadingStatus]);
+		if (loadingStatus) {
+			const textElement = loadingRef.current;
+			const animation = gsap.fromTo(
+				textElement,
+				{ opacity: 0 },
+				{ opacity: 1, yoyo: true, repeat: -1, duration: 1 }
+			);
+			return () => {
+				animation.kill();
+			};
+		}
+	}, [loadingStatus]);
 
 
 	function Loader() {
 		const { progress } = useProgress()
 		loadingRef.current.textContent = 'LOADING ' + progress.toFixed(0) + '%';
-		if ( progress > 99.9 ) {
+		if ( progress > 99 ) {
 			setContentLoaded(true);
 			setTimeout(() => {
 				setLoadingStatus(true);
@@ -145,7 +328,7 @@ function App() {
 							}}
 						>	
 							<Suspense fallback={<Loader />}>
-							{!contentLoaded ?
+							{!contentLoaded && !restartStatus?
 								<>
 									<color attach="background" args={['#fbfbfb']} />
 									<PerformanceMonitor onIncline={() => setDpr(minDpr)} onDecline={() => setDpr(maxDpr)}>
@@ -155,6 +338,28 @@ function App() {
 								</>
 								: null}
 							</Suspense>
+							{countdownStatus ? 
+								<Html wrapperClass={'countdown-overlay'} className='countdown-stats'>
+									<p ref={countdownValue} className='countdown-value'></p>
+								</Html>
+								: null
+							}
+							{pauseMenu ? 
+								<Html wrapperClass={'pause-overlay'} className='pause-stats' ref={pauseMenuRef}>
+									<button onClick={resumeButton}>RESUME</button>
+									<button onClick={restartButton}>RESTART</button>
+									<button onClick={quitButton}>QUIT</button>
+								</Html>
+								: null
+							}
+							{finishStatus ? 
+								<Html wrapperClass={'finish-overlay'} className='finish-stats' ref={finishStats}>
+									<div className="finish-time" ref={finishTime}></div>
+									<button onClick={restartButton}>RESTART</button>
+									<button onClick={quitButton}>QUIT</button>
+								</Html>
+								: null
+							}
 						</Canvas>
 					</UserControls>
 				</>
@@ -163,4 +368,8 @@ function App() {
 	);
 }
 
-root.render(<App />);
+root.render(
+	<StrictMode>
+		<App />
+	</StrictMode>	
+);
