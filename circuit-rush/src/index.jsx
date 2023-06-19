@@ -84,8 +84,8 @@ function App() {
 				clickSound.play();
 				setGameLoaded(true);
 				setContentLoaded(false);
-				countdown();
 				setTimeout (() => {
+					countdown();
 					setCountdownStatus(true);
 				}, 1000);
 			}
