@@ -67,27 +67,29 @@ function App() {
   const gamePhase = useGame((state) => state.phase);
 	const { startTime, endTime } = useGame((state) => state);
 
-  if (gamePhase === 'loading' && !gameStarted) {
-    setGameStarted(true);
-  }
-
 	const quitButton = () => {
 		setTimeout(() => {
     	window.location.reload();
 		}, 500);
 	};
 
+	const handleCanvasKeyDown = (event) => { 
+		if (!gameStarted || !gameLoaded) {
+			event.preventDefault();
+		}
+	};
+
 	const handleKeyDown = (event) => {
 		if (event.key === 'Enter') {
-			if (loadingStatus && gamePhase === 'loading') {
+			if (loadingStatus) {
 				clickSound.volume = 0.05;
 				clickSound.play();
-				setGameLoaded(true);
-				setContentLoaded(false);
 				setTimeout (() => {
-					countdown();
+					setContentLoaded(false);
+					setGameLoaded(true);
 					setCountdownStatus(true);
-				}, 1000);
+					countdown();
+				}, 200);
 			}
 		}
 		if (event.key === 'p' || event.key === 'P') {
@@ -140,6 +142,14 @@ function App() {
 			resume();
 		}
 	}, [gamePaused]);
+
+	useEffect(() => {
+		if (gamePhase === 'loading') {
+			setTimeout(() => { 
+				setGameStarted(true);
+			}, 200);
+		}
+	}, [gamePhase]);
 
 	useEffect(() => { 
     function padWithZero(number, width = 2) {
@@ -236,7 +246,7 @@ function App() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [gameStarted, gameLoaded, loadingStatus, contentLoaded, gamePhase]);
+  }, [gameStarted, gameLoaded, loadingStatus, gamePhase]);
 
 	useEffect(() => {
     if (lottieRef.current) {
@@ -274,7 +284,7 @@ function App() {
 	function Loader() {
 		const { progress } = useProgress()
 		loadingRef.current.textContent = 'LOADING ' + progress.toFixed(0) + '%';
-		if ( progress > 99 ) {
+		if ( progress > 99.9 ) {
 			setContentLoaded(true);
 			setTimeout(() => {
 				setLoadingStatus(true);
@@ -305,6 +315,7 @@ function App() {
 					) : null}
 					<UserControls>
 						<Canvas
+							onKeyDown={handleCanvasKeyDown}
 							dpr={dpr}
 							shadows={perfomanceMode > 0 ? 'soft' : 'basic'} 
 							camera={{

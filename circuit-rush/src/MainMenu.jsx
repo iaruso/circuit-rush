@@ -20,10 +20,10 @@ const MainMenu = () => {
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       if (!loadingStatus && startStatus) {
+				updateLoadingStatus();
+        loading();
 				clickSound.volume = 0.05;
 				clickSound.play();
-        loading();
-        updateLoadingStatus();
       }
     }
   };
@@ -54,13 +54,13 @@ const MainMenu = () => {
 			});
 			setTimeout(() => {
 				setStartStatus(true);
-			}, 3000);
+			}, 2500);
 			if (!mobileDevice) {
 				const textElement = textRef.current;
 				const animation = gsap.fromTo(
 					textElement,
 					{ opacity: 0 },
-					{ opacity: 1, yoyo: true, repeat: -1, duration: 1, delay: 3 }
+					{ opacity: 1, yoyo: true, repeat: -1, duration: 1, delay: 2.5 }
 				);
 				return () => {
 					animation.kill();
