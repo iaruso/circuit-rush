@@ -6,8 +6,8 @@ import { Canvas } from '@react-three/fiber';
 import Experience from './Experience.jsx';
 import useGame from './stores/Game.jsx';
 import UserControls from './UserControls';
-import { Perf } from 'r3f-perf';
 import { useDetectGPU, PerformanceMonitor, useProgress, Html } from '@react-three/drei';
+import { EffectComposer, DepthOfField} from '@react-three/postprocessing'
 import MainMenu from './MainMenu.jsx';
 import Lottie from 'lottie-react';
 import keyboardAnimation from '../public/static/keyboard.json';
@@ -17,11 +17,9 @@ const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
 
 function App() {
-	const [mainSound] = useState(() => new Audio('./static/main-music.mp3'));
 	const [countdownSound] = useState(() => new Audio('./static/countdown.mp3'));
   const [countdownStartSound] = useState(() => new Audio('./static/countdown-start.mp3'));
 	const [clickSound] = useState(() => new Audio('./static/click.mp3'));
-	const [mainSoundPlaying, setMainSoundPlaying] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
   const GPUTier = useDetectGPU();
   const [perfomanceMode, setPerfomanceMode] = useState(0);
@@ -69,44 +67,41 @@ function App() {
   const gamePhase = useGame((state) => state.phase);
 	const { startTime, endTime } = useGame((state) => state);
 
-	if (gamePhase === 'ready') {
-		mainSoundPlaying ? null : setMainSoundPlaying(true);
-	}
   if (gamePhase === 'loading' && !gameStarted) {
-		console.log(GPUTier);
     setGameStarted(true);
   }
-	
+
+	const quitButton = () => {
+		setTimeout(() => {
+    	window.location.reload();
+		}, 500);
+	};
+
 	const handleKeyDown = (event) => {
 		if (event.key === 'Enter') {
-			if (loadingStatus) {
+			if (loadingStatus && gamePhase === 'loading') {
 				clickSound.volume = 0.05;
 				clickSound.play();
 				setGameLoaded(true);
 				setContentLoaded(false);
 				countdown();
-				setMainSoundPlaying(false);
-			  setTimeout (() => {
+				setTimeout (() => {
 					setCountdownStatus(true);
 				}, 1000);
 			}
 		}
-		if (event.key === 'p') {
+		if (event.key === 'p' || event.key === 'P') {
 			if (gamePhase === 'playing') {
 				setPauseMenu(true);
 				setGamePaused(true);
 			}
 		}
-	};
-
-	useEffect(() => { 
-		if (mainSoundPlaying) {
-			mainSound.volume = 0.01;
-			mainSound.play();
-		} else {
-			mainSound.pause();
+		if (event.key === 'Escape') {
+			if (gamePhase === 'playing' || gamePhase === 'paused' || gamePhase === 'ended') {
+				quitButton();
+			}
 		}
-	}, [mainSoundPlaying]);
+	};
 	
 	const resumeButton = () => {
 		gsap.to(pauseMenuRef.current, {opacity: 0, duration: 0.8 });
@@ -138,12 +133,6 @@ function App() {
 		}, 1000);
 	};
 
-	const quitButton = () => {
-		setTimeout(() => {
-    	window.location.reload();
-		}, 500);
-	};
-
 	useEffect(() => { 
 		if (gamePaused) {
 			pause();
@@ -170,57 +159,55 @@ function App() {
 			
 			let currentRecordTime = localStorage.getItem('currentRecordTime');
 			let timeDifference = 0;
-			if (!currentRecordTime) {
-				currentRecordTime = '';
-				localStorage.setItem('currentRecordTime', elapsedTime);
-				setTimeout(() => { 
-					finishTime.current.innerHTML = formattedTime;
-				}, 400);
-			} else if (currentRecordTime > elapsedTime) { 
-				localStorage.setItem('currentRecordTime', elapsedTime);
-				timeDifference = currentRecordTime - elapsedTime;
-				const minutes = Math.floor((timeDifference / 60000) % 60);
-				const seconds = Math.floor((timeDifference / 1000) % 60);
-				const milliseconds = timeDifference % 1000;
-
-				const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-				setTimeout(() => { 
-					finishTime.current.innerHTML = formattedTime + '<br><span class="better-time">(-' + formattedTimeDifference + ')</span>';
-				}, 400);
-			} else if (currentRecordTime < elapsedTime) { 
-				timeDifference =  elapsedTime - currentRecordTime;
-				const minutes = Math.floor((timeDifference / 60000) % 60);
-				const seconds = Math.floor((timeDifference / 1000) % 60);
-				const milliseconds = timeDifference % 1000;
-				const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-				setTimeout(() => { 
-					finishTime.current.innerHTML = formattedTime + '<br><span class="worse-time">(+' + formattedTimeDifference + ')</span>';
-				}, 400);
-			} else {
-				setTimeout(() => { 
-					finishTime.current.innerHTML = formattedTime;
-				}, 400);
-			}
-			setTimeout(() => {
+			setTimeout(() => { 
 				gsap.to(finishStats.current, {opacity: 1, duration: 1.5 });
+				if (!currentRecordTime) {
+					currentRecordTime = '';
+					localStorage.setItem('currentRecordTime', elapsedTime);
+					setTimeout(() => { 
+						finishTime.current.innerHTML = formattedTime;
+					}, 200);
+				} else if (currentRecordTime > elapsedTime) { 
+					localStorage.setItem('currentRecordTime', elapsedTime);
+					timeDifference = currentRecordTime - elapsedTime;
+					const minutes = Math.floor((timeDifference / 60000) % 60);
+					const seconds = Math.floor((timeDifference / 1000) % 60);
+					const milliseconds = timeDifference % 1000;
+
+					const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+					setTimeout(() => { 
+						finishTime.current.innerHTML = formattedTime + '<br><span class="better-time">(-' + formattedTimeDifference + ')</span>';
+					}, 200);
+				} else if (currentRecordTime < elapsedTime) { 
+					timeDifference =  elapsedTime - currentRecordTime;
+					const minutes = Math.floor((timeDifference / 60000) % 60);
+					const seconds = Math.floor((timeDifference / 1000) % 60);
+					const milliseconds = timeDifference % 1000;
+					const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+					setTimeout(() => { 
+						finishTime.current.innerHTML = formattedTime + '<br><span class="worse-time">(+' + formattedTimeDifference + ')</span>';
+					}, 200);
+				} else {
+					setTimeout(() => { 
+						finishTime.current.innerHTML = formattedTime;
+					}, 200);
+				}
 			}, 200);
 		}
 	}, [gamePhase]);
-
-
 
 	useEffect(() => {
 		let timer;
 		const countdown = async () => {
 			for (let count = 3; count >= 1; count--) {
 				countdownValue.current.textContent = count;
-				gsap.fromTo(countdownValue.current, { opacity: 1 }, { opacity: 0, duration: 0.6, delay: 0.4 });
+				gsap.fromTo(countdownValue.current, { opacity: 0.8 }, { opacity: 0, duration: 0.6, delay: 0.4 });
 				countdownSound.volume = 0.1;
 				countdownSound.play();
 				await delay(1000);
 			}
 			countdownValue.current.textContent = 'GO';
-			gsap.fromTo(countdownValue.current, { opacity: 1 }, { opacity: 0, duration: 0.6, delay: 0.4 });
+			gsap.fromTo(countdownValue.current, { opacity: 0.8 }, { opacity: 0, duration: 0.6, delay: 0.4 });
 			countdownStartSound.volume = 0.1;
 			countdownStartSound.play();
 			setTimeout(() => {
@@ -291,8 +278,8 @@ function App() {
 			setContentLoaded(true);
 			setTimeout(() => {
 				setLoadingStatus(true);
-        loadingRef.current.textContent = 'PRESS ENTER TO PLAY';
-      }, 2000);
+				loadingRef.current.textContent = 'PRESS ENTER TO PLAY';
+			}, 2000);
 		}
 		return <></>
 	}
@@ -323,20 +310,25 @@ function App() {
 							camera={{
 								fov: 45,
 								near: 0.01,
-								far: 300,
+								far: 200,
 								position: [0, 0, 0],
 							}}
-						>	
+						>
 							<Suspense fallback={<Loader />}>
 							{!contentLoaded && !restartStatus?
 								<>
-									<color attach="background" args={['#fbfbfb']} />
+									{ perfomanceMode > 0 ? 
+										<EffectComposer>
+											<DepthOfField focalLength={0.1} bokehScale={0.25} height={200} />
+										</EffectComposer>
+									: null }
+									<color attach="background" args={['#F9F9F9']} />
 									<PerformanceMonitor onIncline={() => setDpr(minDpr)} onDecline={() => setDpr(maxDpr)}>
 										<Experience perfomanceMode={perfomanceMode} />
 									</PerformanceMonitor>
-									<Perf position="top-right" minimal={true} overClock /> 
 								</>
-								: null}
+								: null
+							}
 							</Suspense>
 							{countdownStatus ? 
 								<Html wrapperClass={'countdown-overlay'} className='countdown-stats'>

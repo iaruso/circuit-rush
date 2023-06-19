@@ -54,8 +54,6 @@ export default function Vehicle({ checkpoint }) {
         materialParams.color = '#ff4242';
         materialParams.emissive = '#000000';
         materialParams.emissiveIntensity = 1;
-      } else if (child.name === 'Headlights') {
-        materialParams.color = 'yellow';
       } else {
         materialParams.color = '#ffffff';
         materialParams.emissive = '#ffffff';

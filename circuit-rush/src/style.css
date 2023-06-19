@@ -1,5 +1,5 @@
 :root {
-	font-size: max(calc(12px + (32 - 12) * (100vw - 1920px) / (3840 - 480)), 12px)
+	font-size: max(calc(12px + (32 - 12) * (100vw - 1920px) / (3840 - 480)), 12px);
 }
 
 p, a, div {
@@ -59,7 +59,6 @@ html, body, #root {
 .start-info.mobile {
 	font-size: 1.5rem;
 	opacity: 1 !important;
-	color: #7a3334;
 }
 
 .loading-screen {
@@ -102,9 +101,8 @@ html, body, #root {
 
 .countdown-value {
 	font-family: 'Bebas Neue', cursive;
-	font-size: 8rem;
+	font-size: 10rem;
 	color: #E37B7C;
-	margin-bottom: 10rem;
 }
 
 .vehicle-stats-overlay, .circuit-stats-overlay, .countdown-overlay, .pause-overlay, .finish-overlay, .reset-alert-overlay {
@@ -123,14 +121,14 @@ html, body, #root {
 }
 
 .pause-stats, .finish-stats {
-	width: 16rem;
+	width: 20rem;
 	display: flex;
 	flex-direction: column;
-	background-color: #00000060;
+	background-color: #00000020;
 	opacity: 0.8;
 	border-radius: 0.25rem;
 	padding: 2rem;
-	border: 0.125rem solid #ffffff40;
+	border: 0.125rem solid #00000010;
 }
 
 .finish-stats {
@@ -142,7 +140,7 @@ html, body, #root {
 }
 
 .pause-stats button, .finish-stats button {
-	background-color: #00000080;
+	background-color: #00000030;
 	border: none;
 	border-radius: 0.25rem;
 	height: 4rem;
@@ -151,6 +149,7 @@ html, body, #root {
 	color: #fff;
 	cursor: pointer;
 	transition: all 0.4s ease-in-out;
+	padding: 0rem;;
 }
 
 .pause-stats > *:not(:last-child), .finish-stats > *:not(:last-child) {
@@ -162,7 +161,7 @@ html, body, #root {
 }
 
 .worse-time {
-	color: #eeeeee;
+	color: #e37b7d;
 }
 
 .better-time {
@@ -171,6 +170,10 @@ html, body, #root {
 
 .pause-stats button:hover, .pause-stats button:focus, .finish-stats button:hover, .finish-stats button:focus {
 	background-color: #00000050;
+}
+
+.pause-stats button:focus-visible, .finish-stats button:focus-visible {
+	outline: 1px solid #404040;
 }
 	
 .vehicle-stats-overlay { 
@@ -182,11 +185,12 @@ html, body, #root {
 	bottom: 2rem;
 	display: flex;
 	height: 4rem;
-  background-color: #00000060;
 	opacity: 0.8;
 	font-family: 'Bebas Neue', cursive;
 	border-radius: 0.25rem;
-	border: 0.125rem solid #ffffff40;
+	background-color: #ffffff80;
+	backdrop-filter: blur(1rem);
+	border: 0.125rem solid #00000010;
 }
 
 .vehicle-transmission, .vehicle-speed {
@@ -197,19 +201,19 @@ html, body, #root {
   justify-content: center;
 	align-items: center;
 	padding-top: 0.125rem;
-	color: #ffffff;
+	color: #e37b7d;
   font-size: 2rem;
 }
 
 .vehicle-gear-stats {
-	width: 8rem;
+	width: 12rem;
   margin: 1rem 0;
 	border-radius: 0.25rem;
-	background-color: #00000030;
+	background-color: #ffffff;
 }
 
 .vehicle-speed-bar {
-	background-color: #ffffff;
+	background-color: #e37b7d;
 	height: 100%;
 	transition: width 0.05s ease-in-out;
 	border-radius: 0.25rem;
@@ -220,14 +224,15 @@ html, body, #root {
 	top: 2rem;
 	display: flex;
 	justify-content: space-between;
-	width: 16rem;
+	width: 20rem;
 	padding: 0 1.5rem;
 	height: 4rem;
-  background-color: #00000060;
 	opacity: 0.8;
 	font-family: 'Bebas Neue', cursive;
 	border-radius: 0.25rem;
-  border: 0.125rem solid #ffffff40;
+	background-color: #ffffff80;
+	backdrop-filter: blur(1rem);
+	border: 0.125rem solid #00000010;
 }
 
 .circuit-lap, .circuit-time {
@@ -237,7 +242,7 @@ html, body, #root {
 	justify-content: center;
 	align-items: center;
 	padding-top: 0.125rem;
-	color: #ffffff;
+	color: #e37b7d;
 	font-size: 2rem;
 }
 
@@ -248,5 +253,11 @@ html, body, #root {
 .reset-message {
 	font-family: 'Bebas Neue', cursive;
 	font-size: 3rem;
-	color: #00000060;
-}	
+	color: #e37b7d;
+}
+
+@media screen and (max-width: 1080px) {
+	.keyboard-controls {
+		width: 100%;
+	}
+}

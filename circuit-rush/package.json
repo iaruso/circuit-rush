@@ -20,7 +20,7 @@
     "@react-three/cannon": "^6.5.2",
     "@react-three/drei": "9.50",
     "@react-three/fiber": "^8.9.2",
-    "@react-three/postprocessing": "^2.14.7",
+    "@react-three/postprocessing": "^2.14.10",
     "@react-three/rapier": "^0.15.1",
     "cannon-es": "^0.20.0",
     "gsap": "^3.11.5",

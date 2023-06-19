@@ -37,7 +37,7 @@ export default function Checkpoints({ checkpoint, setCheckpoint }) {
   };
 
   const playLapSound = () => {
-    lapSound.volume = 0.5;
+    lapSound.volume = 0.4;
     lapSound.play();
   };
 

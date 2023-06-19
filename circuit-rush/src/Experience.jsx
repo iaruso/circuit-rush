@@ -84,46 +84,44 @@ export default function Experience({ perfomanceMode }) {
 	}, [gameFinished, phase])
   return (
     <>
-			<PerformanceMonitor>
-				<directionalLight
-					ref={light}
-					castShadow={perfMode > 0 ? true : false}
-					position={[-100, 100, -100]}
-					intensity={2}
-					shadow-camera={shadowCamera}
-					shadow-bias={shadowBiasArray[perfMode]}
-					shadow-mapSize-width={shadowMapSizeWidthArray[perfMode]}
-					shadow-mapSize-height={shadowMapSizeHeightArray[perfMode]}
-					color={'#fff'}
-					radius={perfMode > 1 ? 6 : 2}
-					blurSamples={perfMode > 1 ? 12 : 4}
-				/>
-				<pointLight position={[100, 100, 100]} intensity={0.2} color={'#3865fc'} />
-				<pointLight position={[-100, 100, -100]} intensity={0.2} color={'#ff6f00'} />
-				<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
-				<ambientLight intensity={1} color={'#fff'} />
-				<Environment files={'static/adamsbridge.hdr'} />
-				<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true} isPaused={gamePaused}>
-					{/* <Debug scale={1} color={'#ff0000'}> */}
-						<PhysicsWorld />
-						<Suspense>
-							<Objects
-								cubesData={cubesArray}
-								cubesCount={cubesArray.length}
-								waypointsRightData={waypointsRightArray}
-								waypointsRightCount={waypointsRightArray.length}
-								waypointsLeftData={waypointsLeftArray}
-								waypointsLeftCount={waypointsLeft.length}
-								perfomanceMode={perfMode === 2 ? false : true }
-							/>
-						</Suspense>
-						<Plane />
-						<Vehicle checkpoint={checkpoint} />
-						<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
-					{/* </Debug> */}
-				</Physics>
-				<Circuit />
-			</PerformanceMonitor>
+			<directionalLight
+				ref={light}
+				castShadow={perfMode > 0 ? true : false}
+				position={[-100, 100, -100]}
+				intensity={2}
+				shadow-camera={shadowCamera}
+				shadow-bias={shadowBiasArray[perfMode]}
+				shadow-mapSize-width={shadowMapSizeWidthArray[perfMode]}
+				shadow-mapSize-height={shadowMapSizeHeightArray[perfMode]}
+				color={'#fff'}
+				radius={perfMode > 1 ? 6 : 2}
+				blurSamples={perfMode > 1 ? 12 : 4}
+			/>
+			<pointLight position={[100, 100, 100]} intensity={0.2} color={'#3865fc'} />
+			<pointLight position={[-100, 100, -100]} intensity={0.2} color={'#ff6f00'} />
+			<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
+			<ambientLight intensity={1} color={'#fff'} />
+			<Environment files={'static/adamsbridge.hdr'} />
+			<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true} isPaused={gamePaused}>
+				{/* <Debug scale={1} color={'#ff0000'}> */}
+					<PhysicsWorld />
+					<Suspense>
+						<Objects
+							cubesData={cubesArray}
+							cubesCount={cubesArray.length}
+							waypointsRightData={waypointsRightArray}
+							waypointsRightCount={waypointsRightArray.length}
+							waypointsLeftData={waypointsLeftArray}
+							waypointsLeftCount={waypointsLeft.length}
+							perfomanceMode={perfMode === 2 ? false : true }
+						/>
+					</Suspense>
+					<Plane />
+					<Vehicle checkpoint={checkpoint} />
+					<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
+				{/* </Debug> */}
+			</Physics>
+			<Circuit />
     </>
   );
 }

@@ -21,9 +21,7 @@ export default function Circuit() {
 			child.material = new THREE.MeshStandardMaterial({
 				color: '#f9f9f9',
 				roughness: 1,
-				metalness: 0,
-				emissive: "#fff",
-				emissiveIntensity: 0.8
+				metalness: 0
 			});
 		}
   });

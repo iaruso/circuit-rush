@@ -74,7 +74,7 @@ const MainMenu = () => {
 			<img className="main-cover" ref={backgroundRef} src={'static/cover.webp'} alt='Circuit Rush Main Screen Cover'/>
 			<div className="menu">
 				<div ref={textRef} className="start-info">
-					{!mobileDevice ? 'PRESS ENTER TO START' : 'NOT SUPPORTED ON MOBILE'}
+					{!mobileDevice ? 'PRESS ENTER TO START' : 'MOBILE DEVICES CURRENTLY NOT SUPPORTED'}
 				</div>
 			</div>
 		</div>
