@@ -38,7 +38,6 @@ function App() {
 	const finishStats = useRef(null);
 	const finishTime = useRef(null);
 	const pauseMenuRef = useRef(null);
-	const [contentLoaded, setContentLoaded] = useState(false);
 	const [countdownStatus, setCountdownStatus] = useState(false);
 	const [restartStatus, setRestartStatus] = useState(false);
 	const countdown = useGame((state) => state.countdown);
@@ -64,8 +63,7 @@ function App() {
 		}
 	}, [perfomanceMode]);
 
-  const gamePhase = useGame((state) => state.phase);
-	const { startTime, endTime } = useGame((state) => state);
+	const { phase, startTime, endTime } = useGame((state) => state);
 
 	const quitButton = () => {
 		setTimeout(() => {
@@ -85,7 +83,6 @@ function App() {
 				clickSound.volume = 0.05;
 				clickSound.play();
 				setTimeout (() => {
-					setContentLoaded(false);
 					setGameLoaded(true);
 					setCountdownStatus(true);
 					countdown();
@@ -93,13 +90,13 @@ function App() {
 			}
 		}
 		if (event.key === 'p' || event.key === 'P') {
-			if (gamePhase === 'playing') {
+			if (phase === 'playing') {
 				setPauseMenu(true);
 				setGamePaused(true);
 			}
 		}
 		if (event.key === 'Escape') {
-			if (gamePhase === 'playing' || gamePhase === 'paused' || gamePhase === 'ended') {
+			if (phase === 'playing' || phase === 'paused' || phase === 'ended') {
 				quitButton();
 			}
 		}
@@ -114,14 +111,14 @@ function App() {
 	};
 
 	const restartButton = () => {
-		if (gamePhase === 'ended') {
+		if (phase === 'ended') {
 			setCountdownStatus(false);
 			setFinishStatus(false);
 			setTimeout(() => { 
 				setCountdownStatus(true);
 			}, 2000);
 		}
-		if (gamePhase === 'paused')  {
+		if (phase === 'paused')  {
 			setTimeout(() => { 
 				setCountdownStatus(true);
 			}, 2000);
@@ -144,12 +141,12 @@ function App() {
 	}, [gamePaused]);
 
 	useEffect(() => {
-		if (gamePhase === 'loading') {
+		if (phase === 'loading') {
 			setTimeout(() => { 
 				setGameStarted(true);
 			}, 200);
 		}
-	}, [gamePhase]);
+	}, [phase]);
 
 	useEffect(() => { 
     function padWithZero(number, width = 2) {
@@ -157,7 +154,7 @@ function App() {
 			return paddedNumber.padStart(width, '0');
     }
     
-    if (gamePhase === 'ended') {
+    if (phase === 'ended') {
 			setFinishStatus(true);
 			let elapsedTime = 0;
 			elapsedTime = endTime - startTime;
@@ -204,7 +201,7 @@ function App() {
 				}
 			}, 200);
 		}
-	}, [gamePhase]);
+	}, [phase]);
 
 	useEffect(() => {
 		let timer;
@@ -246,7 +243,7 @@ function App() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [gameStarted, gameLoaded, loadingStatus, gamePhase]);
+  }, [gameStarted, gameLoaded, loadingStatus, phase]);
 
 	useEffect(() => {
     if (lottieRef.current) {
@@ -285,7 +282,6 @@ function App() {
 		const { progress } = useProgress()
 		loadingRef.current.textContent = 'LOADING ' + progress.toFixed(0) + '%';
 		if ( progress > 99.9 ) {
-			setContentLoaded(true);
 			setTimeout(() => {
 				setLoadingStatus(true);
 				loadingRef.current.textContent = 'PRESS ENTER TO PLAY';
@@ -317,16 +313,10 @@ function App() {
 						<Canvas
 							onKeyDown={handleCanvasKeyDown}
 							dpr={dpr}
-							shadows={perfomanceMode > 0 ? 'soft' : 'basic'} 
-							camera={{
-								fov: 45,
-								near: 0.01,
-								far: 200,
-								position: [0, 0, 0],
-							}}
+							shadows={perfomanceMode > 0 ? 'soft' : 'basic'}
 						>
 							<Suspense fallback={<Loader />}>
-							{!contentLoaded && !restartStatus?
+							{!restartStatus?
 								<>
 									{ perfomanceMode > 0 ? 
 										<EffectComposer>

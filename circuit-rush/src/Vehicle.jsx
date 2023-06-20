@@ -13,8 +13,7 @@ import { VehicleControls } from './VehicleControls';
 import Camera from './Camera';
 import useGame from "./stores/Game.jsx";
 
-const cameraPositions = [[0, 40, -40], [0, 20, -25], [0, 4, -15]];
-const lookPositions = [[0, 0, 0], [0, 0, 0], [0, 1, 0]];
+const cameraPositions = [[0, 40, -40], [0, 20, -25]];
 
 export default function Vehicle({ checkpoint }) {
   const camera = useThree((state) => state.camera);
@@ -112,20 +111,11 @@ export default function Vehicle({ checkpoint }) {
 	}, [phase]);
 
 	const handleCameraChange = () => {
-		if (alternativeCamera == 0) {
-			cameraRef.current.position.set(...cameraPositions[1]);
-			lookRef.current.position.set(...lookPositions[1]);
-			alternativeCamera = 1;
-		} else if (alternativeCamera == 1) {
-			cameraRef.current.position.set(...cameraPositions[2]);
-			lookRef.current.position.set(...lookPositions[2]);
-			alternativeCamera = 2;
-		} else {
-			cameraRef.current.position.set(...cameraPositions[0]);
-			lookRef.current.position.set(...lookPositions[0]);
-			alternativeCamera = 0;
-		}
+		const positionIndex = alternativeCamera === 0 ? 1 : 0;
+		cameraRef.current.position.set(...cameraPositions[positionIndex]);
+		alternativeCamera = 1 - alternativeCamera;
 	};
+
 	const debounceCameraChange = useRef(debounce(handleCameraChange, 50));	
 
 	useEffect(() => {
@@ -169,9 +159,9 @@ export default function Vehicle({ checkpoint }) {
     });
   }, []);
 
-	const engineForces = [1200, 1800, 2400, 2000, 1800, 1200, 0]; 
-	const brakeForces = [10, 15, 20, 25, 30, 35, 0];
-	const maxSpeeds = [1, 20, 36, 48, 72, 119, 150];
+	const engineForces = [3000, 3200, 2800, 2400, 2000, 1600, 0]; 
+	const brakeForces = [10, 20, 30, 40, 50, 50, 0];
+	const maxSpeeds = [1, 20, 40, 65, 90, 140, 160];
 	var currentGear = 0;
 
   useFrame((state, delta) => {
@@ -189,7 +179,7 @@ export default function Vehicle({ checkpoint }) {
 		
 		const cameraPosition = new Vector3(0, 0, 0);
 		cameraPosition.setFromMatrixPosition(cameraRef.current.matrixWorld);
-		if (cameraPosition.y < 2.5 && phase === "playing") { 
+		if (cameraPosition.y < 10 && phase === "playing") { 
 			setResetAlert(true);
 		} else {
 			setResetAlert(false);
@@ -225,7 +215,7 @@ export default function Vehicle({ checkpoint }) {
       <group ref={vehicle} name="vehicle">
         <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
           <primitive object={mesh} position={[0, -0.7, -0.1]} />
-          <object3D ref={lookRef} position={[...lookPositions[0]]}>
+          <object3D ref={lookRef} position={[0, 0, 0]}>
             <Camera ref={cameraRef} cameraRef={cameraRef} position={[...cameraPositions[0]]} />
           </object3D>
         </group>

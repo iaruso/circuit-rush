@@ -15,7 +15,7 @@ export default function PhysicsWorld() {
   const cubesArray = physics;
   return (
     <>
-			<Instances range={cubesArray.length} material={cubeMaterial} geometry={cubeGeometry} castShadow receiveShadow>
+			<Instances range={cubesArray.length} material={cubeMaterial} geometry={cubeGeometry}>
         <group position={[0, 0, 0]}>
 					{cubesArray.map((cubeParams, index) => (
 						<Cube key={index} position={cubeParams.slice(0,3)} rotation={[0, (cubeParams[3] * Math.PI) / 180, 0]} size={cubeParams.slice(4)} />

@@ -32,15 +32,15 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 			const { forward, backward, leftward, rightward, brake, reset, horn } = getKeys();
 			if (forward) {
 				if (gear === 0) setReverseFlag(false);
-				vehicleApi.applyEngineForce(-forcePower / 2, 0);
-				vehicleApi.applyEngineForce(-forcePower / 2, 1);
+				vehicleApi.applyEngineForce(-forcePower * 0.6, 0);
+				vehicleApi.applyEngineForce(-forcePower * 0.6, 1);
 				vehicleApi.applyEngineForce(-forcePower, 2);
 				vehicleApi.applyEngineForce(-forcePower, 3);
 			} else if (backward) {
 				speed > 20 ? (rearForce = forcePower / 10) : (rearForce = forcePower / 2);
 				if (gear === 0) setReverseFlag(true);
-				vehicleApi.applyEngineForce(rearForce / 2, 0);
-				vehicleApi.applyEngineForce(rearForce / 2, 1);
+				vehicleApi.applyEngineForce(rearForce * 0.6, 0);
+				vehicleApi.applyEngineForce(rearForce * 0.6, 1);
 				vehicleApi.applyEngineForce(rearForce, 2);
 				vehicleApi.applyEngineForce(rearForce, 3);
 			} else {

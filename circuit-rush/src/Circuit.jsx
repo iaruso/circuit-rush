@@ -15,11 +15,16 @@ export default function Circuit() {
       child.castShadow = true;
       child.receiveShadow = true;
     }
-		if (child.name === 'Plane' || child.name === 'Terrain') {
-			child.castShadow = false;
-			child.receiveShadow = true;
+		if (child.name === 'Terrain') {
 			child.material = new THREE.MeshStandardMaterial({
 				color: '#f9f9f9',
+				roughness: 1,
+				metalness: 0
+			});
+		}
+		if (child.name === 'Plane') {
+			child.material = new THREE.MeshStandardMaterial({
+				color: '#f0f0f0',
 				roughness: 1,
 				metalness: 0
 			});

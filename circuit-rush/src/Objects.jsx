@@ -1,6 +1,9 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect } from 'react';
 import { Instances, useGLTF } from '@react-three/drei';
 import { MeshStandardMaterial } from 'three';
+import useGame from './stores/Game';
+import waypointsLeft from '../public/static/waypoints-left'
+import waypointsRight from '../public/static/waypoints-right'
 import Cube from './Cube';
 import gsap from 'gsap';
 import Waypoint from './Waypoint';
@@ -10,16 +13,20 @@ const objectsMaterial = new MeshStandardMaterial({
   color: "#fff",
   roughness: 1,
   metalness: 0,
-	emissive: "#fff",
-	emissiveIntensity: 0.1
+  emissive: "#fff",
+  emissiveIntensity: 0.1
 });
 
-export default function Objects({ cubesData, cubesCount, waypointsRightData, waypointsLeftData, perfomanceMode }) {
-  const { nodes: cubeNodes } = useGLTF(perfomanceMode ? './static/cube-min.glb' : './static/cube.glb');
-  const { nodes: waypointRight } = useGLTF('./static/waypoint-right.glb');
-  const { nodes: waypointLeft } = useGLTF('./static/waypoint-left.glb');
-  const { nodes: arrowRight } = useGLTF('./static/arrow-right.glb');
-  const { nodes: arrowLeft } = useGLTF('./static/arrow-left.glb');
+export default function Objects({ cubesData, cubesCount, perfomanceMode }) {
+	const [{ nodes: cubeNodes }, { nodes: waypointRight}, { nodes: waypointLeft}, { nodes: arrowRight}, { nodes: arrowLeft}] = useGLTF([
+		perfomanceMode ? './static/cube-min.glb' : './static/cube.glb',
+		'./static/waypoint-right.glb',
+		'./static/waypoint-left.glb',
+		'./static/arrow-right.glb',
+		'./static/arrow-left.glb'
+	]);
+	const waypointsRightData = waypointsRight;
+	const waypointsLeftData = waypointsLeft;
 
   const colors = ['#fff', '#deadae'];
   const scale = [1, 1, 1];
@@ -29,22 +36,17 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
   const arrowLeftInstanceRefs = useRef([]);
   const enableCollisionHandlingRef = useRef(false);
 
+  const { phase } = useGame((state) => state);
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      enableCollisionHandlingRef.current = true;
-    }, 2000);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, []);
+    phase === 'playing' ? (enableCollisionHandlingRef.current = true) : (enableCollisionHandlingRef.current = false);
+  }, [phase]);
 
   const handleCollide = (e, index) => {
     if (!enableCollisionHandlingRef.current) {
       return;
     }
     const cubeColor = cubeInstanceRefs.current[index].color;
-    animateColor(cubeColor, { r: 1, g: 0, b: 0.05 }, { r: 1, g: 1, b: 1 });
+    animateColor(cubeColor, { r: 1, g: 0, b: 0 }, { r: 1, g: 1, b: 1 });
   };
 
   const animateColor = (color, startColor, endColor) => {
@@ -64,15 +66,9 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
     });
   };
 
-  const memoizedCubeGeometry = useMemo(() => cubeNodes?.Cube?.geometry, [cubeNodes]);
-  const memoizedWaypointRightGeometry = useMemo(() => waypointRight?.Waypoint?.geometry, [waypointRight]);
-  const memoizedWaypointLeftGeometry = useMemo(() => waypointLeft?.Waypoint?.geometry, [waypointLeft]);
-  const memoizedArrowRightGeometry = useMemo(() => arrowRight?.Arrow?.geometry, [arrowRight]);
-  const memoizedArrowLeftGeometry = useMemo(() => arrowLeft?.Arrow?.geometry, [arrowLeft]);
-
   return (
     <>
-      <Instances range={cubesCount} material={objectsMaterial} geometry={memoizedCubeGeometry} castShadow>
+      <Instances range={cubesCount} material={objectsMaterial} geometry={cubeNodes?.Cube?.geometry} receiveShadow castShadow>
         <group position={[0, 0, 0]}>
           {cubesData.map((props, i) => (
             <Cube
@@ -90,7 +86,7 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
       </Instances>
 
       {[waypointsRightData, waypointsLeftData].map((waypointsData, sideIndex) => (
-        <Instances key={sideIndex} range={waypointsData.length} material={objectsMaterial} geometry={sideIndex === 0 ? memoizedWaypointRightGeometry : memoizedWaypointLeftGeometry} castShadow>
+        <Instances key={sideIndex} range={waypointsData.length} material={objectsMaterial} geometry={sideIndex === 0 ? waypointRight?.Waypoint?.geometry : waypointLeft?.Waypoint?.geometry} castShadow>
           <group position={[0, 0, 0]}>
             {waypointsData.map((props, i) => (
               <Waypoint
@@ -105,7 +101,7 @@ export default function Objects({ cubesData, cubesCount, waypointsRightData, way
       ))}
 
       {[waypointsRightData, waypointsLeftData].map((waypointsData, sideIndex) => (
-        <Instances key={sideIndex} range={waypointsData.length} material={objectsMaterial} geometry={sideIndex === 0 ? memoizedArrowRightGeometry : memoizedArrowLeftGeometry}>
+        <Instances key={sideIndex} range={waypointsData.length} material={objectsMaterial} geometry={sideIndex === 0 ? arrowRight?.Arrow?.geometry : arrowLeft?.Arrow?.geometry}>
           <group position={[0, 0, 0]}>
             {waypointsData.map((props, i) => (
               <Arrow

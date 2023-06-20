@@ -8,8 +8,6 @@ import { Physics, Debug, usePlane } from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
 import cubes from '../public/static/cubes'
-import waypointsLeft from '../public/static/waypoints-left'
-import waypointsRight from '../public/static/waypoints-right'
 import { OrbitControls } from '@react-three/drei'
 import Checkpoints from './Checkpoints'
 import useGame from './stores/Game.jsx'
@@ -35,15 +33,10 @@ export default function Experience({ perfomanceMode }) {
   const light = useRef();
   const cameraRef = useRef();
   const cubesArray = cubes;
-  const waypointsLeftArray = waypointsLeft;
-  const waypointsRightArray = waypointsRight;
 	const [checkpoint, setCheckpoint] = useState(0);
 	const [gamePaused, setGamePaused] = useState(false);
 	const [gameFinished, setGameFinished] = useState(false);
 	const perfMode = perfomanceMode;
-	const shadowBiasArray = [1, 0.1, 0.01];
-	const shadowMapSizeWidthArray = [0, 1024, 2048];
-	const shadowMapSizeHeightArray = [0, 1024, 4048];
   const shadowCameraSize = 200;
   const shadowCamera = new OrthographicCamera(
     -shadowCameraSize,
@@ -86,16 +79,16 @@ export default function Experience({ perfomanceMode }) {
     <>
 			<directionalLight
 				ref={light}
-				castShadow={perfMode > 0 ? true : false}
+				castShadow={true}
 				position={[-100, 100, -100]}
 				intensity={2}
 				shadow-camera={shadowCamera}
-				shadow-bias={shadowBiasArray[perfMode]}
-				shadow-mapSize-width={shadowMapSizeWidthArray[perfMode]}
-				shadow-mapSize-height={shadowMapSizeHeightArray[perfMode]}
+				shadow-bias={0.01}
+				shadow-mapSize-width={4096}
+				shadow-mapSize-height={4096}
 				color={'#fff'}
-				radius={perfMode > 1 ? 6 : 2}
-				blurSamples={perfMode > 1 ? 12 : 4}
+				radius={perfMode > 0 ? 6 : 2}
+				blurSamples={perfMode > 0 ? 12 : 4}
 			/>
 			<pointLight position={[100, 100, 100]} intensity={0.2} color={'#3865fc'} />
 			<pointLight position={[-100, 100, -100]} intensity={0.2} color={'#ff6f00'} />
@@ -109,11 +102,7 @@ export default function Experience({ perfomanceMode }) {
 						<Objects
 							cubesData={cubesArray}
 							cubesCount={cubesArray.length}
-							waypointsRightData={waypointsRightArray}
-							waypointsRightCount={waypointsRightArray.length}
-							waypointsLeftData={waypointsLeftArray}
-							waypointsLeftCount={waypointsLeft.length}
-							perfomanceMode={perfMode === 2 ? false : true }
+							perfomanceMode={perfMode === 0 ? true : false }
 						/>
 					</Suspense>
 					<Plane />

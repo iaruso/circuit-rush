@@ -5,8 +5,8 @@ const UserControls = ({ children }) => {
   return (
     <KeyboardControls
       map={[
-        { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
-        { name: 'backward', keys: ['ArrowDown', 'KeyS'] },
+        { name: 'forward', keys: ['ArrowUp', 'KeyW', 'KeyZ'] },
+        { name: 'backward', keys: ['ArrowDown', 'KeyS', 'KeyQ'] },
         { name: 'leftward', keys: ['ArrowLeft', 'KeyA'] },
         { name: 'rightward', keys: ['ArrowRight', 'KeyD'] },
         { name: 'brake', keys: ['Space'] },

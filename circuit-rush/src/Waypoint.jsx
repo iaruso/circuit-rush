@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import { useBox } from '@react-three/cannon';
 import { Instance } from '@react-three/drei';
 
@@ -18,6 +18,7 @@ export default function Waypoint({ position, rotation, index }) {
   return (
     <>
       <Instance
+				index={index}
         ref={(instance) => {
           waypointRef.current = instance;
           waypointInstanceRef.current = instance;
