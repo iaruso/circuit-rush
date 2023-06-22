@@ -90,8 +90,8 @@ export default function Experience({ perfomanceMode }) {
 				radius={perfMode > 0 ? 6 : 2}
 				blurSamples={perfMode > 0 ? 12 : 4}
 			/>
-			<pointLight position={[100, 100, 100]} intensity={0.2} color={'#3865fc'} />
-			<pointLight position={[-100, 100, -100]} intensity={0.2} color={'#ff6f00'} />
+			{/* <pointLight position={[100, 100, 100]} intensity={1} color={'#fff'} />
+			<pointLight position={[-100, 100, -100]} intensity={1} color={'#fff'} /> */}
 			<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
 			<ambientLight intensity={1} color={'#fff'} />
 			<Environment files={'static/adamsbridge.hdr'} />

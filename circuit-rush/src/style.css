@@ -49,7 +49,7 @@ html, body, #root {
 	opacity: 0;
 	font-family: 'Bebas Neue', cursive;
 	font-size: 3rem;
-	color: #E37B7C;
+	color: #e55556;
 }
 
 .start-info {
@@ -104,7 +104,7 @@ html, body, #root {
 .countdown-value {
 	font-family: 'Bebas Neue', cursive;
 	font-size: 10rem;
-	color: #E37B7C;
+	color: #e55556;
 }
 
 .vehicle-stats-overlay, .circuit-stats-overlay, .countdown-overlay, .pause-overlay, .finish-overlay, .reset-alert-overlay {
@@ -163,7 +163,7 @@ html, body, #root {
 }
 
 .worse-time {
-	color: #e37b7d;
+	color: #e55556;
 }
 
 .better-time {
@@ -185,14 +185,6 @@ html, body, #root {
 .vehicle-stats {
 	position: relative;
 	bottom: 2rem;
-	display: flex;
-	height: 4rem;
-	opacity: 0.8;
-	font-family: 'Bebas Neue', cursive;
-	border-radius: 0.25rem;
-	background-color: #ffffff80;
-	backdrop-filter: blur(1rem);
-	border: 0.125rem solid #00000010;
 }
 
 .vehicle-transmission, .vehicle-speed {
@@ -203,7 +195,7 @@ html, body, #root {
   justify-content: center;
 	align-items: center;
 	padding-top: 0.125rem;
-	color: #e37b7d;
+	color: #e55556;
   font-size: 2rem;
 }
 
@@ -215,7 +207,7 @@ html, body, #root {
 }
 
 .vehicle-speed-bar {
-	background-color: #e37b7d;
+	background-color: #e55556;
 	height: 100%;
 	transition: width 0.05s ease-in-out;
 	border-radius: 0.25rem;
@@ -224,15 +216,17 @@ html, body, #root {
 .circuit-stats {
 	position: relative;
 	top: 2rem;
-	display: flex;
 	justify-content: space-between;
 	width: 20rem;
 	padding: 0 1.5rem;
+}
+
+.vehicle-stats, .circuit-stats {
+	display: flex;
 	height: 4rem;
-	opacity: 0.8;
 	font-family: 'Bebas Neue', cursive;
 	border-radius: 0.25rem;
-	background-color: #ffffff80;
+	background-color: #ffffffcc;
 	backdrop-filter: blur(1rem);
 	border: 0.125rem solid #00000010;
 }
@@ -244,7 +238,7 @@ html, body, #root {
 	justify-content: center;
 	align-items: center;
 	padding-top: 0.125rem;
-	color: #e37b7d;
+	color: #e55556;
 	font-size: 2rem;
 }
 
@@ -255,7 +249,7 @@ html, body, #root {
 .reset-message {
 	font-family: 'Bebas Neue', cursive;
 	font-size: 3rem;
-	color: #e37b7d;
+	color: #e55556;
 }
 
 @media screen and (max-width: 1080px) {

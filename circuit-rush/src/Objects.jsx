@@ -12,9 +12,7 @@ import Arrow from './Arrow';
 const objectsMaterial = new MeshStandardMaterial({
   color: "#fff",
   roughness: 1,
-  metalness: 0,
-  emissive: "#fff",
-  emissiveIntensity: 0.1
+  metalness: -0.3
 });
 
 export default function Objects({ cubesData, cubesCount, perfomanceMode }) {
@@ -46,7 +44,7 @@ export default function Objects({ cubesData, cubesCount, perfomanceMode }) {
       return;
     }
     const cubeColor = cubeInstanceRefs.current[index].color;
-    animateColor(cubeColor, { r: 1, g: 0, b: 0 }, { r: 1, g: 1, b: 1 });
+    animateColor(cubeColor, { r: 1, g: 0.02, b: 0.05 }, { r: 1, g: 1, b: 1 });
   };
 
   const animateColor = (color, startColor, endColor) => {
@@ -61,6 +59,7 @@ export default function Objects({ cubesData, cubesCount, perfomanceMode }) {
           g: endColor.g,
           b: endColor.b,
           duration: 1,
+					delay: 10
         });
       },
     });

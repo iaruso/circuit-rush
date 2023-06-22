@@ -208,13 +208,13 @@ function App() {
 		const countdown = async () => {
 			for (let count = 3; count >= 1; count--) {
 				countdownValue.current.textContent = count;
-				gsap.fromTo(countdownValue.current, { opacity: 0.8 }, { opacity: 0, duration: 0.6, delay: 0.4 });
+				gsap.fromTo(countdownValue.current, { opacity: 1 }, { opacity: 0, duration: 0.6, delay: 0.4 });
 				countdownSound.volume = 0.1;
 				countdownSound.play();
 				await delay(1000);
 			}
 			countdownValue.current.textContent = 'GO';
-			gsap.fromTo(countdownValue.current, { opacity: 0.8 }, { opacity: 0, duration: 0.6, delay: 0.4 });
+			gsap.fromTo(countdownValue.current, { opacity: 1 }, { opacity: 0, duration: 0.6, delay: 0.4 });
 			countdownStartSound.volume = 0.1;
 			countdownStartSound.play();
 			setTimeout(() => {
