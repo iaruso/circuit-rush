@@ -7,29 +7,15 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
   const [controls, setControls] = useState({});
   const [subscribeKeys, getKeys] = useKeyboardControls();
   const [isBrakePressed, setIsBrakePressed] = useState(false);
-  const [isHornClickable, setIsHornClickable] = useState(true);
   const positions = [[44, 0.7, -5], [-28, 0.7, -12], [2, 0.7, 44]];
   const rotations = [[0, Math.PI, 0], [0, Math.PI / 2, 0], [0, Math.PI / 2, 0]];
-  const [hornSound] = useState(() => new Audio('./static/horn.mp3'));
-
-  useEffect(() => {
-    const handleSoundEnd = () => {
-      setIsHornClickable(true);
-    };
-
-    hornSound.addEventListener('ended', handleSoundEnd);
-
-    return () => {
-      hornSound.removeEventListener('ended', handleSoundEnd);
-    };
-  }, [hornSound]);
 	
   var rearForce = 0;
 	const { phase } = useGame((state) => state);
   useFrame((state, delta) => {
     if (!vehicleApi || !chassisApi) return;
 		if (phase === "playing") {
-			const { forward, backward, leftward, rightward, brake, reset, horn } = getKeys();
+			const { forward, backward, leftward, rightward, brake, reset } = getKeys();
 			if (forward) {
 				if (gear === 0) setReverseFlag(false);
 				vehicleApi.applyEngineForce(-forcePower * 0.6, 0);
@@ -83,13 +69,7 @@ export const VehicleControls = (vehicleApi, chassisApi, speed, gear, forcePower,
 				chassisApi.rotation.set(...rotations[checkpoint]);
 			}
 
-			if (horn && isHornClickable) {
-				hornSound.currentTime = 0;
-				hornSound.volume = 0.05;
-				hornSound.play();
-				setIsHornClickable(false);
-			}
 		}
-  }, [controls, vehicleApi, chassisApi, checkpoint, hornSound, isHornClickable]);
+  }, [controls, vehicleApi, chassisApi, checkpoint]);
   return controls;
 };

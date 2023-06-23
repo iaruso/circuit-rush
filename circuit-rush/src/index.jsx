@@ -33,6 +33,7 @@ function App() {
 	const [loadingStatus, setLoadingStatus] = useState(false);
 	const [gameLoaded, setGameLoaded] = useState(false);
 	const [gamePaused, setGamePaused] = useState(false);
+	const [gamePlaying, setGamePlaying] = useState(false);
 	const [pauseMenu, setPauseMenu] = useState(false);
 	const [finishStatus, setFinishStatus] = useState(false);
 	const finishStats = useRef(null);
@@ -47,6 +48,15 @@ function App() {
 	const restart = useGame((state) => state.restart);
 
 	useEffect(() => {
+
+		const language = navigator.language;
+
+		if (language.startsWith('fr')) {
+			console.log('France');
+		} else {
+			console.log('Not French');
+		}
+
 		GPUTier.fps > 60 ? setPerfomanceMode(2) : GPUTier.fps > 30 ? setPerfomanceMode(1) : setPerfomanceMode(0);
 		if (perfomanceMode == 2) {
 			setDpr(1);
@@ -79,9 +89,10 @@ function App() {
 
 	const handleKeyDown = (event) => {
 		if (event.key === 'Enter') {
-			if (loadingStatus) {
+			if (loadingStatus && !gamePlaying) {
 				clickSound.volume = 0.05;
 				clickSound.play();
+				setGamePlaying(true);
 				setTimeout (() => {
 					setGameLoaded(true);
 					setCountdownStatus(true);
@@ -222,6 +233,7 @@ function App() {
 			}, 1000);
 			setTimeout(() => { 
 				start();
+				ga
 			}, 200);
 		};
 

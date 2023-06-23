@@ -9,6 +9,7 @@ const MainMenu = () => {
   const textRef = useRef(null);
 	const GPUTier = useDetectGPU();
 	const [mobileDevice, setMobileDevice] = useState(false);
+	const [accelerationEnabled, setAccelerationEnabled] = useState(false);
 	const [startStatus, setStartStatus] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(false);
   const loading = useGame((state) => state.startLoading);
@@ -18,7 +19,7 @@ const MainMenu = () => {
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && !mobileDevice && accelerationEnabled) {
       if (!loadingStatus && startStatus) {
 				updateLoadingStatus();
         loading();
@@ -36,6 +37,11 @@ const MainMenu = () => {
 			setMobileDevice(false);
 		}
 	}, [loadingStatus]);
+
+	useEffect(() => {
+		GPUTier.fps == undefined && GPUTier.tier < 2 && !GPUTier.isMobile ? setAccelerationEnabled(false) : setAccelerationEnabled(true);
+		console.log(GPUTier);
+	}, [accelerationEnabled]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -74,7 +80,7 @@ const MainMenu = () => {
 			<img className="main-cover" ref={backgroundRef} src={'static/cover.webp'} alt='Circuit Rush Main Screen Cover'/>
 			<div className="menu">
 				<div ref={textRef} className="start-info">
-					{!mobileDevice ? 'PRESS ENTER TO START' : 'MOBILE DEVICES CURRENTLY NOT SUPPORTED'}
+					{!accelerationEnabled ? 'ENABLE GPU ACCELERATION IN YOUR BROWSER SETTINGS' : !mobileDevice ? 'PRESS ENTER TO START' : 'MOBILE DEVICES CURRENTLY NOT SUPPORTED'}
 				</div>
 			</div>
 		</div>
