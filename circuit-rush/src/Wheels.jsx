@@ -10,7 +10,7 @@ export const Wheels = (front, radius) => {
     axleLocal: [-1, 0, 0],
     suspensionStiffness: 50,
     suspensionRestLength: 0.5,
-    frictionSlip: 6,
+    frictionSlip: 5,
     dampingRelaxation: 2.5,
     dampingCompression: 10,
     maxSuspensionForce: 200000,

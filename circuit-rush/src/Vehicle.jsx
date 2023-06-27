@@ -50,9 +50,8 @@ export default function Vehicle({ checkpoint }) {
         emissiveIntensity: 1,
       };
       if (child.name === 'Backlights') {
-        materialParams.color = '#ff4242';
-        materialParams.emissive = '#000000';
-        materialParams.emissiveIntensity = 1;
+        materialParams.color = '#e55556';
+        materialParams.emissiveIntensity = -0.15;
       } else {
         materialParams.color = '#ffffff';
         materialParams.emissive = '#ffffff';
@@ -159,9 +158,9 @@ export default function Vehicle({ checkpoint }) {
     });
   }, []);
 
-	const engineForces = [3000, 3200, 2800, 2400, 2000, 1600, 0]; 
+	const engineForces = [3000, 3200, 2800, 2400, 1600, 1600, 0]; 
 	const brakeForces = [10, 20, 30, 40, 50, 50, 0];
-	const maxSpeeds = [1, 20, 40, 65, 90, 140, 160];
+	const maxSpeeds = [1, 20, 40, 65, 90, 160, 180];
 	var currentGear = 0;
 
   useFrame((state, delta) => {
@@ -197,7 +196,7 @@ export default function Vehicle({ checkpoint }) {
 		setForce(scaledEngineForce);
 		setBrake(brakeForces[currentGear]);
 		setTransmission(reverseFlag ? 'R' : gear === 0 ? 1 : gear === 6 ? '5' : gear.toString());
-		setGearProgress(speed === 1 ? 2.5 : (reverseFlag && speed > 20)  || speed >= 120 ? 100 : (speedWithinGearRange / gearSpeedRange) * 100);
+		setGearProgress(speed === 1 ? 2.5 : (reverseFlag && speed > 20)  || speed >= 160 ? 100 : (speedWithinGearRange / gearSpeedRange) * 100);
 
     const position = new Vector3(0, 0, 0);
     position.setFromMatrixPosition(lookRef.current.matrixWorld);

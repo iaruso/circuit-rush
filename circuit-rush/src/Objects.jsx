@@ -12,7 +12,7 @@ import Arrow from './Arrow';
 const objectsMaterial = new MeshStandardMaterial({
   color: "#fff",
   roughness: 1,
-  metalness: 0
+  metalness: -0.3
 });
 
 export default function Objects({ cubesData, cubesCount, perfomanceMode }) {
@@ -44,32 +44,26 @@ export default function Objects({ cubesData, cubesCount, perfomanceMode }) {
       return;
     }
     const cubeColor = cubeInstanceRefs.current[index].color;
-    animateColor(cubeColor, { r: 1, g: 0.01, b: 0.04 }, { r: 1, g: 1, b: 1 });
+    animateColor(cubeColor, { r: 1, g: 0, b: 0.03 }, { r: 1, g: 1, b: 1 });
   };
 
-const animateColor = (color, startColor, endColor) => {
-  const timeline = gsap.timeline();
-  
-  timeline.to(color, {
-    r: startColor.r,
-    g: startColor.g,
-    b: startColor.b,
-    duration: 1
-  })
-  .to(color, {
-    duration: 1,
-    delay: 1, // Delay the start of the next animation by 1 second
-    onComplete: () => {
-      gsap.to(color, {
-        r: endColor.r,
-        g: endColor.g,
-        b: endColor.b,
-        duration: 1
-      });
-    }
-  });
-};
-
+  const animateColor = (color, startColor, endColor) => {
+    gsap.to(color, {
+      r: startColor.r,
+      g: startColor.g,
+      b: startColor.b,
+      duration: 1,
+			ease: 'power4',
+      onComplete: () => {
+        gsap.to(color, {
+          r: endColor.r,
+          g: endColor.g,
+          b: endColor.b,
+          duration: 1
+        });
+      },
+    });
+  };
 
   return (
     <>

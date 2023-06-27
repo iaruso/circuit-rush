@@ -60,11 +60,11 @@ function App() {
 		GPUTier.fps > 60 ? setPerfomanceMode(2) : GPUTier.fps > 30 ? setPerfomanceMode(1) : setPerfomanceMode(0);
 		if (perfomanceMode == 2) {
 			setDpr(1);
-			setMinDpr(0.5);
+			setMinDpr(0.8);
 			setMaxDpr(2);
 		} else if ( perfomanceMode == 1) {
 			setDpr(0.8);
-			setMinDpr(0.5);
+			setMinDpr(0.6);
 			setMaxDpr(1.2);
 		} else {
 			setDpr(0.5);
@@ -233,7 +233,6 @@ function App() {
 			}, 1000);
 			setTimeout(() => { 
 				start();
-				ga
 			}, 200);
 		};
 

@@ -1,5 +1,5 @@
 :root {
-	font-size: max(calc(12px + (32 - 12) * (100vw - 1920px) / (3840 - 480)), 12px);
+	font-size: max(calc(12px + (24 - 20) * (100vw - 1080px) / (3840 - 1080)), 12px);
 }
 
 p, a, div {
@@ -29,8 +29,23 @@ html, body, #root {
 
 .main-cover {
 	opacity: 0;
-	width: 100%;
-	object-fit: cover;
+	max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+@media (min-aspect-ratio: 18/9) {
+  .main-cover {
+    width: auto;
+    height: 100%;
+  }
+}
+
+@media (max-aspect-ratio: 18/9) {
+  .main-cover {
+    width: 100%;
+    height: auto;
+  }
 }
 
 .menu {
@@ -123,11 +138,11 @@ html, body, #root {
 }
 
 .pause-stats, .finish-stats {
-	width: 20rem;
+	width: 16rem;
 	display: flex;
 	flex-direction: column;
-	background-color: #00000020;
-	opacity: 0.8;
+	background-color: #ffffff33;
+	backdrop-filter: blur(0.25rem);
 	border-radius: 0.25rem;
 	padding: 2rem;
 	border: 0.125rem solid #00000010;
@@ -138,17 +153,17 @@ html, body, #root {
 	text-align: center;
 	font-family: 'Bebas Neue', cursive;
 	font-size: 3rem;
-	color: #ffffff;
+	color: #e55556;
 }
 
 .pause-stats button, .finish-stats button {
-	background-color: #00000030;
+	background-color: #ffffff80;
 	border: none;
 	border-radius: 0.25rem;
 	height: 4rem;
 	font-family: 'Bebas Neue', cursive;
 	font-size: 2rem;
-	color: #fff;
+	color: #e55556;
 	cursor: pointer;
 	transition: all 0.4s ease-in-out;
 	padding: 0rem;;
@@ -163,19 +178,20 @@ html, body, #root {
 }
 
 .worse-time {
-	color: #e55556;
+	color: #b12c2c;
 }
 
 .better-time {
-	color: #ffffff
+	color: #606060;
 }
 
 .pause-stats button:hover, .pause-stats button:focus, .finish-stats button:hover, .finish-stats button:focus {
-	background-color: #00000050;
+	background-color: #ffffffb0;
+	color: #606060;
 }
 
 .pause-stats button:focus-visible, .finish-stats button:focus-visible {
-	outline: 1px solid #404040;
+	outline: 0px solid #fff;
 }
 	
 .vehicle-stats-overlay { 
@@ -226,8 +242,8 @@ html, body, #root {
 	height: 4rem;
 	font-family: 'Bebas Neue', cursive;
 	border-radius: 0.25rem;
-	background-color: #ffffffcc;
-	backdrop-filter: blur(1rem);
+	background-color: #ffffff33;
+	backdrop-filter: blur(0.25rem);
 	border: 0.125rem solid #00000010;
 }
 

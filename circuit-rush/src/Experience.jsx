@@ -1,10 +1,10 @@
 import { Suspense, useEffect, useRef, useState } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import { Environment, PerformanceMonitor } from '@react-three/drei'
+import { useThree } from '@react-three/fiber'
+import { Environment } from '@react-three/drei'
 import { OrthographicCamera } from 'three'
 import Circuit from './Circuit'
 import Vehicle from './Vehicle'
-import { Physics, Debug, usePlane } from '@react-three/cannon'
+import { Physics, usePlane } from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
 import cubes from '../public/static/cubes'
@@ -90,13 +90,12 @@ export default function Experience({ perfomanceMode }) {
 				radius={perfMode > 0 ? 6 : 2}
 				blurSamples={perfMode > 0 ? 12 : 4}
 			/>
-			{/* <pointLight position={[100, 100, 100]} intensity={1} color={'#fff'} />
-			<pointLight position={[-100, 100, -100]} intensity={1} color={'#fff'} /> */}
+			<pointLight position={[100, 100, 100]} intensity={0.4} color={'#7f84d8'} />
+			<pointLight position={[-100, 100, -100]} intensity={0.4} color={'#454362'} />
 			<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
-			<ambientLight intensity={1} color={'#fff'} />
+			<ambientLight intensity={1.2} color={'#dfdfe6'} />
 			<Environment files={'static/adamsbridge.hdr'} />
 			<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true} isPaused={gamePaused}>
-				{/* <Debug scale={1} color={'#ff0000'}> */}
 					<PhysicsWorld />
 					<Suspense>
 						<Objects
@@ -108,7 +107,6 @@ export default function Experience({ perfomanceMode }) {
 					<Plane />
 					<Vehicle checkpoint={checkpoint} />
 					<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
-				{/* </Debug> */}
 			</Physics>
 			<Circuit />
     </>
