@@ -1,17 +1,15 @@
 import './style.css';
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Suspense, useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState, useRef, StrictMode } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { gsap } from 'gsap';
+import { useDetectGPU, PerformanceMonitor, useProgress, Html } from '@react-three/drei';
 import Experience from './Experience.jsx';
 import useGame from './stores/Game.jsx';
 import UserControls from './UserControls';
-import { useDetectGPU, PerformanceMonitor, useProgress, Html } from '@react-three/drei';
-import { EffectComposer, DepthOfField} from '@react-three/postprocessing'
 import MainMenu from './MainMenu.jsx';
-import Lottie from 'lottie-react';
-import keyboardAnimation from '../public/static/keyboard.json';
-import { gsap } from 'gsap';
+import Keyboard from './Keyboard.jsx';
+
 
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
@@ -26,8 +24,8 @@ function App() {
   const [dpr, setDpr] = useState(0.5);
 	const [minDpr, setMinDpr] = useState(0.5);
 	const [maxDpr, setMaxDpr] = useState(0.8);
-	const lottieRef = useRef(null);
-	const lottieContent = useRef(null);
+	const [frenchKeyboard, setFrenchKeyboard] = useState(false);
+	const keyboardContent = useRef(null);
 	const loadingRef = useRef(null);
 	const countdownValue = useRef(null);
 	const [loadingStatus, setLoadingStatus] = useState(false);
@@ -48,15 +46,15 @@ function App() {
 	const restart = useGame((state) => state.restart);
 
 	useEffect(() => {
-
 		const language = navigator.language;
-
 		if (language.startsWith('fr')) {
-			console.log('France');
+			setFrenchKeyboard(true);
 		} else {
-			console.log('Not French');
+			setFrenchKeyboard(false);
 		}
+	}, [frenchKeyboard]);
 
+	useEffect(() => {
 		GPUTier.fps > 60 ? setPerfomanceMode(2) : GPUTier.fps > 30 ? setPerfomanceMode(1) : setPerfomanceMode(0);
 		if (perfomanceMode == 2) {
 			setDpr(1);
@@ -257,22 +255,19 @@ function App() {
   }, [gameStarted, gameLoaded, loadingStatus, phase]);
 
 	useEffect(() => {
-    if (lottieRef.current) {
-			const lottieElement = lottieContent.current;
+    if (keyboardContent.current) {
+			const keyboardElement = keyboardContent.current;
 			const animation = gsap.fromTo(
-				lottieElement,
+				keyboardElement,
 				{ opacity: 0 },
 				{ opacity: 1, duration: 1.5 }
 			);
-      const timeout = setTimeout(() => {
-				lottieRef.current.play();
-			}, 1000);
 			return () => {
 				animation.kill();
       	clearTimeout(timeout);
     	};
     }
-  }, [gameStarted, lottieRef]);
+  }, [gameStarted, keyboardContent]);
 
 	useEffect(() => {
 		if (loadingStatus) {
@@ -291,7 +286,7 @@ function App() {
 
 	function Loader() {
 		const { progress } = useProgress()
-		loadingRef.current.textContent = 'LOADING ' + progress.toFixed(0) + '%';
+		loadingRef.current.textContent = progress.toFixed(0) + '%';
 		if ( progress > 99.9 ) {
 			setTimeout(() => {
 				setLoadingStatus(true);
@@ -309,13 +304,8 @@ function App() {
 				<>
 					{!gameLoaded ? (
 						<div className='loading-screen'>
-							<div className="keyboard-controls" ref={lottieContent}>
-								<Lottie
-									animationData={keyboardAnimation}
-									loop={true}
-									autoplay={false}
-									lottieRef={lottieRef}
-								/>
+							<div className="keyboard-controls" ref={keyboardContent}>
+								<Keyboard keyboardType={frenchKeyboard} />
 							</div>
 							<div ref={loadingRef} className="loading-info"></div>
 						</div>
@@ -329,11 +319,6 @@ function App() {
 							<Suspense fallback={<Loader />}>
 							{!restartStatus?
 								<>
-									{ perfomanceMode > 0 ? 
-										<EffectComposer>
-											<DepthOfField focalLength={0.1} bokehScale={0.25} height={200} />
-										</EffectComposer>
-									: null }
 									<color attach="background" args={['#F9F9F9']} />
 									<PerformanceMonitor onIncline={() => setDpr(minDpr)} onDecline={() => setDpr(maxDpr)}>
 										<Experience perfomanceMode={perfomanceMode} />
@@ -375,5 +360,5 @@ function App() {
 root.render(
 	<StrictMode>
 		<App />
-	</StrictMode>	
+	</StrictMode>,
 );

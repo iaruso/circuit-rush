@@ -5,7 +5,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { Html, useKeyboardControls } from '@react-three/drei';
 import { MeshStandardMaterial, Vector3 }from 'three';
 import { gsap } from 'gsap';
-import { debounce, set } from 'lodash';
+import { debounce } from 'lodash';
 import { useBox, useRaycastVehicle } from '@react-three/cannon';
 import { Wheels } from './Wheels';
 import { Wheel } from './Wheel';

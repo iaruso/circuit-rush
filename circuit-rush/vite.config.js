@@ -8,7 +8,7 @@ export default defineConfig({
   base: './',
   plugins: [
     react(),
-    viteCompression(),
+    viteCompression()
   ],
 	server: {
 		host: true,
@@ -19,6 +19,6 @@ export default defineConfig({
   build: {
     outDir: '../dist',
     emptyOutDir: true,
-    sourcemap: true
+    sourcemap: false
   }
 });

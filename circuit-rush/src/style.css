@@ -60,20 +60,22 @@ html, body, #root {
   margin-bottom: 6rem;
 }
 
-.start-info, .loading-info {
+.start-info, .loading-info, .keyboard-info {
 	opacity: 0;
-	font-family: 'Bebas Neue', cursive;
+	font-family: 'Bebas Neue', sans-serif;
 	font-size: 3rem;
 	color: #e55556;
-}
-
-.start-info {
 	text-align: center;
 }
 
 .start-info.mobile {
 	font-size: 1.5rem;
 	opacity: 1 !important;
+}
+
+.keyboard-info {
+ 	position: absolute;
+	top: 6rem;	
 }
 
 .loading-screen {
@@ -93,7 +95,7 @@ html, body, #root {
 	opacity: 1;
 	position: fixed;
 	bottom: 6rem;
-  right: 6rem;
+	text-align: center;
 }
 
 .keyboard-controls {
@@ -104,6 +106,14 @@ html, body, #root {
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	position: relative;
+}
+
+.keyboard-controls svg {
+	width: max(60vw, 80%);
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
 }
 
 .interface {
@@ -113,11 +123,11 @@ html, body, #root {
 	width: 100%;
 	height: 100%;
 	pointer-events: none;
-	font-family: 'Bebas Neue', cursive;
+	font-family: 'Bebas Neue', sans-serif;
 }
 
 .countdown-value {
-	font-family: 'Bebas Neue', cursive;
+	font-family: 'Bebas Neue', sans-serif;
 	font-size: 10rem;
 	color: #e55556;
 }
@@ -151,7 +161,7 @@ html, body, #root {
 .finish-stats {
 	opacity: 0;
 	text-align: center;
-	font-family: 'Bebas Neue', cursive;
+	font-family: 'Bebas Neue', sans-serif;
 	font-size: 3rem;
 	color: #e55556;
 }
@@ -161,7 +171,7 @@ html, body, #root {
 	border: none;
 	border-radius: 0.25rem;
 	height: 4rem;
-	font-family: 'Bebas Neue', cursive;
+	font-family: 'Bebas Neue', sans-serif;
 	font-size: 2rem;
 	color: #e55556;
 	cursor: pointer;
@@ -240,7 +250,7 @@ html, body, #root {
 .vehicle-stats, .circuit-stats {
 	display: flex;
 	height: 4rem;
-	font-family: 'Bebas Neue', cursive;
+	font-family: 'Bebas Neue', sans-serif;
 	border-radius: 0.25rem;
 	background-color: #ffffff33;
 	backdrop-filter: blur(0.25rem);
@@ -263,7 +273,7 @@ html, body, #root {
 }
 
 .reset-message {
-	font-family: 'Bebas Neue', cursive;
+	font-family: 'Bebas Neue', sans-serif;
 	font-size: 3rem;
 	color: #e55556;
 }
@@ -272,4 +282,24 @@ html, body, #root {
 	.keyboard-controls {
 		width: 100%;
 	}
+}
+
+.cls-1 {
+	fill: #f0f0f0;
+}
+
+.cls-2 {
+	fill: #fff;
+}
+
+.cls-3, .cls-4 {
+	fill: #aaa;
+}
+
+.cls-6 {
+	fill: #f7f7f7;
+}
+
+.cls-7 {
+	fill: #eee;
 }

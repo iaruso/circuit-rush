@@ -40,7 +40,6 @@ const MainMenu = () => {
 
 	useEffect(() => {
 		GPUTier.fps == undefined && GPUTier.tier < 2 && !GPUTier.isMobile ? setAccelerationEnabled(false) : setAccelerationEnabled(true);
-		console.log(GPUTier);
 	}, [accelerationEnabled]);
 
   useEffect(() => {
