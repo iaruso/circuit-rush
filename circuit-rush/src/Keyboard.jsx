@@ -160,8 +160,7 @@ export default function Keyboard({keyboardType}) {
 		if(!changeableState) return;
 		const handleKeyDown = (event) => {
 			const key = event.key.toLowerCase();;
-			if (currentState !== 1 && (
-				key === movementUp || key === movementLeft || key === 's' || key === 'd' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp')) {
+			if (currentState !== 1 && (key === movementUp || key === movementLeft || key === 's' || key === 'd' || key === 'arrowdown' || key === 'arrowleft' || key === 'arrowright' || key === 'arrowup')) {
 				handleKeyPress(1);
 			} else if (currentState !== 2 && key === ' ') {
 				handleKeyPress(2);
