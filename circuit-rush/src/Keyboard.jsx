@@ -4,9 +4,13 @@ import gsap from 'gsap';
 export default function Keyboard({keyboardType}) {
 	const keyboardRef = useRef(null);
 	const keyboardTextRef = useRef(null);
+	const prevCurrentState = useRef(1);
+	const [changeableState, setChangeableState] = useState(false); 
 	const keyboardAzerty = 'movement-key-azerty';
 	const keyboardQwerty = 'movement-key-qwerty';
 	const [currentState, setCurrentState] = useState(1);
+	const [movementUp, setMovementUp] = useState(null);
+	const [movementLeft, setMovementLeft] = useState(null);
 
 	const animationSettings = {
 		1: { className: 'movement', keyClassName: 'movement-key', text: 'Movement', onComplete: () => setCurrentState(2) },
@@ -20,88 +24,167 @@ export default function Keyboard({keyboardType}) {
 	useEffect(() => {
     if (keyboardType) {
       const elements = keyboardRef.current.querySelectorAll(`.${keyboardQwerty}`);
+			setMovementUp('z');
+			setMovementLeft('q');
       elements.forEach((element) => {
         element.style.opacity = 0;
       });
     } else {
 			const elements = keyboardRef.current.querySelectorAll(`.${keyboardAzerty}`);
+			setMovementUp('w');
+			setMovementLeft('a');
       elements.forEach((element) => {
         element.style.opacity = 0;
       });
 		}
   }, [keyboardType]);
-
-	useEffect(() => {
-		const { onComplete } = animationSettings[currentState];
-		gsap.delayedCall(5, onComplete);
-  }, [currentState]);
 	
 	useEffect(() => {
-		const { className } = animationSettings[currentState];
-
+		prevCurrentState.current = currentState;
+		const { className, keyClassName, text } = animationSettings[currentState];
 		const elements = keyboardRef.current.querySelectorAll(`.${className}`);
+		const keyElements = currentState === 1
+			? keyboardRef.current.querySelectorAll(`.${keyboardType ? keyboardAzerty : keyboardQwerty}, .${keyClassName}`)
+			: keyboardRef.current.querySelectorAll(`.${keyClassName}`);
+		setChangeableState(false);
+
 		elements.forEach((element) => {
 			gsap.to(element, {
 				fill: '#e55556',
 				duration: 1,
-				delay: 0.2,
+				delay: 1,
 				onComplete: () => {
-					gsap.to(element, {
-						fill: '#f7f7f7',
-						duration: 1,
-						delay: 2.8,
+					setChangeableState(true);
+					gsap.delayedCall(3, () => {
+						fadeOutElements(currentState, false);
 					});
 				},
 			});
 		});
-	}, [currentState]);
 
-	useEffect(() => {
-		const { keyClassName } = animationSettings[currentState];
-		const elements = currentState === 1
-			? keyboardRef.current.querySelectorAll(`.${keyboardType ? keyboardAzerty : keyboardQwerty}, .${keyClassName}`)
-			: keyboardRef.current.querySelectorAll(`.${keyClassName}`);
-
-		elements.forEach((element) => {
+		keyElements.forEach((element) => {
 			gsap.to(element, {
 				fill: '#fff',
 				duration: 1,
+				delay: 1,
 				onComplete: () => {
-					gsap.to(element, {
-						fill: '#aaaaaa',
-						duration: 1,
-						delay: 3,
+					gsap.delayedCall(3, () => {
+						fadeOutKeys(currentState, false);
 					});
 				},
 			});
 		});
-	}, [currentState]);
 
-	useEffect(() => {
-		const { text } = animationSettings[currentState];
-		keyboardTextRef.current.innerHTML = text;
+		gsap.delayedCall(1, () => {
+			if (keyboardTextRef.current)
+			keyboardTextRef.current.innerHTML = text;
+		});
+
 		gsap.fromTo(
 			keyboardTextRef.current,
-			{ y: '-10%', opacity: 0 },
-			{ 
-				y: '0%', 
-				opacity: 1, 
+			{
+				y: '-10%',
+				opacity: 0,
+			},
+			{
+				y: '0%',
+				opacity: 1,
 				duration: 1,
+				delay: 1,
 				onComplete: () => {
-					gsap.to(keyboardTextRef.current, {
-						y: '-10%',
-						opacity: 0,
-						duration: 1,
-						delay: 3
+					gsap.delayedCall(3, () => {
+						fadeOutText();
 					});
 				},
 			}
 		);
 	}, [currentState]);
 
+	const fadeOutElements = (prevState, bool) => {
+		if (prevState === prevCurrentState.current && keyboardRef.current && !bool) {
+			const { className, onComplete } = animationSettings[currentState];
+			onComplete();
+			const elements = keyboardRef.current.querySelectorAll(`.${className}`);
+			elements.forEach((element) => {
+				gsap.to(element, {
+					fill: '#f7f7f7',
+					duration: 1
+				});
+			});
+		} else if (keyboardRef.current) {
+			const { className } = animationSettings[prevState];
+			const elements = keyboardRef.current.querySelectorAll(`.${className}`);
+			elements.forEach((element) => {
+				gsap.to(element, {
+					fill: '#f7f7f7',
+					duration: 1
+				});
+			});
+		}
+	};
+
+	const fadeOutKeys = (prevState) => {
+		if (currentState === prevCurrentState.current  && keyboardRef.current) {
+			const { keyClassName } = animationSettings[prevState];
+			const keyElements = prevState === 1
+				? keyboardRef.current.querySelectorAll(`.${keyboardType ? keyboardAzerty : keyboardQwerty}, .${keyClassName}`)
+				: keyboardRef.current.querySelectorAll(`.${keyClassName}`);
+			keyElements.forEach((element) => {
+				gsap.to(element, {
+					fill: '#aaaaaa',
+					duration: 1
+				});
+			});
+		} 
+	};
+
+	const fadeOutText = () => {
+		if (currentState === prevCurrentState.current && keyboardRef.current) {
+			gsap.to(keyboardTextRef.current, {
+				y: '-10%',
+				opacity: 0,
+				duration: 1
+			});
+		}
+	};
+
+	const handleKeyPress = (newState) => {
+		setCurrentState((prevState) => {
+			fadeOutKeys(prevState, true);
+			fadeOutElements(prevState, true);
+			return newState;
+		});
+	};
+
+	useEffect(() => {
+		if(!changeableState) return;
+		const handleKeyDown = (event) => {
+			const key = event.key.toLowerCase();;
+			if (currentState !== 1 && (
+				key === movementUp || key === movementLeft || key === 's' || key === 'd' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp')) {
+				handleKeyPress(1);
+			} else if (currentState !== 2 && key === ' ') {
+				handleKeyPress(2);
+			} else if (currentState !== 3 && key === 'c') {
+				handleKeyPress(3);
+			} else if (currentState !== 4 && key === 'r') {
+				handleKeyPress(4);
+			} else if (currentState !== 5 && key === 'p') {
+				handleKeyPress(5);
+			} else if (currentState !== 6 && key === 'escape') {
+				handleKeyPress(6);
+			}
+		};
+
+		window.addEventListener('keydown', handleKeyDown);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [changeableState]);
+
   return (
     <>
-			<p ref={keyboardTextRef} className={'keyboard-info'}></p>
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2519.5 817.5" ref={keyboardRef}>
 				<g id="keyboard">
 					<rect className="cls-1" width="2519.5" height="817.5" rx="12" ry="12"/>
@@ -468,6 +551,7 @@ export default function Keyboard({keyboardType}) {
 					<path data-name="movement-key" className="cls-4 movement-key" d="m2440.5,750.75l-4.2-4.35,10.65-10.65h-36.45s0-6,0-6h36.45s-10.65-10.65-10.65-10.65l4.2-4.35,18,18-18,18Z"/>
 				</g>
 			</svg>
+			<p ref={keyboardTextRef} className={'keyboard-info'}></p>
     </>
   );
 }

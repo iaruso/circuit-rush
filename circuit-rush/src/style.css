@@ -74,8 +74,16 @@ html, body, #root {
 }
 
 .keyboard-info {
+	background-color: #e55556;
+	color: #fff;
+	padding: 0.6rem 1rem 0.5rem 1rem;
+	border-radius: 0.25rem;
  	position: absolute;
 	top: 6rem;	
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 4rem;
 }
 
 .loading-screen {

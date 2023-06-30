@@ -44,6 +44,13 @@ function App() {
 	const pause = useGame((state) => state.pause);
 	const resume = useGame((state) => state.resume);
 	const restart = useGame((state) => state.restart);
+	
+	useEffect(() => { 
+		console.log(
+			`Welcome to Circuit Rush! 🚗\nHope you have fun with this game :)\n\nRepository: %chttps://github.com/iaruso/circuit-rush%c`,
+			"color: #e55556; text-decoration: underline; cursor: pointer"
+		);
+	}, []);
 
 	useEffect(() => {
 		const language = navigator.language;
@@ -358,7 +365,5 @@ function App() {
 }
 
 root.render(
-	<StrictMode>
-		<App />
-	</StrictMode>,
+	<App />
 );
