@@ -90,10 +90,10 @@ export default function Experience({ perfomanceMode }) {
 				radius={perfMode > 0 ? 6 : 2}
 				blurSamples={perfMode > 0 ? 12 : 4}
 			/>
-			<pointLight position={[100, 100, 100]} intensity={0.4} color={'#7f84d8'} />
-			<pointLight position={[-100, 100, -100]} intensity={0.4} color={'#454362'} />
+			<pointLight position={[100, 100, 100]} intensity={0.2} color={'#7f84d8'} />
+			<pointLight position={[-100, 100, -100]} intensity={0.2} color={'#454362'} />
 			<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
-			<ambientLight intensity={1.2} color={'#dfdfe6'} />
+			<ambientLight intensity={0.8} color={'#dfdfe6'} />
 			<Environment files={'static/adamsbridge.hdr'} />
 			<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true} isPaused={gamePaused}>
 					<PhysicsWorld />

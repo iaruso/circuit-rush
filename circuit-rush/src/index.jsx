@@ -326,7 +326,7 @@ function App() {
 							<Suspense fallback={<Loader />}>
 							{!restartStatus?
 								<>
-									<color attach="background" args={['#F9F9F9']} />
+									<color attach="background" args={['#F7F7F7']} />
 									<PerformanceMonitor onIncline={() => setDpr(minDpr)} onDecline={() => setDpr(maxDpr)}>
 										<Experience perfomanceMode={perfomanceMode} />
 									</PerformanceMonitor>
