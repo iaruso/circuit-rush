@@ -5,12 +5,12 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Circuit Rush</title>
-	<meta name="description" content="Experience the minimalist and visually captivating world of Circuit Rush, a thrilling web-based racing game powered by three.js. Play it now!">
+	<meta name="description" content="Experience the minimalist and visually captivating world of Circuit Rush, a thrilling web-based racing game powered by React Three Fiber and Cannon. Play it now!">
 	<link rel="icon" href="../public/favicon.ico">
 	<meta property="og:url" content="https://circuit-rush.com/">
 	<meta property="og:type" content="website">
 	<meta property="og:title" content="Circuit Rush">
-	<meta property="og:description" content="Experience the minimalist and visually captivating world of Circuit Rush, a thrilling web-based racing game powered by three.js. Play it now!">
+	<meta property="og:description" content="Experience the minimalist and visually captivating world of Circuit Rush, a thrilling web-based racing game powered by React Three Fiber and Cannon. Play it now!">
 	<meta property="og:image:type" content="image/png">
 	<meta property="og:image" content="../public/cover-og.png">
 	<meta property="og:image:width" content="1200">
@@ -18,7 +18,7 @@
 	<meta property="og:image:alt" content="Circuit Rush">
 	<meta name="twitter:site" content="https://circuit-rush.com">
 	<meta name="twitter:title" content="Circuit Rush">
-	<meta name="twitter:description" content="Experience the minimalist and visually captivating world of Circuit Rush, a thrilling web-based racing game powered by three.js. Play it now!">
+	<meta name="twitter:description" content="Experience the minimalist and visually captivating world of Circuit Rush, a thrilling web-based racing game powered by React Three Fiber and Cannon. Play it now!">
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:image:src" content="../public/cover-og.png">
 	<meta name="theme-color" content="#F7F6F5">
@@ -28,20 +28,31 @@
 			src: url('../public/static/BebasNeue-Regular.ttf');
 			font-display: swap;
 		}
-		body {
-			font-family: 'Bebas Neue', Arial, sans-serif;
-			background-color: #F7F6F5;;
-		}
-		#root {
+		html, body {
 			position: fixed;
 			top: 0;
 			left: 0;
+			width: 100%;
+			height: 100%;
+		}
+		body {
+			font-family: 'Bebas Neue', Arial, sans-serif;
+			background-color: white;
+			margin: 0;
+			padding: 1rem;
+			box-sizing: border-box;
+		}
+		#root {
 			width: 100%;
 			height: 100%;
 			overflow: hidden;
 			display: flex;
 			justify-content: center;
 			align-items: center;
+			border-radius: 0.5rem;
+			background: #F7F7F7;
+			border: 0.5px solid #E0E0E0;
+			outline: none;
 		}
 		#loading-text {
 			opacity: 0;
