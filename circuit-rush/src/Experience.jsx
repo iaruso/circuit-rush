@@ -94,7 +94,7 @@ export default function Experience({ perfomanceMode }) {
 			<pointLight position={[-100, 100, -100]} intensity={0.2} color={'#454362'} />
 			<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
 			<ambientLight intensity={0.8} color={'#dfdfe6'} />
-			<Environment files={'static/adamsbridge.hdr'} />
+			<Environment files={'static/environment.hdr'} />
 			<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true} isPaused={gamePaused}>
 					<PhysicsWorld />
 					<Suspense>

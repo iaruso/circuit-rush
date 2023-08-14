@@ -76,7 +76,7 @@ const MainMenu = () => {
 
   return (
 		<div className="main-screen">
-			<img className="main-cover" ref={backgroundRef} src={'static/cover.webp'} alt='Circuit Rush Main Screen Cover'/>
+			<img className="main-cover" ref={backgroundRef} src={'static/cover.webp'} alt='Circuit Rush Main Screen Cover' style={{ width: 'auto', height: 'auto' }}/>
 			<div className="menu">
 				<div ref={textRef} className="start-info">
 					{!accelerationEnabled ? 'ENABLE GPU ACCELERATION IN YOUR BROWSER SETTINGS' : !mobileDevice ? 'PRESS ENTER TO START' : 'MOBILE DEVICES CURRENTLY NOT SUPPORTED'}
