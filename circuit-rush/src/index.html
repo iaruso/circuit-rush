@@ -23,6 +23,7 @@
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:image:src" content="../public/cover-og.png">
 	<meta name="theme-color" content="#F7F6F5">
+	<link rel="preload" as="font" href="../public/static/BebasNeue-Regular.ttf">
 	<style>
 		@font-face {
 			font-family: 'Bebas Neue';
@@ -59,6 +60,8 @@
 			opacity: 0;
 			font-size: 2rem;
 			color: #e55556;
+		}
+		.fade-animation {
 			animation: fadeAnimation 1s ease-in-out infinite 0.5s;
 		}
 		@keyframes fadeAnimation {
@@ -81,6 +84,15 @@
 	<div id="root">
 		<div id="loading-text">Loading...</div>
 	</div>
+	<script>
+		if ('fonts' in document) {
+			Promise.all([
+				document.fonts.load("1em 'Bebas Neue'")
+			]).then(function() {
+				document.getElementById('loading-text').classList.add('fade-animation');
+			});
+		}
+	</script>
 	<script type="module" src="./index.jsx"></script>
 </body>
 </html>
