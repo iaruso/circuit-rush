@@ -50,7 +50,7 @@ export default function Vehicle({ checkpoint }) {
         emissiveIntensity: 1,
       };
       if (child.name === 'Backlights') {
-        materialParams.color = '#e55556';
+        materialParams.color = '#e55555';
         materialParams.emissiveIntensity = -0.15;
       } else {
         materialParams.color = '#ffffff';

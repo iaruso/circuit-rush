@@ -65,7 +65,7 @@ const MainMenu = () => {
 				const animation = gsap.fromTo(
 					textElement,
 					{ opacity: 0 },
-					{ opacity: 1, yoyo: true, repeat: -1, duration: 1, delay: 2.5 }
+					{ opacity: 1, yoyo: true, repeat: -1, duration: 1, delay: 2.5, ease: 'power2.inOut' }
 				);
 				return () => {
 					animation.kill();

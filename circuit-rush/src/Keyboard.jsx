@@ -50,7 +50,7 @@ export default function Keyboard({keyboardType}) {
 
 		elements.forEach((element) => {
 			gsap.to(element, {
-				fill: '#e55556',
+				fill: '#e55555',
 				duration: 1,
 				delay: 1,
 				onComplete: () => {

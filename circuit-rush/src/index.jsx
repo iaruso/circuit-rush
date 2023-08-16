@@ -4,12 +4,12 @@ import { Suspense, useEffect, useState, useRef, StrictMode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { gsap } from 'gsap';
 import { useDetectGPU, PerformanceMonitor, useProgress, Html } from '@react-three/drei';
+import ConfettiExplosion from 'react-confetti-explosion';
 import Experience from './Experience.jsx';
 import useGame from './stores/Game.jsx';
 import UserControls from './UserControls';
 import MainMenu from './MainMenu.jsx';
 import Keyboard from './Keyboard.jsx';
-
 
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
@@ -36,6 +36,7 @@ function App() {
 	const [finishStatus, setFinishStatus] = useState(false);
 	const finishStats = useRef(null);
 	const finishTime = useRef(null);
+	const [isExploding, setIsExploding] = useState(false);
 	const pauseMenuRef = useRef(null);
 	const [countdownStatus, setCountdownStatus] = useState(false);
 	const [restartStatus, setRestartStatus] = useState(false);
@@ -48,7 +49,7 @@ function App() {
 	useEffect(() => { 
 		console.log(
 			`Welcome to Circuit Rush! 🚗\nHope you have fun with this game :)\n\nRepository: %chttps://github.com/iaruso/circuit-rush%c`,
-			"color: #e55556; text-decoration: underline; cursor: pointer"
+			"color: #e55555; text-decoration: underline; cursor: pointer"
 		);
 	}, []);
 
@@ -184,6 +185,7 @@ function App() {
 			let timeDifference = 0;
 			setTimeout(() => { 
 				gsap.to(finishStats.current, {opacity: 1, duration: 1.5 });
+				setIsExploding(true);
 				if (!currentRecordTime) {
 					currentRecordTime = '';
 					localStorage.setItem('currentRecordTime', elapsedTime);
@@ -224,13 +226,13 @@ function App() {
 		const countdown = async () => {
 			for (let count = 3; count >= 1; count--) {
 				countdownValue.current.textContent = count;
-				gsap.fromTo(countdownValue.current, { opacity: 1 }, { opacity: 0, duration: 0.6, delay: 0.4 });
+				gsap.fromTo(countdownValue.current, { opacity: 1, scale: 1.2 }, { opacity: 0, scale: 1, duration: 0.6, delay: 0.4 });
 				countdownSound.volume = 0.1;
 				countdownSound.play();
 				await delay(1000);
 			}
 			countdownValue.current.textContent = 'GO';
-			gsap.fromTo(countdownValue.current, { opacity: 1 }, { opacity: 0, duration: 0.6, delay: 0.4 });
+			gsap.fromTo(countdownValue.current, { opacity: 1, scale: 1.2 }, { opacity: 0, scale: 1, duration: 0.6, delay: 0.4 });
 			countdownStartSound.volume = 0.1;
 			countdownStartSound.play();
 			setTimeout(() => {
@@ -282,7 +284,7 @@ function App() {
 			const animation = gsap.fromTo(
 				textElement,
 				{ opacity: 0 },
-				{ opacity: 1, yoyo: true, repeat: -1, duration: 1 }
+				{ opacity: 1, yoyo: true, repeat: -1, duration: 1, ease: 'power2.inOut' }
 			);
 			return () => {
 				animation.kill();
@@ -350,6 +352,7 @@ function App() {
 							}
 							{finishStatus ? 
 								<Html wrapperClass={'finish-overlay'} className='finish-stats' ref={finishStats}>
+									<>{isExploding && <ConfettiExplosion force={0.4} duration={2200} particleCount={30} width={400} colors={['#e55555', '#ba3636', '#de7c7c']}/>}</>
 									<div className="finish-time" ref={finishTime}></div>
 									<button onClick={restartButton}>RESTART</button>
 									<button onClick={quitButton}>QUIT</button>
