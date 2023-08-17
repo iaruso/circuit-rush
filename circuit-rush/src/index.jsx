@@ -185,12 +185,13 @@ function App() {
 			let timeDifference = 0;
 			setTimeout(() => { 
 				gsap.to(finishStats.current, {opacity: 1, duration: 1.5 });
-				setIsExploding(true);
 				if (!currentRecordTime) {
+					setIsExploding(true);
 					currentRecordTime = '';
 					localStorage.setItem('currentRecordTime', elapsedTime);
 					setTimeout(() => { 
 						finishTime.current.innerHTML = formattedTime;
+						setIsExploding(true);
 					}, 200);
 				} else if (currentRecordTime > elapsedTime) { 
 					localStorage.setItem('currentRecordTime', elapsedTime);
@@ -198,9 +199,9 @@ function App() {
 					const minutes = Math.floor((timeDifference / 60000) % 60);
 					const seconds = Math.floor((timeDifference / 1000) % 60);
 					const milliseconds = timeDifference % 1000;
-
 					const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-					setTimeout(() => { 
+					setTimeout(() => {
+						setIsExploding(true);
 						finishTime.current.innerHTML = formattedTime + '<br><span class="better-time">(-' + formattedTimeDifference + ')</span>';
 					}, 200);
 				} else if (currentRecordTime < elapsedTime) { 
@@ -352,7 +353,7 @@ function App() {
 							}
 							{finishStatus ? 
 								<Html wrapperClass={'finish-overlay'} className='finish-stats' ref={finishStats}>
-									<>{isExploding && <ConfettiExplosion force={0.4} duration={2200} particleCount={30} width={400} colors={['#e55555', '#ba3636', '#de7c7c']}/>}</>
+									<>{isExploding && <ConfettiExplosion force={0.4} duration={3000} particleCount={60} width={600} colors={['#e55555', '#ba3636', '#e55555']}/>}</>
 									<div className="finish-time" ref={finishTime}></div>
 									<button onClick={restartButton}>RESTART</button>
 									<button onClick={quitButton}>QUIT</button>
