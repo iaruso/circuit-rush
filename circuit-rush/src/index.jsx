@@ -353,7 +353,7 @@ function App() {
 							}
 							{finishStatus ? 
 								<Html wrapperClass={'finish-overlay'} className='finish-stats' ref={finishStats}>
-									<>{isExploding && <ConfettiExplosion force={0.4} duration={3000} particleCount={60} width={600} colors={['#e55555', '#ba3636', '#e55555']}/>}</>
+									<>{isExploding && <ConfettiExplosion force={0.4} duration={4000} particleSize={8} particleCount={128} width={window.innerWidth > 1080 ? window.innerWidth / 2 : window.innerWidth * 0.8} colors={['#e55555', '#db3d3d', '#e55555', '#fc4c4c']} className='confetti-explosion'/>}</>
 									<div className="finish-time" ref={finishTime}></div>
 									<button onClick={restartButton}>RESTART</button>
 									<button onClick={quitButton}>QUIT</button>

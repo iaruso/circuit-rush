@@ -55,7 +55,7 @@ p, a, div {
 	opacity: 0;
 	font-family: 'Bebas Neue', sans-serif;
 	font-size: 3rem;
-	color: #e55556;
+	color: #e55555;
 	text-align: center;
 }
 
@@ -65,7 +65,7 @@ p, a, div {
 }
 
 .keyboard-info {
-	background-color: #e55556;
+	background-color: #e55555;
 	color: #fff;
 	padding: 1.2rem 1.2rem 1rem 1.2rem;
 	border-radius: 0.5rem;
@@ -128,7 +128,7 @@ p, a, div {
 .countdown-value {
 	font-family: 'Bebas Neue', sans-serif;
 	font-size: 10rem;
-	color: #e55556;
+	color: #e55555;
 }
 
 .vehicle-stats-overlay, .circuit-stats-overlay, .countdown-overlay, .pause-overlay, .finish-overlay, .reset-alert-overlay {
@@ -158,11 +158,12 @@ p, a, div {
 }
 
 .finish-stats {
+	position: relative;
 	opacity: 0;
 	text-align: center;
 	font-family: 'Bebas Neue', sans-serif;
 	font-size: 3rem;
-	color: #e55556;
+	color: #e55555;
 }
 
 .pause-stats button, .finish-stats button {
@@ -172,7 +173,7 @@ p, a, div {
 	height: 4rem;
 	font-family: 'Bebas Neue', sans-serif;
 	font-size: 2rem;
-	color: #e55556;
+	color: #e55555;
 	cursor: pointer;
 	transition: all 0.4s ease-in-out;
 	padding: 0rem;;
@@ -192,6 +193,12 @@ p, a, div {
 
 .better-time {
 	color: #606060;
+}
+
+.confetti-explosion {
+	position: absolute;
+  left: 50%;
+  top: 50%;
 }
 
 .pause-stats button:hover, .pause-stats button:focus, .finish-stats button:hover, .finish-stats button:focus {
@@ -220,7 +227,7 @@ p, a, div {
   justify-content: center;
 	align-items: center;
 	padding-top: 0.125rem;
-	color: #e55556;
+	color: #e55555;
   font-size: 2rem;
 }
 
@@ -232,7 +239,7 @@ p, a, div {
 }
 
 .vehicle-speed-bar {
-	background-color: #e55556;
+	background-color: #e55555;
 	height: 100%;
 	transition: width 0.05s ease-in-out;
 	border-radius: 0.25rem;
@@ -263,7 +270,7 @@ p, a, div {
 	justify-content: center;
 	align-items: center;
 	padding-top: 0.125rem;
-	color: #e55556;
+	color: #e55555;
 	font-size: 2rem;
 }
 
@@ -274,7 +281,7 @@ p, a, div {
 .reset-message {
 	font-family: 'Bebas Neue', sans-serif;
 	font-size: 3rem;
-	color: #e55556;
+	color: #e55555;
 }
 
 @media screen and (max-width: 1080px) {
