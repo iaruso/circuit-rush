@@ -28,7 +28,7 @@ function Plane(props) {
   );
 }
 
-export default function Experience({ perfomanceMode }) {
+export default function Experience({ performanceMode }) {
   const { scene } = useThree();
   const light = useRef();
   const cameraRef = useRef();
@@ -36,7 +36,7 @@ export default function Experience({ perfomanceMode }) {
 	const [checkpoint, setCheckpoint] = useState(0);
 	const [gamePaused, setGamePaused] = useState(false);
 	const [gameFinished, setGameFinished] = useState(false);
-	const perfMode = perfomanceMode;
+	const perfMode = performanceMode;
   const shadowCameraSize = 200;
   const shadowCamera = new OrthographicCamera(
     -shadowCameraSize,
@@ -95,18 +95,18 @@ export default function Experience({ perfomanceMode }) {
 			<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
 			<ambientLight intensity={0.8} color={'#dfdfe6'} />
 			<Environment files={'static/environment.hdr'} />
-			<Circuit perfomanceMode={perfMode !== 2 ? true : false }/>
+			<Circuit performanceMode={perfMode !== 2 ? true : false }/>
 			<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true} isPaused={gamePaused}>
 					<PhysicsWorld />
 					<Suspense>
 						<Objects
 							cubesData={cubesArray}
 							cubesCount={cubesArray.length}
-							perfomanceMode={perfMode === 0 ? true : false }
+							performanceMode={perfMode === 0 ? true : false }
 						/>
 					</Suspense>
 					<Plane />
-					<Vehicle checkpoint={checkpoint} />
+					<Vehicle checkpoint={checkpoint} performanceMode={perfMode === 0 ? true : false } />
 					<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
 			</Physics>
     </>

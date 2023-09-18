@@ -15,9 +15,9 @@ const objectsMaterial = new MeshStandardMaterial({
   metalness: -0.3
 });
 
-export default function Objects({ cubesData, cubesCount, perfomanceMode }) {
+export default function Objects({ cubesData, cubesCount, performanceMode }) {
 	const [{ nodes: cubeNodes }, { nodes: waypointRight}, { nodes: waypointLeft}, { nodes: arrowRight}, { nodes: arrowLeft}] = useGLTF([
-		perfomanceMode ? './static/cube-min.glb' : './static/cube.glb',
+		performanceMode ? './static/cube-min.glb' : './static/cube.glb',
 		'./static/waypoint-right.glb',
 		'./static/waypoint-left.glb',
 		'./static/arrow-right.glb',

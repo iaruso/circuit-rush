@@ -15,7 +15,7 @@ import useGame from "./stores/Game.jsx";
 
 const cameraPositions = [[0, 40, -40], [0, 20, -25]];
 
-export default function Vehicle({ checkpoint }) {
+export default function Vehicle({ checkpoint, performanceMode }) {
   const camera = useThree((state) => state.camera);
   const cameraRef = useRef();
   const lookRef = useRef();
@@ -24,6 +24,7 @@ export default function Vehicle({ checkpoint }) {
 	const resetAlertMessage = useRef();
 	var alternativeCamera = 0;
 	const [subscribeKeys, getKeys] = useKeyboardControls();
+	const perfMode = performanceMode;
 
   const [speed, setSpeed] = useState(0);
 	const [gear, setGear] = useState(0);
@@ -215,7 +216,7 @@ export default function Vehicle({ checkpoint }) {
         <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
           <primitive object={mesh} position={[0, -0.7, -0.1]} />
           <object3D ref={lookRef} position={[0, 0, 0]}>
-            <Camera ref={cameraRef} cameraRef={cameraRef} position={[...cameraPositions[0]]} />
+            <Camera ref={cameraRef} cameraRef={cameraRef} position={[...cameraPositions[0]]} performanceMode={perfMode}/>
           </object3D>
         </group>
         <Wheel wheelRef={wheels[0]} />

@@ -20,7 +20,7 @@ function App() {
 	const [clickSound] = useState(() => new Audio('./static/click.mp3'));
   const [gameStarted, setGameStarted] = useState(false);
   const GPUTier = useDetectGPU();
-  const [perfomanceMode, setPerfomanceMode] = useState(0);
+  const [performanceMode, setPerformanceMode] = useState(0);
   const [dpr, setDpr] = useState(0.5);
 	const [minDpr, setMinDpr] = useState(0.5);
 	const [maxDpr, setMaxDpr] = useState(0.8);
@@ -63,12 +63,12 @@ function App() {
 	}, [frenchKeyboard]);
 
 	useEffect(() => {
-		GPUTier.fps > 60 ? setPerfomanceMode(2) : GPUTier.fps > 30 ? setPerfomanceMode(1) : setPerfomanceMode(0);
-		if (perfomanceMode == 2) {
+		GPUTier.fps > 60 ? setPerformanceMode(2) : GPUTier.fps > 30 ? setPerformanceMode(1) : setPerformanceMode(0);
+		if (performanceMode == 2) {
 			setDpr(1);
 			setMinDpr(0.8);
 			setMaxDpr(2);
-		} else if ( perfomanceMode == 1) {
+		} else if ( performanceMode == 1) {
 			setDpr(0.8);
 			setMinDpr(0.6);
 			setMaxDpr(1.2);
@@ -77,7 +77,7 @@ function App() {
 			setMinDpr(0.5);
 			setMaxDpr(0.8);
 		}
-	}, [perfomanceMode]);
+	}, [performanceMode]);
 
 	const { phase, startTime, endTime } = useGame((state) => state);
 
@@ -324,14 +324,14 @@ function App() {
 						<Canvas
 							onKeyDown={handleCanvasKeyDown}
 							dpr={dpr}
-							shadows={perfomanceMode > 0 ? 'soft' : 'basic'}
+							shadows={performanceMode > 0 ? 'soft' : 'basic'}
 						>
 							<Suspense fallback={<Loader />}>
 							{!restartStatus?
 								<>
 									<color attach="background" args={['#F7F7F7']} />
 									<PerformanceMonitor onIncline={() => setDpr(minDpr)} onDecline={() => setDpr(maxDpr)}>
-										<Experience perfomanceMode={perfomanceMode} />
+										<Experience performanceMode={performanceMode} />
 									</PerformanceMonitor>
 								</>
 								: null
