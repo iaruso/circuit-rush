@@ -11,31 +11,26 @@ export default function Cube({ position, rotation, color, args, onCollide, cubeI
     onCollide,
     restitution: 0.9,
     friction: 0.1,
-    userData: {
-      name: 'cube',
-    }
+    userData: { name: 'cube' },
   }));
 
   const cubeInstanceRef = useRef();
-  const argsRef = useRef(args);
+  const setRefs = (instance) => {
+    cubeRef.current = cubeInstanceRef.current = instance;
+  };
 
   useEffect(() => {
     cubeInstanceRefs.current[index] = cubeInstanceRef.current;
     return () => {
       cubeInstanceRefs.current[index] = null;
     };
-  }, [cubeInstanceRefs, index, argsRef]);
+  }, [cubeInstanceRefs, index]);
 
   return (
-    <>
-      <Instance
-        ref={(instance) => {
-          cubeRef.current = instance;
-          cubeInstanceRef.current = instance;
-        }}
-        color={color}
-				index={index}
-      />
-    </>
+    <Instance
+      ref={setRefs}
+      color={color}
+      index={index}
+    />
   );
 }

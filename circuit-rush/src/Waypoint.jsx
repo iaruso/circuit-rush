@@ -14,15 +14,15 @@ export default function Waypoint({ position, rotation, index }) {
   }));
 
   const waypointInstanceRef = useRef();
+  const setRefs = (instance) => {
+    waypointRef.current = waypointInstanceRef.current = instance;
+  };
 
   return (
     <>
       <Instance
-				index={index}
-        ref={(instance) => {
-          waypointRef.current = instance;
-          waypointInstanceRef.current = instance;
-        }}
+        index={index}
+        ref={setRefs}
       />
     </>
   );
