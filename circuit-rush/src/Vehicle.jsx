@@ -211,33 +211,33 @@ export default function Vehicle({ checkpoint, performanceMode }) {
 	VehicleControls(vehicleApi, chassisApi, speed, gear, forcePower, brakePower, setReverseFlag, checkpoint);
 
   return (
-    <>
-      <group ref={vehicle} name="vehicle">
-        <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
-          <primitive object={mesh} position={[0, -0.7, -0.1]} />
-          <object3D ref={lookRef} position={[0, 0, 0]}>
-            <Camera ref={cameraRef} cameraRef={cameraRef} position={[...cameraPositions[0]]} performanceMode={perfMode}/>
-          </object3D>
-        </group>
-        <Wheel wheelRef={wheels[0]} />
-        <Wheel wheelRef={wheels[1]} />
-        <Wheel wheelRef={wheels[2]} />
-        <Wheel wheelRef={wheels[3]} />
-      </group>
-      <Html wrapperClass={'vehicle-stats-overlay'} className='vehicle-stats' ref={vehicleStats}>
+		<>
+			<group ref={vehicle} name="vehicle">
+				<group ref={chassisBody} matrixWorldNeedsUpdate={true}>
+					<primitive object={mesh} position={[0, -0.7, -0.1]} />
+					<object3D ref={lookRef} position={[0, 0, 0]}>
+						<Camera ref={cameraRef} cameraRef={cameraRef} position={[...cameraPositions[0]]} performanceMode={perfMode} />
+					</object3D>
+				</group>
+				<Wheel wheelRef={wheels[0]} />
+				<Wheel wheelRef={wheels[1]} />
+				<Wheel wheelRef={wheels[2]} />
+				<Wheel wheelRef={wheels[3]} />
+			</group>
+			<Html wrapperClass={'vehicle-stats-overlay'} className='vehicle-stats' ref={vehicleStats}>
 				<p className='vehicle-transmission'>{transmission}</p>
 				<div className='vehicle-gear-stats'>
 					<div className='vehicle-speed-bar' style={{ width: `${gearProgressBar}%` }}></div>
 				</div>
 				<p className='vehicle-speed'>{speed}</p>
-      </Html>
+			</Html>
 			{resetAlert ? 
 				<Html wrapperClass={'reset-alert-overlay'} className='reset-alert' ref={resetAlertContent}>
 					<div ref={resetAlertMessage} className="reset-message">PRESS R TO RESET CAR</div>
 				</Html>
 				: null
 			}
-    </>
-  );
+		</>
+	);
 }
 	
