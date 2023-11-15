@@ -77,6 +77,7 @@ function App() {
 			setMinDpr(0.5);
 			setMaxDpr(0.8);
 		}
+		console.log(GPUTier);
 	}, [performanceMode]);
 
 	const { phase, startTime, endTime } = useGame((state) => state);

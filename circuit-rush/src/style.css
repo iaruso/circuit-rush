@@ -16,6 +16,7 @@ p, a, div {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	position: relative;
 }
 
 .main-cover {
@@ -23,6 +24,7 @@ p, a, div {
 	max-width: calc(100% - 1px);
   max-height: 100%;
   object-fit: contain;
+  pointer-events: none;
 }
 
 @media (min-aspect-ratio: 18/9) {
@@ -282,6 +284,82 @@ p, a, div {
 	font-family: 'Bebas Neue', sans-serif;
 	font-size: 3rem;
 	color: #e55555;
+}
+
+.source-info-buttons {
+	position: absolute;
+	bottom: 1rem;
+	right: 1rem;
+	display: flex;
+	gap: 1rem;
+}
+
+.source-info-btn {
+	background-color: #FAFAFA;
+	width: 3rem;
+	height: 3rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 0.5rem;
+	border: 0.05rem solid #E0E0E0;
+	cursor: pointer;
+	transition: all 0.4s ease-in-out;
+}
+
+.source-info-btn svg {
+	width: 1.5rem;
+	height: 1.5rem;
+	fill: #606060;
+	transition: all 0.4s ease-in-out;
+}
+
+.source-info-btn:hover {
+	background-color: #f0f0f0;
+}
+
+.source-info-btn:hover svg {
+	fill: #404040;
+}
+
+#specs-info-btn {
+	position: relative;
+}
+
+.specs-info {
+	position: absolute;
+  bottom: 4rem;
+  right: 0;
+	background-color: #FAFAFA;
+	width: fit-content;
+	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	border-radius: 0.5rem;
+	border: 0.05rem solid #E0E0E0;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.4s ease-in;
+}
+
+.specs-info.active {
+	opacity: 1;
+}
+
+.specs-info span {
+	font-family: 'Bebas Neue', sans-serif;
+	width: max-content;
+}
+
+.specs-info-title {
+	font-size: 1.5rem;
+	color: #404040;
+}
+
+.specs-info-text {
+	font-size: 1.25rem;
+	color: #606060;
 }
 
 @media screen and (max-width: 1080px) {
