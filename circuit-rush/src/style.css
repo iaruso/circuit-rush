@@ -152,6 +152,7 @@ p, a, div {
 	width: 16rem;
 	display: flex;
 	flex-direction: column;
+	gap: 1rem;
 	background-color: #ffffff33;
 	backdrop-filter: blur(0.25rem);
 	border-radius: 0.25rem;
@@ -179,10 +180,6 @@ p, a, div {
 	cursor: pointer;
 	transition: all 0.4s ease-in-out;
 	padding: 0rem;;
-}
-
-.pause-stats > *:not(:last-child), .finish-stats > *:not(:last-child) {
-	margin-bottom: 1rem;
 }
 
 .worse-time, .better-time {
@@ -360,6 +357,18 @@ p, a, div {
 .specs-info-text {
 	font-size: 1.25rem;
 	color: #606060;
+}
+
+.buttons-overlay {
+	transform: none !important;
+	width: 6.5rem;
+	height: 3rem;
+	display: flex !important;
+	justify-content: start;
+	align-items: center;
+	gap: 0.5rem;
+	top: 1rem !important;
+	left: 1rem !important;
 }
 
 @media screen and (max-width: 1080px) {

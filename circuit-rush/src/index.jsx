@@ -1,6 +1,6 @@
 import './style.css';
 import { createRoot } from 'react-dom/client';
-import { Suspense, useEffect, useState, useRef, StrictMode } from 'react';
+import { Suspense, useEffect, useState, useRef, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { gsap } from 'gsap';
 import { useDetectGPU, PerformanceMonitor, useProgress, Html } from '@react-three/drei';
@@ -294,7 +294,6 @@ function App() {
 		}
 	}, [loadingStatus]);
 
-
 	function Loader() {
 		const { progress } = useProgress()
 		loadingRef.current.textContent = progress.toFixed(0) + '%';
@@ -306,6 +305,23 @@ function App() {
 		}
 		return <></>
 	}
+
+	const [gameBrightness, setGameBrightness] = useState(0.5); // Default value
+
+  useEffect(() => {
+    const storedBrightness = localStorage.getItem('gameBrightness');
+    if (storedBrightness !== null) {
+      setGameBrightness(parseFloat(storedBrightness));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('gameBrightness', gameBrightness.toString()); // Store brightness value in localStorage
+  }, [gameBrightness]);
+
+  const handleBrightnessChange = (event) => {
+    setGameBrightness(parseFloat(event.target.value));
+  };
 
   return (
 		<>
@@ -332,7 +348,7 @@ function App() {
 								<>
 									<color attach="background" args={['#F7F7F7']} />
 									<PerformanceMonitor onIncline={() => setDpr(minDpr)} onDecline={() => setDpr(maxDpr)}>
-										<Experience performanceMode={performanceMode} />
+										<Experience performanceMode={performanceMode} gameBrightness={gameBrightness} />
 									</PerformanceMonitor>
 								</>
 								: null
@@ -346,6 +362,10 @@ function App() {
 							}
 							{pauseMenu ? 
 								<Html wrapperClass={'pause-overlay'} className='pause-stats' ref={pauseMenuRef}>
+									<fieldset className='brighness-section'>
+										<legend>Game brightness</legend>
+										<input type="range" min="0" max="1" step="0.01" value={gameBrightness} onChange={handleBrightnessChange} />
+									</fieldset>
 									<button onClick={resumeButton}>RESUME</button>
 									<button onClick={restartButton}>RESTART</button>
 									<button onClick={quitButton}>QUIT</button>

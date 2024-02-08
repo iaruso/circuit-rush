@@ -1,16 +1,17 @@
-import { Suspense, useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState} from 'react'
 import { useThree } from '@react-three/fiber'
 import { Environment } from '@react-three/drei'
 import { OrthographicCamera } from 'three'
+import { OrbitControls } from '@react-three/drei'
+import { Physics, usePlane } from '@react-three/cannon'
 import Circuit from './Circuit'
 import Vehicle from './Vehicle'
-import { Physics, usePlane } from '@react-three/cannon'
 import PhysicsWorld from './PhysicsWorld'
 import Objects from './Objects'
 import cubes from '../public/static/cubes'
-import { OrbitControls } from '@react-three/drei'
 import Checkpoints from './Checkpoints'
 import useGame from './stores/Game.jsx'
+import GameOptions from './GameOptions'
 
 function Plane(props) {
   const [ref] = usePlane(() => ({
@@ -28,7 +29,7 @@ function Plane(props) {
   );
 }
 
-export default function Experience({ performanceMode }) {
+export default function Experience({ performanceMode, gameBrightness }) {
   const { scene } = useThree();
   const light = useRef();
   const cameraRef = useRef();
@@ -75,6 +76,7 @@ export default function Experience({ performanceMode }) {
 			}, 1000);
 		}
 	}, [gameFinished, phase])
+
   return (
     <>
 			<directionalLight
@@ -93,21 +95,23 @@ export default function Experience({ performanceMode }) {
 			<pointLight position={[100, 100, 100]} intensity={0.2} color={'#7f84d8'} />
 			<pointLight position={[-100, 100, -100]} intensity={0.2} color={'#454362'} />
 			<OrbitControls target={[0, 0, 0]} camera={cameraRef.current} enableRotate={false} enableZoom={false} />
-			<ambientLight intensity={0.8} color={'#dfdfe6'} />
+			<ambientLight intensity={0.4} color={'#dfdfe6'} />
+			<ambientLight intensity={gameBrightness} color={'#fff'} />
 			<Environment files={'static/environment.hdr'} />
 			<Circuit performanceMode={perfMode !== 2 ? true : false }/>
 			<Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true} isPaused={gamePaused}>
-					<PhysicsWorld />
-					<Suspense>
-						<Objects
-							cubesData={cubesArray}
-							cubesCount={cubesArray.length}
-							performanceMode={perfMode === 0 ? true : false }
-						/>
-					</Suspense>
-					<Plane />
-					<Vehicle checkpoint={checkpoint} performanceMode={perfMode === 0 ? true : false } />
-					<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
+				<PhysicsWorld />
+				<Suspense>
+					<Objects
+						cubesData={cubesArray}
+						cubesCount={cubesArray.length}
+						performanceMode={perfMode === 0 ? true : false }
+					/>
+				</Suspense>
+				<Plane />
+				<Vehicle checkpoint={checkpoint} performanceMode={perfMode === 0 ? true : false } />
+				<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
+				<GameOptions />
 			</Physics>
     </>
   );
