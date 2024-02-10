@@ -224,13 +224,16 @@ export default function Vehicle({ checkpoint, performanceMode }) {
 				<Wheel wheelRef={wheels[2]} />
 				<Wheel wheelRef={wheels[3]} />
 			</group>
-			<Html wrapperClass={'vehicle-stats-overlay'} className='vehicle-stats' ref={vehicleStats}>
-				<p className='vehicle-transmission'>{transmission}</p>
-				<div className='vehicle-gear-stats'>
-					<div className='vehicle-speed-bar' style={{ width: `${gearProgressBar}%` }}></div>
-				</div>
-				<p className='vehicle-speed'>{speed}</p>
-			</Html>
+			{ phase !== "paused" ?
+				<Html wrapperClass={'vehicle-stats-overlay'} className='vehicle-stats' ref={vehicleStats}>
+					<p className='vehicle-transmission'>{transmission}</p>
+					<div className='vehicle-gear-stats'>
+						<div className='vehicle-speed-bar' style={{ width: `${gearProgressBar}%` }}></div>
+					</div>
+					<p className='vehicle-speed'>{speed}</p>
+				</Html>
+				: null
+			}
 			{resetAlert ? 
 				<Html wrapperClass={'reset-alert-overlay'} className='reset-alert' ref={resetAlertContent}>
 					<div ref={resetAlertMessage} className="reset-message">PRESS R TO RESET CAR</div>

@@ -11,7 +11,6 @@ import Objects from './Objects'
 import cubes from '../public/static/cubes'
 import Checkpoints from './Checkpoints'
 import useGame from './stores/Game.jsx'
-import GameOptions from './GameOptions'
 
 function Plane(props) {
   const [ref] = usePlane(() => ({
@@ -29,7 +28,7 @@ function Plane(props) {
   );
 }
 
-export default function Experience({ performanceMode, gameBrightness }) {
+export default function Experience({ performanceMode, gameBrightness, isVolumeOn }) {
   const { scene } = useThree();
   const light = useRef();
   const cameraRef = useRef();
@@ -110,8 +109,7 @@ export default function Experience({ performanceMode, gameBrightness }) {
 				</Suspense>
 				<Plane />
 				<Vehicle checkpoint={checkpoint} performanceMode={perfMode === 0 ? true : false } />
-				<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} />
-				<GameOptions />
+				<Checkpoints checkpoint={checkpoint} setCheckpoint={setCheckpoint} isVolumeOn={isVolumeOn} />
 			</Physics>
     </>
   );

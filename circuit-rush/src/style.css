@@ -41,6 +41,10 @@ p, a, div {
   }
 }
 
+#root {
+	position: relative;
+}
+
 .menu {
   position: fixed;
   bottom: 0;
@@ -50,7 +54,8 @@ p, a, div {
 	flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-bottom: 6rem;
+	height: 4rem;
+  margin-bottom: 3rem;
 }
 
 .start-info, .loading-info, .keyboard-info {
@@ -80,11 +85,10 @@ p, a, div {
 }
 
 .loading-screen {
-	position: fixed;
-	inset: calc(1rem + 0.5px);
+	position: absolute;
 	border-radius: 0.5rem;
-	width: calc(100% - 2rem);
-	height: calc(100% - 2rem);
+	width: 100%;
+	height: 100%;
 	background: #F7F7F7;
 	display: flex;
 	justify-content: center;
@@ -95,7 +99,7 @@ p, a, div {
 .loading-info {
 	opacity: 1;
 	position: fixed;
-	bottom: 6rem;
+	bottom: 3rem;
 	text-align: center;
 }
 
@@ -148,7 +152,7 @@ p, a, div {
 	z-index: 2 !important;
 }
 
-.pause-stats, .finish-stats {
+.finish-stats {
 	width: 16rem;
 	display: flex;
 	flex-direction: column;
@@ -160,6 +164,47 @@ p, a, div {
 	border: 0.125rem solid #00000010;
 }
 
+.pause-menu-overlay {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #ffffff33;
+	backdrop-filter: blur(0.25rem);
+	border-radius: 0.25rem;
+}
+
+.pause-menu {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.pause-menu-title {
+	font-family: 'Bebas Neue', sans-serif;
+	font-size: 3rem;
+	color: #e55555;
+	position: absolute;
+	top: 3rem;
+	margin: 0;
+}
+
+.pause-menu-options {
+	display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.game-settings {
+	position: absolute;
+	bottom: 3rem;
+}
+
 .finish-stats {
 	position: relative;
 	opacity: 0;
@@ -169,7 +214,7 @@ p, a, div {
 	color: #e55555;
 }
 
-.pause-stats button, .finish-stats button {
+.pause-menu-overlay button, .finish-stats button {
 	background-color: #ffffff80;
 	border: none;
 	border-radius: 0.25rem;
@@ -200,12 +245,12 @@ p, a, div {
   top: 50%;
 }
 
-.pause-stats button:hover, .pause-stats button:focus, .finish-stats button:hover, .finish-stats button:focus {
+.pause-menu-overlay button:hover, .pause-menu-overlay button:focus, .finish-stats button:hover, .finish-stats button:focus {
 	background-color: #ffffffb0;
 	color: #606060;
 }
 
-.pause-stats button:focus-visible, .finish-stats button:focus-visible {
+.pause-menu-overlay button:focus-visible, .finish-stats button:focus-visible {
 	outline: 0px solid #fff;
 }
 	
@@ -285,37 +330,38 @@ p, a, div {
 
 .source-info-buttons {
 	position: absolute;
-	bottom: 1rem;
-	right: 1rem;
+	bottom: 2rem;
+	right: 2rem;
 	display: flex;
-	gap: 1rem;
+	gap: 2rem;
 }
 
-.source-info-btn {
-	background-color: #FAFAFA;
-	width: 3rem;
-	height: 3rem;
+.game-option-btn {
+	background-color: #ffffff33;
+	backdrop-filter: blur(0.25rem);
+	width: 4rem;
+	height: 4rem;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	border-radius: 0.5rem;
-	border: 0.05rem solid #E0E0E0;
+	border: 0.125rem solid #00000010;
 	cursor: pointer;
 	transition: all 0.4s ease-in-out;
 }
 
-.source-info-btn svg {
-	width: 1.5rem;
-	height: 1.5rem;
+.game-option-btn svg {
+	width: 1.75rem;
+	height: 1.75rem;
 	fill: #606060;
 	transition: all 0.4s ease-in-out;
 }
 
-.source-info-btn:hover {
+.game-option-btn:hover {
 	background-color: #f0f0f0;
 }
 
-.source-info-btn:hover svg {
+.game-option-btn:hover svg {
 	fill: #404040;
 }
 
@@ -325,16 +371,18 @@ p, a, div {
 
 .specs-info {
 	position: absolute;
-  bottom: 4rem;
+  bottom: 6rem;
   right: 0;
-	background-color: #FAFAFA;
+	background-color: #ffffff33;
+	backdrop-filter: blur(0.25rem);
 	width: fit-content;
 	padding: 1rem;
 	display: flex;
 	flex-direction: column;
+	align-items: end;
 	gap: 0.25rem;
 	border-radius: 0.5rem;
-	border: 0.05rem solid #E0E0E0;
+	border: 0.05rem solid #00000010;
 	pointer-events: none;
 	opacity: 0;
 	transition: opacity 0.4s ease-in;
@@ -350,25 +398,74 @@ p, a, div {
 }
 
 .specs-info-title {
-	font-size: 1.5rem;
+	font-size: 2rem;
 	color: #404040;
 }
 
 .specs-info-text {
-	font-size: 1.25rem;
+	font-size: 1.5rem;
 	color: #606060;
 }
 
-.buttons-overlay {
+.pause-button-overlay {
 	transform: none !important;
-	width: 6.5rem;
-	height: 3rem;
+	width: 4rem;
+	height: 4rem;
 	display: flex !important;
 	justify-content: start;
 	align-items: center;
 	gap: 0.5rem;
-	top: 1rem !important;
-	left: 1rem !important;
+	top: 2rem !important;
+	right: 2rem !important;
+	left: unset !important;
+}
+
+.settings-button-overlay {
+	transform: none !important;
+	width: 4rem;
+	height: 4rem;
+	display: flex !important;
+	justify-content: start;
+	align-items: center;
+	gap: 0.5rem;
+	top: 2rem !important;
+	left: 2rem !important;
+	position: relative;
+}
+
+.settings-options {
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 0.25rem;
+	background-color: #FAFAFA;
+	width: fit-content;
+	padding: 1rem;
+	border-radius: 0.5rem;
+	border: 0.05rem solid #E0E0E0;
+	opacity: 0;
+	transition: opacity 0.4s ease-in;
+	top: 6rem;
+}
+
+.settings-options.active {
+	opacity: 1;
+}
+
+.settings-options span {
+	font-family: 'Bebas Neue', sans-serif;
+	width: max-content;
+}
+
+.settings-options-title {
+	font-size: 1.5rem;
+	color: #404040;
+}
+
+.settings-options-text {
+	font-size: 1.25rem;
+	color: #606060;
 }
 
 @media screen and (max-width: 1080px) {

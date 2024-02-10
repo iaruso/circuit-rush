@@ -15,9 +15,11 @@ const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
 
 function App() {
+	const [isVolumeOn, setIsVolumeOn] = useState(true);
 	const [countdownSound] = useState(() => new Audio('./static/countdown.mp3'));
   const [countdownStartSound] = useState(() => new Audio('./static/countdown-start.mp3'));
 	const [clickSound] = useState(() => new Audio('./static/click.mp3'));
+	const [gameBrightness, setGameBrightness] = useState(0.5);
   const [gameStarted, setGameStarted] = useState(false);
   const GPUTier = useDetectGPU();
   const [performanceMode, setPerformanceMode] = useState(0);
@@ -53,6 +55,10 @@ function App() {
 		);
 	}, []);
 
+	const toggleVolume = () => {
+		setIsVolumeOn(prevState => !prevState);
+	};
+
 	useEffect(() => {
 		const language = navigator.language;
 		if (language.startsWith('fr')) {
@@ -77,10 +83,14 @@ function App() {
 			setMinDpr(0.5);
 			setMaxDpr(0.8);
 		}
-		console.log(GPUTier);
 	}, [performanceMode]);
 
 	const { phase, startTime, endTime } = useGame((state) => state);
+
+	const handlePause = () => {
+		setPauseMenu(true);
+		setGamePaused(true);
+	};
 
 	const quitButton = () => {
 		setTimeout(() => {
@@ -97,7 +107,7 @@ function App() {
 	const handleKeyDown = (event) => {
 		if (event.key === 'Enter') {
 			if (loadingStatus && !gamePlaying) {
-				clickSound.volume = 0.05;
+				clickSound.volume = isVolumeOn ? 0.05 : 0;;
 				clickSound.play();
 				setGamePlaying(true);
 				setTimeout (() => {
@@ -109,8 +119,7 @@ function App() {
 		}
 		if (event.key === 'p' || event.key === 'P') {
 			if (phase === 'playing') {
-				setPauseMenu(true);
-				setGamePaused(true);
+				handlePause();
 			}
 		}
 		if (event.key === 'Escape') {
@@ -123,6 +132,7 @@ function App() {
 	const resumeButton = () => {
 		gsap.to(pauseMenuRef.current, {opacity: 0, duration: 0.8 });
 		setTimeout(() => {
+			resume(); /* useEffect not working and I don't know why */
 			setGamePaused(false);
 			setPauseMenu(false);
 		}, 500);
@@ -149,14 +159,6 @@ function App() {
 			restart();
 		}, 1000);
 	};
-
-	useEffect(() => { 
-		if (gamePaused) {
-			pause();
-		} else {
-			resume();
-		}
-	}, [gamePaused]);
 
 	useEffect(() => {
 		if (phase === 'loading') {
@@ -229,13 +231,13 @@ function App() {
 			for (let count = 3; count >= 1; count--) {
 				countdownValue.current.textContent = count;
 				gsap.fromTo(countdownValue.current, { opacity: 1, scale: 1.2 }, { opacity: 0, scale: 1, duration: 0.6, delay: 0.4 });
-				countdownSound.volume = 0.1;
+				countdownSound.volume = isVolumeOn ? 0.1 : 0;
 				countdownSound.play();
 				await delay(1000);
 			}
 			countdownValue.current.textContent = 'GO';
 			gsap.fromTo(countdownValue.current, { opacity: 1, scale: 1.2 }, { opacity: 0, scale: 1, duration: 0.6, delay: 0.4 });
-			countdownStartSound.volume = 0.1;
+			countdownStartSound.volume = isVolumeOn ? 0.1 : 0;
 			countdownStartSound.play();
 			setTimeout(() => {
 				setCountdownStatus(false);
@@ -306,27 +308,47 @@ function App() {
 		return <></>
 	}
 
-	const [gameBrightness, setGameBrightness] = useState(0.5); // Default value
-
   useEffect(() => {
     const storedBrightness = localStorage.getItem('gameBrightness');
+		const storedVolume = localStorage.getItem('isVolumeOn');
     if (storedBrightness !== null) {
       setGameBrightness(parseFloat(storedBrightness));
     }
+		if (storedVolume !== null) {
+			setIsVolumeOn(JSON.parse(storedVolume));
+		}
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('gameBrightness', gameBrightness.toString()); // Store brightness value in localStorage
+    localStorage.setItem('gameBrightness', gameBrightness.toString());
   }, [gameBrightness]);
+
+	useEffect(() => {
+		localStorage.setItem('isVolumeOn', isVolumeOn);
+	}, [isVolumeOn]);
 
   const handleBrightnessChange = (event) => {
     setGameBrightness(parseFloat(event.target.value));
   };
 
+	const handleGamePause = () => {
+		if (phase === 'playing') {
+			handlePause();
+		}
+	};
+
+	useEffect(() => { 
+		if (gamePaused) {
+			pause();
+		} else {
+			resume();
+		}
+	}, [gamePaused]);
+
   return (
 		<>
 			{!gameStarted ? (
-				<MainMenu />
+				<MainMenu isVolumeOn={isVolumeOn}/>
 			) : (
 				<>
 					{!gameLoaded ? (
@@ -348,7 +370,7 @@ function App() {
 								<>
 									<color attach="background" args={['#F7F7F7']} />
 									<PerformanceMonitor onIncline={() => setDpr(minDpr)} onDecline={() => setDpr(maxDpr)}>
-										<Experience performanceMode={performanceMode} gameBrightness={gameBrightness} />
+										<Experience performanceMode={performanceMode} gameBrightness={gameBrightness} isVolumeOn={isVolumeOn}/>
 									</PerformanceMonitor>
 								</>
 								: null
@@ -361,14 +383,25 @@ function App() {
 								: null
 							}
 							{pauseMenu ? 
-								<Html wrapperClass={'pause-overlay'} className='pause-stats' ref={pauseMenuRef}>
-									<fieldset className='brighness-section'>
-										<legend>Game brightness</legend>
-										<input type="range" min="0" max="1" step="0.01" value={gameBrightness} onChange={handleBrightnessChange} />
-									</fieldset>
-									<button onClick={resumeButton}>RESUME</button>
-									<button onClick={restartButton}>RESTART</button>
-									<button onClick={quitButton}>QUIT</button>
+								<Html wrapperClass={'pause-overlay'} className='pause-menu-overlay' ref={pauseMenuRef}>
+									<div className='pause-menu'>
+										<p className='pause-menu-title'>GAME PAUSED</p>
+										<div className='pause-menu-options'>
+											<button onClick={resumeButton}>RESUME</button>
+											<button onClick={restartButton}>RESTART</button>
+											<button onClick={quitButton}>QUIT</button>
+										</div>
+										<div className='game-settings'>
+											<fieldset className='brighness-section'>
+												<legend>Game brightness</legend>
+												<input type="range" min="0" max="1" step="0.01" value={gameBrightness} onChange={handleBrightnessChange} />
+											</fieldset>
+											<button onClick={toggleVolume}>
+												{isVolumeOn ? 'Turn Volume Off' : 'Turn Volume On'}
+											</button>
+										</div>
+									</div>
+									
 								</Html>
 								: null
 							}
@@ -378,6 +411,14 @@ function App() {
 									<div className="finish-time" ref={finishTime}></div>
 									<button onClick={restartButton}>RESTART</button>
 									<button onClick={quitButton}>QUIT</button>
+								</Html>
+								: null
+							}
+							{!gamePaused && gameLoaded && !countdownStatus && (phase == 'playing' || phase == 'paused') ?
+								<Html wrapperClass={'pause-button-overlay'} className='pause-button'>
+									<a id='pause-btn' className="game-option-btn" onClick={handleGamePause}>
+										<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M560-200v-560h160v560H560Zm-320 0v-560h160v560H240Z"/></svg>
+									</a>
 								</Html>
 								: null
 							}
