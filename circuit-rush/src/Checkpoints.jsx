@@ -15,7 +15,8 @@ export default function Checkpoints({ checkpoint, setCheckpoint, isVolumeOn }) {
   const args = [[2, 4, 10], [2, 4, 10], [10, 4, 2]];
   const lapRef = useRef();
   const timeRef = useRef();
-  const [lap, setLap] = useState(1);
+  var lap = 1;
+  var currentCheckpoint = checkpoint;
   const [flag, setFlag] = useState(false);
   const [volumeStatus, setVolumeStatus] = useState(isVolumeOn);
 
@@ -46,8 +47,6 @@ export default function Checkpoints({ checkpoint, setCheckpoint, isVolumeOn }) {
     return checkpoint;
   });
 
-  var currentCheckpoint = checkpoint;
-
   const playCheckpointSound = () => {
     checkpointSound.play();
   };
@@ -62,15 +61,14 @@ export default function Checkpoints({ checkpoint, setCheckpoint, isVolumeOn }) {
 
   const handleCollide = useCallback(
     (index) => (e) => {
+      console.log("Data: " + currentCheckpoint + "/" + lap)
       const { body } = e;
-
       if (body.userData.name === 'vehicle' && index === currentCheckpoint && !flag) {
         if (currentCheckpoint < 2) {
           playCheckpointSound();
-        }
-        if (currentCheckpoint > 1 && lap < 3) {
+        } else if (currentCheckpoint > 1 && lap < 3) {
           playLapSound();
-          setLap(lap + 1);
+          lap++;
         } else if (currentCheckpoint > 1 && lap === 3) {
           setFlag(true);
           playFinishSound();
@@ -92,7 +90,7 @@ export default function Checkpoints({ checkpoint, setCheckpoint, isVolumeOn }) {
     return () => {
       unsubscribeEffect();
     };
-  }, []);
+  }, [lap]);
 
   useFrame(() => {
     let elapsedTime = 0;

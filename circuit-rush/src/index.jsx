@@ -327,9 +327,9 @@ function App() {
 		localStorage.setItem('isVolumeOn', isVolumeOn);
 	}, [isVolumeOn]);
 
-  const handleBrightnessChange = (event) => {
-    setGameBrightness(parseFloat(event.target.value));
-  };
+  function handleBrightnessChange(e) {
+    setGameBrightness(e.target.value);
+  }
 
 	const handleGamePause = () => {
 		if (phase === 'playing') {
@@ -344,6 +344,22 @@ function App() {
 			resume();
 		}
 	}, [gamePaused]);
+
+	function filterme(value) {
+    const toggleElement = document.getElementById('custom-toggle');
+		value = parseFloat(value);
+		console.log(value)
+    if (value === 0) {
+      toggleElement.classList.remove('tgl-max', 'tgl-med');
+      toggleElement.classList.add('tgl-min');
+    } else if (value === 0.5) {
+      toggleElement.classList.remove('tgl-min', 'tgl-max');
+      toggleElement.classList.add('tgl-med');
+    } else if (value === 1) {
+      toggleElement.classList.remove('tgl-min', 'tgl-med');
+      toggleElement.classList.add('tgl-max');
+    }
+  }
 
   return (
 		<>
@@ -385,23 +401,37 @@ function App() {
 							{pauseMenu ? 
 								<Html wrapperClass={'pause-overlay'} className='pause-menu-overlay' ref={pauseMenuRef}>
 									<div className='pause-menu'>
-										<p className='pause-menu-title'>GAME PAUSED</p>
 										<div className='pause-menu-options'>
+											<p className='pause-menu-title'>GAME PAUSED</p>
 											<button onClick={resumeButton}>RESUME</button>
 											<button onClick={restartButton}>RESTART</button>
 											<button onClick={quitButton}>QUIT</button>
-										</div>
-										<div className='game-settings'>
-											<fieldset className='brighness-section'>
-												<legend>Game brightness</legend>
-												<input type="range" min="0" max="1" step="0.01" value={gameBrightness} onChange={handleBrightnessChange} />
-											</fieldset>
-											<button onClick={toggleVolume}>
-												{isVolumeOn ? 'Turn Volume Off' : 'Turn Volume On'}
-											</button>
+											<div className='game-settings'>
+												<div className='section'>
+														<div className='wrapper'>
+															<input id="custom-toggle" className={gameBrightness == 0 ? "tgl-min" : gameBrightness == 1 ? "tgl-max" : "tgl-med"} type="range" min="0" max="1" step="0.5" value={gameBrightness} onChange={(e) => {
+																handleBrightnessChange(e);
+																filterme(e.target.value);
+															}} />
+															<span></span>
+														</div>
+												</div>
+												<div className='section'>
+													<div onClick={toggleVolume} className='game-option-btn'>
+														{isVolumeOn ? (
+															<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+																<path d="M560-131v-82q90-26 145-100t55-168q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 127-78 224.5T560-131ZM120-360v-240h160l200-200v640L280-360H120Zm440 40v-322q47 22 73.5 66t26.5 96q0 51-26.5 94.5T560-320Z"/>
+															</svg>
+														) : (
+															<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+																<path d="M792-56 671-177q-25 16-53 27.5T560-131v-82q14-5 27.5-10t25.5-12L480-368v208L280-360H120v-240h128L56-792l56-56 736 736-56 56Zm-8-232-58-58q17-31 25.5-65t8.5-70q0-94-55-168T560-749v-82q124 28 202 125.5T840-481q0 53-14.5 102T784-288ZM650-422l-90-90v-130q47 22 73.5 66t26.5 96q0 15-2.5 29.5T650-422ZM480-592 376-696l104-104v208Z"/>
+															</svg>
+														)}
+													</div>
+												</div>
+											</div>
 										</div>
 									</div>
-									
 								</Html>
 								: null
 							}

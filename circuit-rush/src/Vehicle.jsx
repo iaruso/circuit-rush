@@ -166,7 +166,7 @@ export default function Vehicle({ checkpoint, performanceMode }) {
 
   useFrame((state, delta) => {
 		const { changeCamera } = getKeys();
-    if (changeCamera) {
+    if (changeCamera && phase == "playing") {
       debounceCameraChange.current();
     }
 
