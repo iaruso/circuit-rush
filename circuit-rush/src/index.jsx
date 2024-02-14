@@ -4,6 +4,9 @@ import { Suspense, useEffect, useState, useRef, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { gsap } from 'gsap';
 import { useDetectGPU, PerformanceMonitor, useProgress, Html } from '@react-three/drei';
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+import Filter from 'bad-words';
 import ConfettiExplosion from 'react-confetti-explosion';
 import Experience from './Experience.jsx';
 import useGame from './stores/Game.jsx';
@@ -36,6 +39,8 @@ function App() {
 	const [gamePlaying, setGamePlaying] = useState(false);
 	const [pauseMenu, setPauseMenu] = useState(false);
 	const [finishStatus, setFinishStatus] = useState(false);
+	const [leaderboardData, setLeaderboardData] = useState([]);
+	const [leaderboardView, setLeaderboardView] = useState(false);
 	const finishStats = useRef(null);
 	const finishTime = useRef(null);
 	const [isExploding, setIsExploding] = useState(false);
@@ -47,6 +52,12 @@ function App() {
 	const pause = useGame((state) => state.pause);
 	const resume = useGame((state) => state.resume);
 	const restart = useGame((state) => state.restart);
+
+	const userId = localStorage.getItem('user-id');
+  const userName = localStorage.getItem('user-name');
+	const userInput = useRef(null);
+  const filter = new Filter();
+	const [error, setError] = useState(null); // New state to track error messag
 	
 	useEffect(() => { 
 		console.log(
@@ -68,6 +79,15 @@ function App() {
 		}
 	}, [frenchKeyboard]);
 
+	// Generate userId
+	useEffect(() => {
+    const userId = localStorage.getItem('user-id');
+    if (!userId) {
+      const newUserId = uuidv4().replace(/-/g, '').slice(0, 32);
+      localStorage.setItem('user-id', newUserId);
+    }
+  }, []);
+
 	useEffect(() => {
 		GPUTier.fps > 60 ? setPerformanceMode(2) : GPUTier.fps > 30 ? setPerformanceMode(1) : setPerformanceMode(0);
 		if (performanceMode == 2) {
@@ -86,6 +106,132 @@ function App() {
 	}, [performanceMode]);
 
 	const { phase, startTime, endTime } = useGame((state) => state);
+
+	const formattedTime = useMemo(() => {
+    function padWithZero(number, width = 2) {
+        const paddedNumber = String(number);
+        return paddedNumber.padStart(width, '0');
+    }
+
+    if (phase === 'ended') {
+        let elapsedTime = 0;
+        elapsedTime = endTime - startTime;
+        const minutes = Math.floor((elapsedTime / 60000) % 60);
+        const seconds = Math.floor((elapsedTime / 1000) % 60);
+        const milliseconds = elapsedTime % 1000;
+        return `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+    }
+
+    return ''; // Return an empty string if phase is not 'ended'
+}, [phase, startTime, endTime]);
+
+useEffect(() => { 
+    function padWithZero(number, width = 2) {
+        const paddedNumber = String(number);
+        return paddedNumber.padStart(width, '0');
+    }
+
+    if (phase === 'ended') {
+        setFinishStatus(true);
+        let elapsedTime = 0;
+        elapsedTime = endTime - startTime;
+        let currentRecordTime = localStorage.getItem('currentRecordTime');
+        let timeDifference = 0;
+        setTimeout(() => { 
+            gsap.to(finishStats.current, {opacity: 1, duration: 1.5 });
+            if (!currentRecordTime) {
+                setIsExploding(true);
+                currentRecordTime = '';
+                localStorage.setItem('currentRecordTime', elapsedTime);
+                setTimeout(() => { 
+                    finishTime.current.innerHTML = formattedTime;
+                    setIsExploding(true);
+                }, 200);
+            } else if (currentRecordTime > elapsedTime) { 
+                localStorage.setItem('currentRecordTime', elapsedTime);
+                timeDifference = currentRecordTime - elapsedTime;
+                const minutes = Math.floor((timeDifference / 60000) % 60);
+                const seconds = Math.floor((timeDifference / 1000) % 60);
+                const milliseconds = timeDifference % 1000;
+                const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+                setTimeout(() => {
+                    setIsExploding(true);
+                    finishTime.current.innerHTML = formattedTime + '<br><span class="better-time">(-' + formattedTimeDifference + ')</span>';
+                }, 200);
+            } else if (currentRecordTime < elapsedTime) { 
+                timeDifference =  elapsedTime - currentRecordTime;
+                const minutes = Math.floor((timeDifference / 60000) % 60);
+                const seconds = Math.floor((timeDifference / 1000) % 60);
+                const milliseconds = timeDifference % 1000;
+                const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+                setTimeout(() => { 
+                    finishTime.current.innerHTML = formattedTime + '<br><span class="worse-time">(+' + formattedTimeDifference + ')</span>';
+                }, 200);
+            } else {
+                setTimeout(() => { 
+                    finishTime.current.innerHTML = formattedTime;
+                }, 200);
+            }
+        }, 200);
+    }
+}, [phase, formattedTime]);
+
+
+	
+	useEffect(() => {
+		if (phase === 'ended' && (!userId || !userName)) {
+			setFinishStatus(true);
+		} else if (phase === "ended" && userId && userName) {
+			axios.get('http://localhost:3001/api/records')
+				.then(response => {
+					setLeaderboardData(response.data);
+					setLeaderboardView(true);
+				})
+		}
+  }, [phase, userId, userName]);
+
+	const handleSubmit = () => {
+		const inputLength = userInput.current.value.trim().length; // Access value from ref
+		const inputValue = userInput.current.value;
+		if (inputLength > 0 && inputLength <= 12 && !filter.isProfane(inputValue)) {
+			// Store the user name in localStorage
+			// Prepare data for posting
+			const data = {
+				user: inputValue,
+				time: formattedTime // Assuming you have formattedTime variable available
+			};
+	
+			// Make POST request to API using Axios
+			axios.post('http://localhost:3001/api/records', data, {
+				headers: {
+					'Content-Type': 'application/json',
+					'record-id': userId
+				}
+			})
+			.then(response => {
+				if (response.status === 200) {
+					localStorage.setItem('user-name', inputValue);
+					setLeaderboardView(true);
+				} else {
+					// Logic to handle error response
+					setError('Failed to submit record. Please try again.');
+					console.error('Error:', response.statusText);
+				}
+			})
+			.catch(error => {
+				setError('Failed to submit record. Please try again.');
+				console.error('Error:', error);
+			});
+		} else {
+			// Handle validation errors
+			setError('Invalid input. Please enter a valid user name.');
+			console.log('Validation failed');
+		}
+	};
+	
+  const clearError = () => {
+    setError(null); // Clear the error message
+  };
 
 	const handlePause = () => {
 		setPauseMenu(true);
@@ -164,63 +310,6 @@ function App() {
 		if (phase === 'loading') {
 			setTimeout(() => { 
 				setGameStarted(true);
-			}, 200);
-		}
-	}, [phase]);
-
-	useEffect(() => { 
-    function padWithZero(number, width = 2) {
-			const paddedNumber = String(number);
-			return paddedNumber.padStart(width, '0');
-    }
-    
-    if (phase === 'ended') {
-			setFinishStatus(true);
-			let elapsedTime = 0;
-			elapsedTime = endTime - startTime;
-			const minutes = Math.floor((elapsedTime / 60000) % 60);
-			const seconds = Math.floor((elapsedTime / 1000) % 60);
-			const milliseconds = elapsedTime % 1000;
-
-			const formattedTime = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-			
-			let currentRecordTime = localStorage.getItem('currentRecordTime');
-			let timeDifference = 0;
-			setTimeout(() => { 
-				gsap.to(finishStats.current, {opacity: 1, duration: 1.5 });
-				if (!currentRecordTime) {
-					setIsExploding(true);
-					currentRecordTime = '';
-					localStorage.setItem('currentRecordTime', elapsedTime);
-					setTimeout(() => { 
-						finishTime.current.innerHTML = formattedTime;
-						setIsExploding(true);
-					}, 200);
-				} else if (currentRecordTime > elapsedTime) { 
-					localStorage.setItem('currentRecordTime', elapsedTime);
-					timeDifference = currentRecordTime - elapsedTime;
-					const minutes = Math.floor((timeDifference / 60000) % 60);
-					const seconds = Math.floor((timeDifference / 1000) % 60);
-					const milliseconds = timeDifference % 1000;
-					const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-					setTimeout(() => {
-						setIsExploding(true);
-						finishTime.current.innerHTML = formattedTime + '<br><span class="better-time">(-' + formattedTimeDifference + ')</span>';
-					}, 200);
-				} else if (currentRecordTime < elapsedTime) { 
-					timeDifference =  elapsedTime - currentRecordTime;
-					const minutes = Math.floor((timeDifference / 60000) % 60);
-					const seconds = Math.floor((timeDifference / 1000) % 60);
-					const milliseconds = timeDifference % 1000;
-					const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-					setTimeout(() => { 
-						finishTime.current.innerHTML = formattedTime + '<br><span class="worse-time">(+' + formattedTimeDifference + ')</span>';
-					}, 200);
-				} else {
-					setTimeout(() => { 
-						finishTime.current.innerHTML = formattedTime;
-					}, 200);
-				}
 			}, 200);
 		}
 	}, [phase]);
@@ -435,10 +524,26 @@ function App() {
 								</Html>
 								: null
 							}
-							{finishStatus ? 
+							{finishStatus && !leaderboardView ? 
 								<Html wrapperClass={'finish-overlay'} className='finish-stats' ref={finishStats}>
 									<>{isExploding && <ConfettiExplosion force={0.4} duration={4000} particleSize={8} particleCount={128} width={window.innerWidth > 1080 ? window.innerWidth / 2 : window.innerWidth * 0.8} colors={['#e55555', '#db3d3d', '#e55555', '#fc4c4c']} className='confetti-explosion'/>}</>
 									<div className="finish-time" ref={finishTime}></div>
+									<input className="new-user" ref={userInput} />
+              		<button type='submit' onClick={handleSubmit}>Confirm</button>
+									{error && (
+										<span className="error-message">{error}</span>
+									)}
+								</Html>
+								: null
+							}
+							{finishStatus && leaderboardView ? 
+								<Html wrapperClass={'leaderboard-overlay'} className='leaderboard-stats' ref={finishStats}>
+									<div className="finish-time" ref={finishTime}></div>
+									<ul>
+										{leaderboardData.map((item, index) => (
+											<li key={index}>{item.user} - {item.time}</li>
+										))}
+									</ul>
 									<button onClick={restartButton}>RESTART</button>
 									<button onClick={quitButton}>QUIT</button>
 								</Html>
