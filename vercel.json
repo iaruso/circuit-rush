@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd circuit-rush && vite build",
+  "rewrites": [
+    { "source": "/circuit-rush/:path*", "destination": "/circuit-rush/index.html" }
+  ],
+  "cleanUrls": true
+}

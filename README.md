@@ -8,7 +8,8 @@
 - Minimalist race track with checkpoints and waypoints
 - Vehicle with realistic physics
 - Ton of cubes to hit that react with collision
-- Three laps in time trial to beat your own record
+- Three laps in time trial to compete worldwide against other players
+- Adjust settings based on your preference
 
 > __Note__  
 > Mobile devices currently not supported       
@@ -18,4 +19,3 @@
 > Hardware acceleration must be activated in your browser
 
 ### [Play it now!](https://circuit-rush.com/)
-### [Behance presentation](https://www.behance.net/gallery/173450225/Circuit-Rush)

@@ -556,7 +556,7 @@ function App() {
 								<Html wrapperClass={'finish-overlay'} className='finish-stats' ref={finishStats}>
 									<>{isExploding && <ConfettiExplosion force={0.4} duration={4000} particleSize={8} particleCount={128} width={window.innerWidth > 1080 ? window.innerWidth / 2 : window.innerWidth * 0.8} colors={['#e55555', '#db3d3d', '#e55555', '#fc4c4c']} className='confetti-explosion'/>}</>
 									<div className="finish-time" ref={finishTime}></div>
-									<input className="new-user" ref={userInput} placeholder='Insert your name'/>
+									<input className="new-user" ref={userInput} placeholder='Insert your name' maxLength={12} required />
               		<button type='submit' className='submit-user' onClick={handleSubmit}>CONFIRM</button>
 									{error && (
 										<span className="error-message">{error}</span>

@@ -15,7 +15,7 @@ export default function Checkpoints({ checkpoint, setCheckpoint, isVolumeOn }) {
   const args = [[2, 4, 10], [2, 4, 10], [10, 4, 2]];
   const lapRef = useRef();
   const timeRef = useRef();
-  var lap = 3;
+  var lap = 1;
   var currentCheckpoint = checkpoint;
   const [flag, setFlag] = useState(false);
   const [volumeStatus, setVolumeStatus] = useState(isVolumeOn);
