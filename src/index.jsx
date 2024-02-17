@@ -313,6 +313,8 @@ function App() {
 
 	const restartButton = () => {
 		if (phase === 'ended') {
+			const leaderboardList = document.querySelector('.leaderboard-list');
+			leaderboardList.innerHTML = '';
 			setCountdownStatus(false);
 			setFinishStatus(false);
 			setLeaderboardView(false);
