@@ -43,6 +43,7 @@ function App() {
 	const [leaderboardView, setLeaderboardView] = useState(false);
 	const finishStats = useRef(null);
 	const finishTime = useRef(null);
+	const finishRecord = useRef(null);
 	const [isExploding, setIsExploding] = useState(false);
 	const pauseMenuRef = useRef(null);
 	const [countdownStatus, setCountdownStatus] = useState(false);
@@ -57,7 +58,7 @@ function App() {
   const userName = localStorage.getItem('user-name');
 	const userInput = useRef(null);
   const filter = new Filter();
-	const [error, setError] = useState(null); // New state to track error messag
+	const [error, setError] = useState(null);
 	
 	useEffect(() => { 
 		console.log(
@@ -65,6 +66,17 @@ function App() {
 			"color: #e55555; text-decoration: underline; cursor: pointer"
 		);
 	}, []);
+
+	useEffect(() => {
+    const deleteLocalStorageItem = () => {
+      localStorage.removeItem('currentRecordTime');
+      localStorage.setItem('newversion', 'true');
+    };
+    const isNewVersion = localStorage.getItem('newversion');
+    if (isNewVersion != 'true') {
+      deleteLocalStorageItem();
+    }
+  }, []);
 
 	const toggleVolume = () => {
 		setIsVolumeOn(prevState => !prevState);
@@ -79,7 +91,6 @@ function App() {
 		}
 	}, [frenchKeyboard]);
 
-	// Generate userId
 	useEffect(() => {
     const userId = localStorage.getItem('user-id');
     if (!userId) {
@@ -109,128 +120,144 @@ function App() {
 
 	const formattedTime = useMemo(() => {
     function padWithZero(number, width = 2) {
-        const paddedNumber = String(number);
-        return paddedNumber.padStart(width, '0');
-    }
+			const paddedNumber = String(number);
+			return paddedNumber.padStart(width, '0');
+		}
 
     if (phase === 'ended') {
-        let elapsedTime = 0;
-        elapsedTime = endTime - startTime;
-        const minutes = Math.floor((elapsedTime / 60000) % 60);
-        const seconds = Math.floor((elapsedTime / 1000) % 60);
-        const milliseconds = elapsedTime % 1000;
-        return `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
+			let elapsedTime = 0;
+			elapsedTime = endTime - startTime;
+			const minutes = Math.floor((elapsedTime / 60000) % 60);
+			const seconds = Math.floor((elapsedTime / 1000) % 60);
+			const milliseconds = elapsedTime % 1000;
+			return `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
     }
-
     return ''; // Return an empty string if phase is not 'ended'
-}, [phase, startTime, endTime]);
+	}, [phase]);
 
-useEffect(() => { 
-    function padWithZero(number, width = 2) {
-        const paddedNumber = String(number);
-        return paddedNumber.padStart(width, '0');
-    }
-
-    if (phase === 'ended') {
-        setFinishStatus(true);
-        let elapsedTime = 0;
-        elapsedTime = endTime - startTime;
-        let currentRecordTime = localStorage.getItem('currentRecordTime');
-        let timeDifference = 0;
-        setTimeout(() => { 
-            gsap.to(finishStats.current, {opacity: 1, duration: 1.5 });
-            if (!currentRecordTime) {
-                setIsExploding(true);
-                currentRecordTime = '';
-                localStorage.setItem('currentRecordTime', elapsedTime);
-                setTimeout(() => { 
-                    finishTime.current.innerHTML = formattedTime;
-                    setIsExploding(true);
-                }, 200);
-            } else if (currentRecordTime > elapsedTime) { 
-                localStorage.setItem('currentRecordTime', elapsedTime);
-                timeDifference = currentRecordTime - elapsedTime;
-                const minutes = Math.floor((timeDifference / 60000) % 60);
-                const seconds = Math.floor((timeDifference / 1000) % 60);
-                const milliseconds = timeDifference % 1000;
-                const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-                setTimeout(() => {
-                    setIsExploding(true);
-                    finishTime.current.innerHTML = formattedTime + '<br><span class="better-time">(-' + formattedTimeDifference + ')</span>';
-                }, 200);
-            } else if (currentRecordTime < elapsedTime) { 
-                timeDifference =  elapsedTime - currentRecordTime;
-                const minutes = Math.floor((timeDifference / 60000) % 60);
-                const seconds = Math.floor((timeDifference / 1000) % 60);
-                const milliseconds = timeDifference % 1000;
-                const formattedTimeDifference = `${padWithZero(minutes)}:${padWithZero(seconds)}:${padWithZero(milliseconds, 3)}`;
-                setTimeout(() => { 
-                    finishTime.current.innerHTML = formattedTime + '<br><span class="worse-time">(+' + formattedTimeDifference + ')</span>';
-                }, 200);
-            } else {
-                setTimeout(() => { 
-                    finishTime.current.innerHTML = formattedTime;
-                }, 200);
-            }
-        }, 200);
-    }
-}, [phase, formattedTime]);
-
-
-	
 	useEffect(() => {
-		if (phase === 'ended' && (!userId || !userName)) {
+		function padWithZero(number, width = 2) {
+			return String(number).padStart(width, '0');
+		}
+
+		if (phase === 'ended') {
 			setFinishStatus(true);
-		} else if (phase === "ended" && userId && userName) {
-			axios.get('http://localhost:3001/api/records')
+			let elapsedTime = endTime - startTime;
+			let currentRecordTime = localStorage.getItem('currentRecordTime');
+			let timeDifference = 0;
+			setTimeout(() => {
+				gsap.to(finishStats.current, {opacity: 1, duration: 1.5});
+				if (currentRecordTime > elapsedTime) {
+					localStorage.setItem('currentRecordTime', elapsedTime);
+					timeDifference = currentRecordTime - elapsedTime;
+					const data = { time: formattedTime };
+					axios.patch(`https://circuit-rush-api.vercel.app/api/records/${userId}`, data, {
+						headers: {
+							'Content-Type': 'application/json',
+							'record-id': userId
+						}
+					}).then(() => {
+						setLeaderboardView(true);
+						setTimeout(() => {
+							finishTime.current.innerHTML = `${formattedTime}<br><span class="better-time">(-${padWithZero(Math.floor(timeDifference / 60000) % 60)}:${padWithZero(Math.floor(timeDifference / 1000) % 60)}:${padWithZero(timeDifference % 1000, 3)})</span>`;
+							finishRecord.current.innerHTML = "New record!";
+							setIsExploding(true);
+						}, 200);
+					});
+				} else {
+					timeDifference = elapsedTime - currentRecordTime;
+					if (!currentRecordTime) {
+						finishTime.current.innerHTML = formattedTime;
+						setIsExploding(true);
+					} else {
+						timeDifference = elapsedTime - currentRecordTime;
+						setLeaderboardView(true);
+						setTimeout(() => {
+							if (timeDifference == 0) {
+								finishTime.current.innerHTML = formattedTime;
+								finishRecord.current.innerHTML = "How is that possible?";
+							} else {
+								finishTime.current.innerHTML = `${formattedTime}<br><span class="worse-time">(+${padWithZero(Math.floor(timeDifference / 60000) % 60)}:${padWithZero(Math.floor(timeDifference / 1000) % 60)}:${padWithZero(timeDifference % 1000, 3)})</span>`;
+								finishRecord.current.innerHTML = "You did better once.";
+							}
+						}, 200);
+					}
+				}
+			}, 200);
+		}
+	}, [phase, formattedTime]);
+
+	useEffect(() => {
+		if (phase === "ended" && userId && userName && leaderboardView) {
+			setTimeout(() => {
+				const leaderboardList = document.querySelector('.leaderboard-list');
+    		leaderboardList.classList.add('loading');
+			}, 50)
+			axios.get('https://circuit-rush-api.vercel.app/api/get-records')
 				.then(response => {
 					setLeaderboardData(response.data);
-					setLeaderboardView(true);
+					const leaderboardList = document.querySelector('.leaderboard-list');
+					leaderboardList.classList.remove('loading');
+					setTimeout(() => {
+						const userElement = document.querySelector('.leaderboard-list-item.user');
+						if (userElement && leaderboardList) {
+							userElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+						}
+					}, 200);
 				})
 		}
-  }, [phase, userId, userName]);
+  }, [leaderboardView]);
 
 	const handleSubmit = () => {
-		const inputLength = userInput.current.value.trim().length; // Access value from ref
-		const inputValue = userInput.current.value;
-		if (inputLength > 0 && inputLength <= 12 && !filter.isProfane(inputValue)) {
-			// Store the user name in localStorage
-			// Prepare data for posting
+		const button = document.querySelector('button.submit-user');
+    button.classList.add('loading');
+		setError(null);
+		const inputValue = userInput.current.value.trim().toUpperCase();;
+		const inputPattern = /^[a-zA-Z0-9]+$/;
+		if (inputPattern.test(inputValue) && inputValue.length > 0 && inputValue.length <= 12 && !filter.isProfane(inputValue)) {
 			const data = {
 				user: inputValue,
-				time: formattedTime // Assuming you have formattedTime variable available
+				time: formattedTime
 			};
-	
-			// Make POST request to API using Axios
-			axios.post('http://localhost:3001/api/records', data, {
+			axios.post('https://circuit-rush-api.vercel.app/api/post-record', data, {
 				headers: {
 					'Content-Type': 'application/json',
 					'record-id': userId
 				}
 			})
 			.then(response => {
+				button.classList.remove('loading');
 				if (response.status === 200) {
 					localStorage.setItem('user-name', inputValue);
+					localStorage.setItem('currentRecordTime', endTime - startTime);
 					setLeaderboardView(true);
+					setTimeout(() => {
+						finishTime.current.innerHTML = formattedTime;
+						finishRecord.current.innerHTML = "Compete against others!";
+					}, 200);
 				} else {
-					// Logic to handle error response
-					setError('Failed to submit record. Please try again.');
-					console.error('Error:', response.statusText);
+					setError('Failed to submit record.');
 				}
 			})
 			.catch(error => {
-				setError('Failed to submit record. Please try again.');
-				console.error('Error:', error);
-			});
+				if (error.response && error.response.status === 409) {
+						setError('Name already in use.');
+				} else {
+						console.error('Error:', error);
+						setError('Failed to submit record.');
+				}
+				button.classList.remove('loading');
+			});			
 		} else {
-			// Handle validation errors
-			setError('Invalid input. Please enter a valid user name.');
-			console.log('Validation failed');
+			setTimeout(() => {
+				setError('Please enter a valid user name.');
+				button.classList.remove('loading');
+			}, 200)
 		}
-	};
+	};	
 	
   const clearError = () => {
-    setError(null); // Clear the error message
+    setError(null);
   };
 
 	const handlePause = () => {
@@ -288,6 +315,8 @@ useEffect(() => {
 		if (phase === 'ended') {
 			setCountdownStatus(false);
 			setFinishStatus(false);
+			setLeaderboardView(false);
+			setIsExploding(false);
 			setTimeout(() => { 
 				setCountdownStatus(true);
 			}, 2000);
@@ -437,7 +466,6 @@ useEffect(() => {
 	function filterme(value) {
     const toggleElement = document.getElementById('custom-toggle');
 		value = parseFloat(value);
-		console.log(value)
     if (value === 0) {
       toggleElement.classList.remove('tgl-max', 'tgl-med');
       toggleElement.classList.add('tgl-min');
@@ -524,28 +552,42 @@ useEffect(() => {
 								</Html>
 								: null
 							}
-							{finishStatus && !leaderboardView ? 
+							{finishStatus && !leaderboardView && !userName? 
 								<Html wrapperClass={'finish-overlay'} className='finish-stats' ref={finishStats}>
 									<>{isExploding && <ConfettiExplosion force={0.4} duration={4000} particleSize={8} particleCount={128} width={window.innerWidth > 1080 ? window.innerWidth / 2 : window.innerWidth * 0.8} colors={['#e55555', '#db3d3d', '#e55555', '#fc4c4c']} className='confetti-explosion'/>}</>
 									<div className="finish-time" ref={finishTime}></div>
-									<input className="new-user" ref={userInput} />
-              		<button type='submit' onClick={handleSubmit}>Confirm</button>
+									<input className="new-user" ref={userInput} placeholder='Insert your name'/>
+              		<button type='submit' className='submit-user' onClick={handleSubmit}>CONFIRM</button>
 									{error && (
 										<span className="error-message">{error}</span>
 									)}
 								</Html>
 								: null
 							}
-							{finishStatus && leaderboardView ? 
+							{finishStatus && leaderboardView && userName? 
 								<Html wrapperClass={'leaderboard-overlay'} className='leaderboard-stats' ref={finishStats}>
-									<div className="finish-time" ref={finishTime}></div>
-									<ul>
-										{leaderboardData.map((item, index) => (
-											<li key={index}>{item.user} - {item.time}</li>
-										))}
-									</ul>
-									<button onClick={restartButton}>RESTART</button>
-									<button onClick={quitButton}>QUIT</button>
+									<>{isExploding && <ConfettiExplosion force={0.4} duration={4000} particleSize={8} particleCount={128} width={window.innerWidth > 1080 ? window.innerWidth / 2 : window.innerWidth * 0.8} colors={['#e55555', '#db3d3d', '#e55555', '#fc4c4c']} className='confetti-explosion'/>}</>
+									<div className='leaderboard-header'>
+										<div className="finish-record" ref={finishRecord}></div>
+										<div className="finish-time" ref={finishTime}></div>
+									</div>
+									<div className='leaderboard-list-area'>
+										<div className='leaderboard-list'>
+											{leaderboardData.map((item, index) => (
+												<div className={`leaderboard-list-item ${item.user === userName ? 'user' : ''}`} key={index}>
+													<div className='leaderboard-list-item-content'>
+														<div className='position'>{index + 1}</div>
+														<div className='name'>{item.user}</div>
+														<div className='time'>{item.time}</div>
+													</div>
+												</div>
+											))}
+										</div>
+									</div>
+									<div className='leaderboard-options'>
+										<button onClick={restartButton}>RESTART</button>
+										<button onClick={quitButton}>QUIT</button>
+									</div>
 								</Html>
 								: null
 							}

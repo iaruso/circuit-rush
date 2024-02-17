@@ -22,7 +22,6 @@ export default function Checkpoints({ checkpoint, setCheckpoint, isVolumeOn }) {
 
   useEffect(() => {
     setVolumeStatus(isVolumeOn);
-    console.log(isVolumeOn);
   }, [isVolumeOn]);
 
   useEffect(() => {
@@ -61,7 +60,6 @@ export default function Checkpoints({ checkpoint, setCheckpoint, isVolumeOn }) {
 
   const handleCollide = useCallback(
     (index) => (e) => {
-      console.log("Data: " + currentCheckpoint + "/" + lap)
       const { body } = e;
       if (body.userData.name === 'vehicle' && index === currentCheckpoint && !flag) {
         if (currentCheckpoint < 2) {
