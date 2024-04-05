@@ -1,7 +1,7 @@
 # Circuit Rush
 
 ### Welcome to Circuit Rush, an adrenaline-fueled racing game created with React Three Fiber. Showcase your expert racing skills as you navigate each curve with finesse in this captivating minimalist world, setting new records with every race.
-![](https://github.com/iaruso/circuit-rush/blob/main/circuit-rush/public/static/github-cover.jpg)
+![](https://github.com/iaruso/circuit-rush/blob/main/public/static/github-cover.jpg)
 
 ### Features
 - Game controls animation (also interactive)
