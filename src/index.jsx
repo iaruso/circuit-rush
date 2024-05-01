@@ -6,7 +6,11 @@ import { gsap } from 'gsap';
 import { useDetectGPU, PerformanceMonitor, useProgress, Html } from '@react-three/drei';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
-import Filter from 'bad-words';
+import {
+	RegExpMatcher,
+	englishDataset,
+	englishRecommendedTransformers,
+} from 'obscenity';
 import ConfettiExplosion from 'react-confetti-explosion';
 import Experience from './Experience.jsx';
 import useGame from './stores/Game.jsx';
@@ -41,6 +45,7 @@ function App() {
 	const [finishStatus, setFinishStatus] = useState(false);
 	const [leaderboardData, setLeaderboardData] = useState([]);
 	const [leaderboardView, setLeaderboardView] = useState(false);
+	const [recreateUser, setRecreateUser] = useState(false);
 	const finishStats = useRef(null);
 	const finishTime = useRef(null);
 	const finishRecord = useRef(null);
@@ -54,10 +59,13 @@ function App() {
 	const resume = useGame((state) => state.resume);
 	const restart = useGame((state) => state.restart);
 
-	const userId = localStorage.getItem('user-id');
-  const userName = localStorage.getItem('user-name');
+	let userId = localStorage.getItem('user-id');
+  let userName = localStorage.getItem('user-name');
 	const userInput = useRef(null);
-  const filter = new Filter();
+	const matcher = new RegExpMatcher({
+		...englishDataset.build(),
+		...englishRecommendedTransformers,
+	});
 	const [error, setError] = useState(null);
 	
 	useEffect(() => { 
@@ -148,21 +156,34 @@ function App() {
 			setTimeout(() => {
 				gsap.to(finishStats.current, {opacity: 1, duration: 1.5});
 				if (currentRecordTime > elapsedTime) {
-					localStorage.setItem('currentRecordTime', elapsedTime);
-					timeDifference = currentRecordTime - elapsedTime;
 					const data = { time: formattedTime };
 					axios.patch(`https://circuit-rush-api.vercel.app/api/records/${userId}`, data, {
-						headers: {
-							'Content-Type': 'application/json',
-							'record-id': userId
-						}
+							headers: {
+									'Content-Type': 'application/json',
+									'record-id': userId
+							}
 					}).then(() => {
-						setLeaderboardView(true);
-						setTimeout(() => {
-							finishTime.current.innerHTML = `${formattedTime}<br><span class="better-time">(-${padWithZero(Math.floor(timeDifference / 60000) % 60)}:${padWithZero(Math.floor(timeDifference / 1000) % 60)}:${padWithZero(timeDifference % 1000, 3)})</span>`;
-							finishRecord.current.innerHTML = "New record!";
-							setIsExploding(true);
-						}, 200);
+							localStorage.setItem('currentRecordTime', elapsedTime);
+					timeDifference = currentRecordTime - elapsedTime;
+							setLeaderboardView(true);
+							setTimeout(() => {
+									finishTime.current.innerHTML = `${formattedTime}<br><span class="better-time">(-${padWithZero(Math.floor(timeDifference / 60000) % 60)}:${padWithZero(Math.floor(timeDifference / 1000) % 60)}:${padWithZero(timeDifference % 1000, 3)})</span>`;
+									finishRecord.current.innerHTML = "New record!";
+									setIsExploding(true);
+							}, 200);
+					}).catch((error) => {
+							localStorage.removeItem('user-name');
+							localStorage.removeItem('user-id');
+							localStorage.removeItem('currentRecordTime');
+							const newUserId = uuidv4().replace(/-/g, '').slice(0, 32);
+							localStorage.setItem('user-id', newUserId);
+							userId = newUserId;
+							userName = null;
+							setRecreateUser(true);
+							setTimeout(() => {
+							gsap.to(finishStats.current, {opacity: 1, duration: 1.5});
+							finishTime.current.innerHTML = formattedTime;
+							}, 200);
 					});
 				} else {
 					timeDifference = elapsedTime - currentRecordTime;
@@ -178,7 +199,7 @@ function App() {
 								finishRecord.current.innerHTML = "How is that possible?";
 							} else {
 								finishTime.current.innerHTML = `${formattedTime}<br><span class="worse-time">(+${padWithZero(Math.floor(timeDifference / 60000) % 60)}:${padWithZero(Math.floor(timeDifference / 1000) % 60)}:${padWithZero(timeDifference % 1000, 3)})</span>`;
-								finishRecord.current.innerHTML = "You did better once.";
+								finishRecord.current.innerHTML = "You did better once";
 							}
 						}, 200);
 					}
@@ -208,13 +229,17 @@ function App() {
 		}
   }, [leaderboardView]);
 
-	const handleSubmit = () => {
-		const button = document.querySelector('button.submit-user');
+	const handleSubmit = (e) => {
+		e.preventDefault();
+		const inputValue = userInput.current.value.trim().toUpperCase();
+		if (matcher.hasMatch(inputValue)) {
+			return;
+		}
+		const button = document.querySelector('input.submit-user');
     button.classList.add('loading');
 		setError(null);
-		const inputValue = userInput.current.value.trim().toUpperCase();;
 		const inputPattern = /^[a-zA-Z0-9]+$/;
-		if (inputPattern.test(inputValue) && inputValue.length > 0 && inputValue.length <= 12 && !filter.isProfane(inputValue)) {
+		if (inputPattern.test(inputValue) && inputValue.length > 0 && inputValue.length <= 12 && !matcher.hasMatch(inputValue)) {
 			const data = {
 				user: inputValue,
 				time: formattedTime
@@ -226,6 +251,7 @@ function App() {
 				}
 			})
 			.then(response => {
+				setRecreateUser(false);
 				button.classList.remove('loading');
 				if (response.status === 200) {
 					localStorage.setItem('user-name', inputValue);
@@ -554,12 +580,14 @@ function App() {
 								</Html>
 								: null
 							}
-							{finishStatus && !leaderboardView && !userName? 
+							{(finishStatus && !leaderboardView && !userName) || recreateUser ? 
 								<Html wrapperClass={'finish-overlay'} className='finish-stats' ref={finishStats}>
 									<>{isExploding && <ConfettiExplosion force={0.4} duration={4000} particleSize={8} particleCount={128} width={window.innerWidth > 1080 ? window.innerWidth / 2 : window.innerWidth * 0.8} colors={['#e55555', '#db3d3d', '#e55555', '#fc4c4c']} className='confetti-explosion'/>}</>
 									<div className="finish-time" ref={finishTime}></div>
-									<input className="new-user" ref={userInput} placeholder='Insert your name' maxLength={12} required />
-              		<button type='submit' className='submit-user' onClick={handleSubmit}>CONFIRM</button>
+									<form className="new-user-form" onSubmit={handleSubmit}>
+										<input className="new-user" ref={userInput} placeholder='Insert your name' pattern=".{3,}" required title='3 characters minimum' />
+										<input type='submit' className='submit-user' value={'CONFIRM'}/>
+									</form>
 									{error && (
 										<span className="error-message">{error}</span>
 									)}

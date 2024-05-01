@@ -389,7 +389,7 @@ p, a, div {
 	color: #e55555;
 }
 
-.pause-menu-overlay button, .finish-stats button, .leaderboard-stats button {
+.pause-menu-overlay button, .finish-stats button, .leaderboard-stats button, .submit-user {
 	background-color: #ffffff80;
 	border: none;
 	border-radius: 0.5rem;
@@ -412,7 +412,13 @@ p, a, div {
 	flex: 1;
 }
 
-.finish-stats button.loading {
+.new-user-form {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.finish-stats button.loading, .submit-user.loading {
 	animation-duration: 2s;
 	animation-fill-mode: forwards;
 	animation-iteration-count: infinite;
@@ -421,6 +427,10 @@ p, a, div {
 	background: #ffffff80;
 	background: linear-gradient(to right, #fafafa 8%, #f4f4f4 38%, #fafafa 54%);
 	background-size: 1000px 640px;
+}
+
+.submit-user {
+	padding-top: 0.25rem;
 }
 
 .finish-time {
@@ -451,7 +461,7 @@ p, a, div {
   top: 50%;
 }
 
-.pause-menu-overlay button:hover, .pause-menu-overlay button:focus, .finish-stats button:hover, .finish-stats button:focus, .leaderboard-stats button:hover, .leaderboard-stats button:focus {
+.pause-menu-overlay button:hover, .pause-menu-overlay button:focus, .finish-stats button:hover, .finish-stats button:focus, .leaderboard-stats button:hover, .leaderboard-stats button:focus, .submit-user:hover, .submit-user:focus {
 	background-color: #ffffffb0;
 	color: #404040;
 }
