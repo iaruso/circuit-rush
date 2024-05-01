@@ -13,7 +13,7 @@
 
 > __Note__  
 > Mobile devices currently not supported       
-> Chromium based browsers have better performance
+> Firefox excels in performance, while Chromium based browsers perform decently with GPU acceleration enabled
 
 > __Warning__  
 > Hardware acceleration must be activated in your browser
