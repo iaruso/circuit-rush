@@ -39,7 +39,7 @@ const MainMenu = ({ isVolumeOn }) => {
 	}, [loadingStatus]);
 
 	useEffect(() => {
-		GPUTier.fps == undefined && GPUTier.tier < 2 && !GPUTier.isMobile ? setAccelerationEnabled(false) : setAccelerationEnabled(true);
+		GPUTier.fps == undefined && GPUTier.tier < 2 && GPUTier.isMobile ? setAccelerationEnabled(false) : setAccelerationEnabled(true);
 	}, [accelerationEnabled]);
 
   useEffect(() => {
