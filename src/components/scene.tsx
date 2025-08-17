@@ -8,60 +8,91 @@ import {
   OrbitControls,
   Environment,
   Outlines,
-  Stats
-  //useGLTF
-} from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+  Stats,
+  KeyboardControls
+} from '@react-three/drei'
+import { Physics, type PlaneProps, usePlane } from '@react-three/cannon'
+import { Canvas } from '@react-three/fiber'
 import { useControls } from 'leva'
+import Vehicle from './vehicle'
+
+const keyboardMap = [
+  { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
+  { name: 'backward', keys: ['ArrowDown', 'KeyS'] },
+  { name: 'leftward', keys: ['ArrowLeft', 'KeyA'] },
+  { name: 'rightward', keys: ['ArrowRight', 'KeyD'] },
+  { name: 'brake', keys: ['Space'] },
+  { name: 'reset', keys: ['KeyR'] },
+]
+
+function Plane(props: PlaneProps) {
+  const [ref] = usePlane(() => ({
+    type: 'Static',
+    rotation: [-Math.PI / 2, 0, 0],
+    restitution: 0.9,
+    friction: 0.1,
+    ...props,
+  }))
+
+  return (
+    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
+      <planeGeometry args={[200, 200]} />
+    </mesh>
+  )
+}
 
 export default function Scene() {
   const { gridSize, ...gridConfig } = useControls({
     gridSize: [10, 10],
-    cellSize: { value: 0.5, min: 0, max: 10, step: 0.1 },
+    cellSize: { value: 1, min: 0, max: 10, step: 0.1 },
     cellThickness: { value: 1, min: 0, max: 5, step: 0.1 },
     cellColor: '#E5EAF6',
-    sectionSize: { value: 2.5, min: 0, max: 10, step: 0.1 },
+    sectionSize: { value: 5, min: 0, max: 10, step: 0.1 },
     sectionThickness: { value: 1.5, min: 0, max: 5, step: 0.1 },
     sectionColor: '#E5EAF6',
     fadeDistance: { value: 25, min: 0, max: 100, step: 1 },
     fadeStrength: { value: 1, min: 0, max: 1, step: 0.1 },
     followCamera: false,
-    infiniteGrid: true
+    infiniteGrid: true,
   })
   return (
-      <Canvas
-        shadows={'basic'}
-      >
+    <KeyboardControls map={keyboardMap}>
+      <Canvas shadows={'basic'}>
         <Stats showPanel={0} className='stats' />
         <color attach='background' args={['#405CB0']} />
         <group position={[0, -0.5, 0]}>
-        <Center top position={[-2, 0, 2]}>
-          <mesh castShadow>
-            <sphereGeometry args={[0.5, 64, 64]} />
-            <meshStandardMaterial color='#98ADDD' />
-            <Outlines thickness={3} color='#E5EAF6'/>
-          </mesh>
-        </Center>
-        <Center top position={[2.5, 0, 1]}>
-          <mesh castShadow rotation={[0, Math.PI / 4, 0]}>
-            <boxGeometry args={[0.7, 0.7, 0.7]} />
-            <meshStandardMaterial color='#98ADDD' />
-            <Outlines thickness={3} color='#E5EAF6' />
-          </mesh>
-        </Center>
-        <Grid position={[0, -0.01, 0]} args={gridSize} {...gridConfig} />
-        <Shadows />
-      </group>
-      <OrbitControls makeDefault />
-      <Environment preset='city' />
+          <Center top position={[-2, 0, 2]}>
+            <mesh castShadow>
+              <sphereGeometry args={[0.5, 64, 64]} />
+              <meshStandardMaterial color='#98ADDD' />
+              <Outlines thickness={3} color='#E5EAF6' />
+            </mesh>
+          </Center>
+          <Center top position={[2.5, 0, 1]}>
+            <mesh castShadow rotation={[0, Math.PI / 4, 0]}>
+              <boxGeometry args={[0.7, 0.7, 0.7]} />
+              <meshStandardMaterial color='#98ADDD' />
+              <Outlines thickness={3} color='#E5EAF6' />
+            </mesh>
+          </Center>
+          <Grid position={[0, -0.01, 0]} args={gridSize} {...gridConfig} />
+          <Shadows />
+          <Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
+            <Vehicle />
+            <Plane />
+          </Physics>
+        </group>
+        <OrbitControls makeDefault />
+        <Environment preset='city' />
       </Canvas>
-  );
+    </KeyboardControls>
+  )
 }
 
 const Shadows = memo(() => (
   <AccumulativeShadows temporal frames={60} color='#E5EAF6' colorBlend={0.5} alphaTest={0.9} scale={20}>
     <RandomizedLight amount={8} radius={4} position={[5, 5, -10]} />
   </AccumulativeShadows>
-));
+))
 
-Shadows.displayName = 'Shadows';
+Shadows.displayName = 'Shadows'
