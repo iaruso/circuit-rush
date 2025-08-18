@@ -9,11 +9,11 @@ import {
   Environment,
   Outlines,
   Stats,
-  KeyboardControls
+  KeyboardControls,
 } from '@react-three/drei'
 import { Physics, type PlaneProps, usePlane } from '@react-three/cannon'
 import { Canvas } from '@react-three/fiber'
-import { useControls } from 'leva'
+import { useControls } from '@/context/use-controls'
 import Vehicle from './vehicle'
 
 const keyboardMap = [
@@ -29,8 +29,8 @@ function Plane(props: PlaneProps) {
   const [ref] = usePlane(() => ({
     type: 'Static',
     rotation: [-Math.PI / 2, 0, 0],
-    restitution: 0.9,
-    friction: 0.1,
+    restitution: 0.02,
+    friction: 1.0,
     ...props,
   }))
 
@@ -42,19 +42,8 @@ function Plane(props: PlaneProps) {
 }
 
 export default function Scene() {
-  const { gridSize, ...gridConfig } = useControls({
-    gridSize: [10, 10],
-    cellSize: { value: 1, min: 0, max: 10, step: 0.1 },
-    cellThickness: { value: 1, min: 0, max: 5, step: 0.1 },
-    cellColor: '#E5EAF6',
-    sectionSize: { value: 5, min: 0, max: 10, step: 0.1 },
-    sectionThickness: { value: 1.5, min: 0, max: 5, step: 0.1 },
-    sectionColor: '#E5EAF6',
-    fadeDistance: { value: 25, min: 0, max: 100, step: 1 },
-    fadeStrength: { value: 1, min: 0, max: 1, step: 0.1 },
-    followCamera: false,
-    infiniteGrid: true,
-  })
+  const { controls } = useControls()
+
   return (
     <KeyboardControls map={keyboardMap}>
       <Canvas shadows={'basic'}>
@@ -75,7 +64,7 @@ export default function Scene() {
               <Outlines thickness={3} color='#E5EAF6' />
             </mesh>
           </Center>
-          <Grid position={[0, -0.01, 0]} args={gridSize} {...gridConfig} />
+          <Grid position={[0, -0.01, 0]} args={controls.scene.grid.size} {...controls.scene.grid} />
           <Shadows />
           <Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
             <Vehicle />

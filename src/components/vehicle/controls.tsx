@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useRef } from 'react'
 import { useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 
@@ -20,7 +20,7 @@ type VehicleControlsProps = {
   vehicleApi: VehicleApi
   chassisApi: ChassisApi
   speed: number
-  gear: number
+  gear: number 
   forcePower: number
   brakePower: number
   setReverseFlag: (flag: boolean) => void
@@ -36,9 +36,11 @@ export const useVehicleControls = ({
   setReverseFlag,
 }: VehicleControlsProps) => {
   const [, getKeys] = useKeyboardControls()
-  const [isBrakePressed, setIsBrakePressed] = useState(false)
 
-  let rearForce = 0
+  const brakeAmtRef = useRef(0)
+  const steerRef = useRef(0)
+
+  const prevSpeedRef = useRef(speed)
 
   useFrame(() => {
     if (!vehicleApi || !chassisApi) return
@@ -50,47 +52,78 @@ export const useVehicleControls = ({
 
     if (forward) {
       if (gear === 0) setReverseFlag(false)
-      vehicleApi.applyEngineForce(-forcePower, 0)
-      vehicleApi.applyEngineForce(-forcePower, 1)
+      const f = -forcePower
+      vehicleApi.applyEngineForce(f, 0)
+      vehicleApi.applyEngineForce(f, 1)
     } else if (backward) {
-      rearForce = speed > 20 ? forcePower / 10 : forcePower / 2
+      const scale = speed > 25 ? 0.15 : speed > 10 ? 0.35 : 0.6
+      const f = forcePower * scale
       if (gear === 0) setReverseFlag(true)
-      vehicleApi.applyEngineForce(rearForce, 0)
-      vehicleApi.applyEngineForce(rearForce, 1)
+      vehicleApi.applyEngineForce(f, 0)
+      vehicleApi.applyEngineForce(f, 1)
     } else {
       vehicleApi.applyEngineForce(0, 0)
       vehicleApi.applyEngineForce(0, 1)
     }
+    const targetBrake = brake ? 1 : 0
 
-    if (brake && !isBrakePressed) {
-      setIsBrakePressed(true)
-      vehicleApi.setBrake(brakePower, 0)
-      vehicleApi.setBrake(brakePower, 1)
-    } else if (!brake && isBrakePressed) {
-      setIsBrakePressed(false)
-      vehicleApi.setBrake(0, 0)
-      vehicleApi.setBrake(0, 1)
-    }
+    // ramp with speed: less aggressive at low speed, stronger at high speed
+    // 0.35 at ~30 km/h -> 1.00 at 160+ km/h
+    const speedK = Math.min(speed / 160, 1)
+    const speedScale = 0.35 + 0.65 * speedK
 
-    if (leftward) {
-      vehicleApi.setSteeringValue(0.4, 2)
-      vehicleApi.setSteeringValue(0.4, 3)
-    } else if (rightward) {
-      vehicleApi.setSteeringValue(-0.4, 2)
-      vehicleApi.setSteeringValue(-0.4, 3)
-    } else {
-      for (let i = 0; i < 4; i++) {
-        vehicleApi.setSteeringValue(0, i)
-      }
-    }
+    // smoothing (simple lerp)
+    brakeAmtRef.current += (targetBrake - brakeAmtRef.current) * 0.2
+
+    // estimate a deceleration (km/h per frame) to moderate the front if it's "diving"
+    const decel = Math.max(prevSpeedRef.current - speed, 0)
+    prevSpeedRef.current = speed
+
+    // anti-dive: when the instant deceleration is large, slightly reduce the front
+    // (0..1 -> 0 means no cut; 1 means maximum cut defined below)
+    const diveFactor = Math.min(decel / 12, 1) // adjust 12 according to your timestep and "feel"
+    const frontDiveCut = 0.25 * diveFactor     // up to -25% front force reduction on strong deceleration
+
+    // base bias (front/rear) + anti-dive correction
+    const baseFrontBias = 0.58
+    const baseRearBias = 0.42
+    const frontBias = Math.max(0, baseFrontBias - frontDiveCut)
+    const rearBias = Math.max(0, baseRearBias + frontDiveCut)
+
+    // final force per wheel (average per wheel) — Vehicle already limits by grip when calculating brakePower
+    const frontPerWheel = Math.abs(brakePower) * speedScale * frontBias
+    const rearPerWheel  = Math.abs(brakePower) * speedScale * rearBias
+
+    const frontBrake = frontPerWheel * brakeAmtRef.current
+    const rearBrake  = rearPerWheel  * brakeAmtRef.current
+
+    // apply continuously per frame (all wheels)
+    // rear (0,1)
+    vehicleApi.setBrake(rearBrake, 0)
+    vehicleApi.setBrake(rearBrake, 1)
+    // front (2,3)
+    vehicleApi.setBrake(frontBrake, 2)
+    vehicleApi.setBrake(frontBrake, 3)
+
+    const steerTarget = leftward ? 0.40 : rightward ? -0.40 : 0
+    steerRef.current += (steerTarget - steerRef.current) * 0.25
+    vehicleApi.setSteeringValue(steerRef.current, 2)
+    vehicleApi.setSteeringValue(steerRef.current, 3)
 
     if (reset) {
       chassisApi.position.set(0, 0.7, 0)
       chassisApi.velocity.set(0, 0, 0)
       chassisApi.angularVelocity.set(0, 0, 0)
       chassisApi.rotation.set(0, 0, 0)
+      for (let i = 0; i < 4; i++) {
+        vehicleApi.setBrake(0, i)
+        vehicleApi.applyEngineForce(0, i)
+        vehicleApi.setSteeringValue(0, i)
+      }
+      brakeAmtRef.current = 0
+      steerRef.current = 0
+      prevSpeedRef.current = 0
     }
   })
-
   return
 }

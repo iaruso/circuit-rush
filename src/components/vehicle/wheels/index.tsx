@@ -1,6 +1,6 @@
 'use client'
 import { useCompoundBody } from '@react-three/cannon'
-import { type MutableRefObject, useRef } from 'react'
+import { type RefObject, useRef } from 'react'
 import type { Group } from 'three'
 
 export interface WheelInfo {
@@ -22,7 +22,7 @@ export interface WheelInfo {
   color?: string
 }
 
-export type WheelsReturn = [MutableRefObject<Group | null>[], WheelInfo[]]
+export type WheelsReturn = [RefObject<Group | null>[], WheelInfo[]]
 
 export const useWheels = (front: number, radius: number): WheelsReturn => {
   const wheels = [
@@ -36,40 +36,51 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
     radius,
     directionLocal: [0, -1, 0] as [number, number, number],
     axleLocal: [-1, 0, 0] as [number, number, number],
-    suspensionStiffness: 50,
-    suspensionRestLength: 0.5,
-    frictionSlip: 5,
-    dampingRelaxation: 2.5,
-    dampingCompression: 10,
+    // Slightly stiffer suspension to reduce front-end dive
+    suspensionStiffness: 55,
+    suspensionRestLength: 0.42,
+    // Longitudinal tire grip on raycast (dry asphalt)
+    frictionSlip: 9.0,
+    // Damping
+    dampingRelaxation: 6,
+    dampingCompression: 4,
     maxSuspensionForce: 200000,
-    rollInfluence: 0.01,
+    // Less body roll
+    rollInfluence: 0.05,
     maxSuspensionTravel: 0.25,
-    customSlidingRotationalSpeed: -100000,
+    // IMPORTANT: realistic value, helps 'free rolling' and prevents infinite drift
+    customSlidingRotationalSpeed: -30,
     useCustomSlidingRotationalSpeed: true,
   }
 
   const wheelInfos: WheelInfo[] = [
+    // 0 — REAR LEFT
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [-0.7, 0.05, -front + 0.5],
       isFrontWheel: false,
-      color: 'red'
+      color: 'red',
     },
+    // 1 — REAR RIGHT
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [0.7, 0.05, -front + 0.5],
       isFrontWheel: false,
-      color: 'red'
+      color: 'red',
     },
+    // 2 — FRONT LEFT (slight adjustment: a bit less grip than rear)
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [-0.7, 0.05, front - 0.5],
       isFrontWheel: true,
+      frictionSlip: 8.5,
     },
+    // 3 — FRONT RIGHT
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [0.7, 0.05, front - 0.5],
       isFrontWheel: true,
+      frictionSlip: 8.5,
     },
   ]
 
