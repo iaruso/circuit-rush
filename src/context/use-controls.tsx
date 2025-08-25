@@ -72,7 +72,7 @@ const defaultValues: ControlsType = {
         wheels: {
           wheelSize: [0.33, 0.4], // radius and width
           front: {
-            force: 3000,
+            force: 2500,
           },
           back: {
             force: 2000,
@@ -177,7 +177,7 @@ export const ControlsProvider: FC<{ children: ReactNode }> = ({ children }) => {
             step: [0.1, 0.1, 0.1],
           },
           mass: {
-            value: getStoredValue('mass', 1000),
+            value: getStoredValue('mass', 800),
             min: 500,
             max: 2000,
             step: 1,

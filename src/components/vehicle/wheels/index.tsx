@@ -36,20 +36,15 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
     radius,
     directionLocal: [0, -1, 0] as [number, number, number],
     axleLocal: [-1, 0, 0] as [number, number, number],
-    // Slightly stiffer suspension to reduce front-end dive
-    suspensionStiffness: 55,
-    suspensionRestLength: 0.42,
-    // Longitudinal tire grip on raycast (dry asphalt)
+    suspensionStiffness: 60, // 40 and 100
+    suspensionRestLength: 0.3, // 0.3 to 0.5
     frictionSlip: 9.0,
-    // Damping
-    dampingRelaxation: 6,
+    dampingRelaxation: 8,
     dampingCompression: 4,
     maxSuspensionForce: 200000,
-    // Less body roll
-    rollInfluence: 0.05,
-    maxSuspensionTravel: 0.25,
-    // IMPORTANT: realistic value, helps 'free rolling' and prevents infinite drift
-    customSlidingRotationalSpeed: -30,
+    rollInfluence: 0.08, // 0.05 to 0.15
+    maxSuspensionTravel: 0.3,
+    customSlidingRotationalSpeed: -90,
     useCustomSlidingRotationalSpeed: true,
   }
 
@@ -86,7 +81,7 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
 
   const propsFunc = () => ({
     collisionFilterGroup: 0,
-    mass: 20,
+    mass: 10,
     shapes: [
       {
         args: [wheelInfo.radius, wheelInfo.radius, 0.3, 32] as [number, number, number, number],
@@ -99,7 +94,7 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
 
   const propsFuncFront = () => ({
     collisionFilterGroup: 0,
-    mass: 50,
+    mass: 8,
     shapes: [
       {
         args: [wheelInfo.radius, wheelInfo.radius, 0.3, 32] as [number, number, number, number],

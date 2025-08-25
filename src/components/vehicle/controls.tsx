@@ -97,18 +97,20 @@ export const useVehicleControls = ({
     const frontBrake = frontPerWheel * brakeAmtRef.current
     const rearBrake  = rearPerWheel  * brakeAmtRef.current
 
+    // console.log(forcePower) // This needs rework, use setBrake as friction
     // apply continuously per frame (all wheels)
     // rear (0,1)
-    vehicleApi.setBrake(rearBrake, 0)
-    vehicleApi.setBrake(rearBrake, 1)
+    vehicleApi.setBrake(forcePower / 1000 * 5, 0)
+    vehicleApi.setBrake(forcePower / 1000 * 5, 1)
     // front (2,3)
-    vehicleApi.setBrake(frontBrake, 2)
-    vehicleApi.setBrake(frontBrake, 3)
+    vehicleApi.setBrake(frontBrake * 0.15, 2)
+    vehicleApi.setBrake(frontBrake * 0.15, 3)
 
     const steerTarget = leftward ? 0.40 : rightward ? -0.40 : 0
     steerRef.current += (steerTarget - steerRef.current) * 0.25
-    vehicleApi.setSteeringValue(steerRef.current, 2)
-    vehicleApi.setSteeringValue(steerRef.current, 3)
+    console.log(steerRef.current.toFixed(2))
+    vehicleApi.setSteeringValue(steerRef.current < 0 ? steerRef.current * 0.33 : steerRef.current, 2) // left
+    vehicleApi.setSteeringValue(steerRef.current > 0 ? steerRef.current * 0.33 : steerRef.current, 3) // right
 
     if (reset) {
       chassisApi.position.set(0, 0.7, 0)
