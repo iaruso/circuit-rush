@@ -42,6 +42,7 @@ type ControlsType = {
         gearRatio5: number
         gearRatio6: number
         gearRatio7: number
+        gearRatio8: number
         finalDrive: number
       }
     }
@@ -67,7 +68,7 @@ const defaultValues: ControlsType = {
     },
     vehicle: {
       body: {
-        vehicleSize: [4, 0.5, 2], // length, height, width
+        vehicleSize: [3, 0.5, 1.5], // length, height, width
         mass: 1000,
         wheels: {
           wheelSize: [0.33, 0.4], // radius and width
@@ -80,14 +81,16 @@ const defaultValues: ControlsType = {
         },
       },
       gears: {
-        gearRatio1: 3.2,
-        gearRatio2: 2.4,
-        gearRatio3: 1.9,
-        gearRatio4: 1.6,
-        gearRatio5: 1.3,
-        gearRatio6: 1.05,
-        gearRatio7: 0.85,
-        finalDrive: 3.5,
+        // F1 8-speed gear ratios for realistic speed ranges
+        gearRatio1: 6.20,   // 0-100 km/h (2x faster, monstrous)
+        gearRatio2: 2.41,   // 100-135 km/h
+        gearRatio3: 1.90,   // 135-170 km/h
+        gearRatio4: 1.52,   // 170-210 km/h
+        gearRatio5: 1.27,   // 210-250 km/h
+        gearRatio6: 1.05,   // 250-290 km/h
+        gearRatio7: 0.88,   // 290-330 km/h
+        gearRatio8: 0.78,   // 330+ km/h
+        finalDrive: 3.9,
       },
     },
   },
@@ -177,7 +180,7 @@ export const ControlsProvider: FC<{ children: ReactNode }> = ({ children }) => {
             step: [0.1, 0.1, 0.1],
           },
           mass: {
-            value: getStoredValue('mass', 800),
+            value: getStoredValue('mass', 600), // reduced from 800 for lighter, faster car
             min: 500,
             max: 2000,
             step: 1,
@@ -205,31 +208,31 @@ export const ControlsProvider: FC<{ children: ReactNode }> = ({ children }) => {
         }),
         Gears: folder({
           gearRatio1: {
-            value: getStoredValue('gearRatio1', 3.2),
+            value: getStoredValue('gearRatio1', 3.10),
             min: 2.0,
             max: 20.0,
             step: 0.1,
           },
           gearRatio2: {
-            value: getStoredValue('gearRatio2', 2.4),
+            value: getStoredValue('gearRatio2', 2.41),
             min: 1.5,
             max: 3.0,
             step: 0.1,
           },
           gearRatio3: {
-            value: getStoredValue('gearRatio3', 1.9),
+            value: getStoredValue('gearRatio3', 1.90),
             min: 1.2,
             max: 2.5,
             step: 0.1,
           },
           gearRatio4: {
-            value: getStoredValue('gearRatio4', 1.6),
+            value: getStoredValue('gearRatio4', 1.52),
             min: 1.0,
             max: 2.0,
             step: 0.1,
           },
           gearRatio5: {
-            value: getStoredValue('gearRatio5', 1.3),
+            value: getStoredValue('gearRatio5', 1.27),
             min: 0.8,
             max: 1.8,
             step: 0.1,
@@ -241,13 +244,19 @@ export const ControlsProvider: FC<{ children: ReactNode }> = ({ children }) => {
             step: 0.1,
           },
           gearRatio7: {
-            value: getStoredValue('gearRatio7', 0.85),
+            value: getStoredValue('gearRatio7', 0.88),
             min: 0.5,
             max: 1.2,
             step: 0.1,
           },
+          gearRatio8: {
+            value: getStoredValue('gearRatio8', 0.78),
+            min: 0.4,
+            max: 1.0,
+            step: 0.1,
+          },
           finalDrive: {
-            value: getStoredValue('finalDrive', 3.5),
+            value: getStoredValue('finalDrive', 3.9),
             min: 2.0,
             max: 5.0,
             step: 0.1,
@@ -303,6 +312,7 @@ export const ControlsProvider: FC<{ children: ReactNode }> = ({ children }) => {
           gearRatio5: controls.gearRatio5,
           gearRatio6: controls.gearRatio6,
           gearRatio7: controls.gearRatio7,
+          gearRatio8: controls.gearRatio8,
           finalDrive: controls.finalDrive,
         },
       },

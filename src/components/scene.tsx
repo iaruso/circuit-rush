@@ -66,7 +66,19 @@ export default function Scene() {
           </Center>
           <Grid position={[0, -0.01, 0]} args={controls.scene.grid.size} {...controls.scene.grid} />
           <Shadows />
-          <Physics gravity={[0, -9.81, 0]} broadphase={'SAP'} allowSleep={true}>
+          <Physics
+            gravity={[0, -9.81, 0]}
+            broadphase={'SAP'}
+            allowSleep={true}
+            iterations={12}
+            tolerance={0.001}
+            defaultContactMaterial={{
+              friction: 0.001,
+              restitution: 0,
+              contactEquationStiffness: 1e8,
+              contactEquationRelaxation: 3,
+            }}
+          >
             <Vehicle />
             <Plane />
           </Physics>

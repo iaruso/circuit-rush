@@ -24,6 +24,9 @@ type VehicleControlsProps = {
   forcePower: number
   brakePower: number
   setReverseFlag: (flag: boolean) => void
+  setThrottle?: (t: number) => void
+  setBrakePressed?: (b: boolean) => void
+  setSteerAngle?: (a: number) => void
 }
 
 export const useVehicleControls = ({
@@ -34,6 +37,9 @@ export const useVehicleControls = ({
   forcePower,
   brakePower,
   setReverseFlag,
+  setThrottle,
+  setBrakePressed,
+  setSteerAngle,
 }: VehicleControlsProps) => {
   const [, getKeys] = useKeyboardControls()
 
@@ -50,6 +56,19 @@ export const useVehicleControls = ({
 
     const { forward, backward, leftward, rightward, brake, reset } = keys
 
+    // --- Report throttle, brake, and steering for DRS logic ---
+    if (setThrottle) setThrottle(forward ? 1 : 0) // digital throttle, 1 if pressed
+    if (setBrakePressed) setBrakePressed(!!brake)
+    if (setSteerAngle) {
+      // Base steering angle in radians
+      let baseAngle = leftward ? 0.48 : rightward ? -0.48 : 0 // 20% more than 0.40
+      // Speed-sensitive steering multiplier (100–300 km/h: 1.0x to 1.2x)
+      const speedClamped = Math.max(100, Math.min(speed, 300))
+      const speedMultiplier = 1.0 + ((speedClamped - 100) / 200) * 0.2
+      baseAngle *= speedMultiplier
+      setSteerAngle(baseAngle)
+    }
+
     if (forward) {
       if (gear === 0) setReverseFlag(false)
       const f = -forcePower
@@ -62,8 +81,12 @@ export const useVehicleControls = ({
       vehicleApi.applyEngineForce(f, 0)
       vehicleApi.applyEngineForce(f, 1)
     } else {
+      // Stronger auto-brake when not accelerating or reversing
       vehicleApi.applyEngineForce(0, 0)
       vehicleApi.applyEngineForce(0, 1)
+      // Apply extra brake force to both rear wheels
+      vehicleApi.setBrake(Math.abs(brakePower), 0)
+      vehicleApi.setBrake(Math.abs(brakePower), 1)
     }
     const targetBrake = brake ? 1 : 0
 
@@ -90,27 +113,56 @@ export const useVehicleControls = ({
     const frontBias = Math.max(0, baseFrontBias - frontDiveCut)
     const rearBias = Math.max(0, baseRearBias + frontDiveCut)
 
-    // final force per wheel (average per wheel) — Vehicle already limits by grip when calculating brakePower
-    const frontPerWheel = Math.abs(brakePower) * speedScale * frontBias
-    const rearPerWheel  = Math.abs(brakePower) * speedScale * rearBias
+    // --- Brake force scales from 10× to 100× engine force ---
+    const maxEngineForce = Math.abs(forcePower)
+    // Braking force scales up with speed: 10× at low speed, 100× at high speed
+    const speedFactor = Math.min(100.0, 10.0 + (speed / 3))
+    let maxBrakePerWheel = maxEngineForce * speedFactor
+    // Cap at 100× engine force
+    maxBrakePerWheel = Math.min(maxBrakePerWheel, maxEngineForce * 100.0)
+    // Minimum is 10× engine force
+    maxBrakePerWheel = Math.max(maxBrakePerWheel, maxEngineForce * 10.0)
+    const brakeForce = Math.min(Math.abs(brakePower), maxBrakePerWheel) * brakeAmtRef.current
+    vehicleApi.setBrake(brakeForce, 0)
+    vehicleApi.setBrake(brakeForce, 1)
 
-    const frontBrake = frontPerWheel * brakeAmtRef.current
-    const rearBrake  = rearPerWheel  * brakeAmtRef.current
+    // --- Downforce (F1 style) ---
+    // Downforce increases with speed: F = k * v^2
+    // k is a tunable constant (try 0.04 for F1 feel, adjust as needed)
 
-    // console.log(forcePower) // This needs rework, use setBrake as friction
-    // apply continuously per frame (all wheels)
-    // rear (0,1)
-    vehicleApi.setBrake(forcePower / 1000 * 5, 0)
-    vehicleApi.setBrake(forcePower / 1000 * 5, 1)
-    // front (2,3)
-    vehicleApi.setBrake(frontBrake * 0.15, 2)
-    vehicleApi.setBrake(frontBrake * 0.15, 3)
+    // Ackermann + speed-sensitive steering
+    // 1. Inputs and Speed Sensitivity
+    const maxBaseSteer = 0.40;
+    const steerInput = leftward ? 1 : rightward ? -1 : 0;
 
-    const steerTarget = leftward ? 0.40 : rightward ? -0.40 : 0
-    steerRef.current += (steerTarget - steerRef.current) * 0.25
-    console.log(steerRef.current.toFixed(2))
-    vehicleApi.setSteeringValue(steerRef.current < 0 ? steerRef.current * 0.33 : steerRef.current, 2) // left
-    vehicleApi.setSteeringValue(steerRef.current > 0 ? steerRef.current * 0.33 : steerRef.current, 3) // right
+    // Speed-sensitive multiplier (1.0x at 100km/h to 1.2x at 300km/h)
+    const speedClamped = Math.max(100, Math.min(speed, 300));
+    const speedMultiplier = 1.0 + ((speedClamped - 100) / 200) * 0.2;
+
+    // Calculate the base target angle
+    const targetAngle = steerInput * maxBaseSteer * speedMultiplier;
+
+    // Smooth the steering transition (lerp)
+    steerRef.current += (targetAngle - steerRef.current) * 0.25;
+
+    // 2. Aggressive Ackermann Logic
+    // To see the wheel gap like in your drawing, use 1.4 for Inner and 0.6 for Outer
+    let leftSteer = 0;
+    let rightSteer = 0;
+
+    if (steerRef.current > 0) { 
+      // TURNING LEFT: Left wheel is INNER (sharper), Right is OUTER (shallower)
+      leftSteer = steerRef.current * 1.40; 
+      rightSteer = steerRef.current * 0.60;
+    } else if (steerRef.current < 0) { 
+      // TURNING RIGHT: Right wheel is INNER (sharper), Left is OUTER (shallower)
+      leftSteer = steerRef.current * 0.60;
+      rightSteer = steerRef.current * 1.40;
+    }
+
+    // 3. Apply to Vehicle
+    vehicleApi.setSteeringValue(leftSteer, 2);  // front-left
+    vehicleApi.setSteeringValue(rightSteer, 3); // front-right
 
     if (reset) {
       chassisApi.position.set(0, 0.7, 0)

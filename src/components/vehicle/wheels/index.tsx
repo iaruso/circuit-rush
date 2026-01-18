@@ -38,7 +38,7 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
     axleLocal: [-1, 0, 0] as [number, number, number],
     suspensionStiffness: 60, // 40 and 100
     suspensionRestLength: 0.3, // 0.3 to 0.5
-    frictionSlip: 9.0,
+    frictionSlip: 6.0, // Lower for less friction
     dampingRelaxation: 8,
     dampingCompression: 4,
     maxSuspensionForce: 200000,
@@ -55,6 +55,7 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
       chassisConnectionPointLocal: [-0.7, 0.05, -front + 0.5],
       isFrontWheel: false,
       color: 'red',
+      frictionSlip: 7.5, // Increased rear friction for stability
     },
     // 1 — REAR RIGHT
     {
@@ -62,20 +63,21 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
       chassisConnectionPointLocal: [0.7, 0.05, -front + 0.5],
       isFrontWheel: false,
       color: 'red',
+      frictionSlip: 7.5, // Increased rear friction for stability
     },
-    // 2 — FRONT LEFT (slight adjustment: a bit less grip than rear)
+    // 2 — FRONT LEFT (same frictionSlip as rear)
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [-0.7, 0.05, front - 0.5],
       isFrontWheel: true,
-      frictionSlip: 8.5,
+      frictionSlip: 6.0,
     },
     // 3 — FRONT RIGHT
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [0.7, 0.05, front - 0.5],
       isFrontWheel: true,
-      frictionSlip: 8.5,
+      frictionSlip: 6.0,
     },
   ]
 
