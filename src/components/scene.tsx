@@ -5,7 +5,6 @@ import {
   Center,
   AccumulativeShadows,
   RandomizedLight,
-  OrbitControls,
   Environment,
   Outlines,
   Stats,
@@ -23,6 +22,7 @@ const keyboardMap = [
   { name: 'rightward', keys: ['ArrowRight', 'KeyD'] },
   { name: 'brake', keys: ['Space'] },
   { name: 'reset', keys: ['KeyR'] },
+  { name: 'cameraToggle', keys: ['KeyC'] },
 ]
 
 function Plane(props: PlaneProps) {
@@ -83,7 +83,6 @@ export default function Scene() {
             <Plane />
           </Physics>
         </group>
-        <OrbitControls makeDefault />
         <Environment preset='city' />
       </Canvas>
     </KeyboardControls>

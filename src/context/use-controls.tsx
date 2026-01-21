@@ -1,7 +1,42 @@
 'use client'
-import { FC, ReactNode} from 'react'
-import { createContext, useContext, useEffect } from 'react'
+import { FC, ReactNode, createContext, useContext } from 'react'
 import { folder, useControls as useLevaControls } from 'leva'
+
+// Flat default values for easy access
+const defaults = {
+  // Scene - Grid
+  gridSize: [10, 10] as [number, number],
+  cellSize: 1,
+  cellThickness: 1,
+  cellColor: '#E5EAF6',
+  sectionSize: 5,
+  sectionThickness: 1.5,
+  sectionColor: '#E5EAF6',
+  fadeDistance: 25,
+  fadeStrength: 1,
+  followCamera: false,
+  infiniteGrid: true,
+
+  // Vehicle - Body
+  vehicleSize: [4, 0.5, 2] as [number, number, number],
+  mass: 800,
+
+  // Vehicle - Wheels
+  wheelSize: [0.33, 0.4] as [number, number],
+  frontForce: 4000,
+  backForce: 3000,
+
+  // Vehicle - Gears
+  gearRatio1: 6.20,
+  gearRatio2: 2,
+  gearRatio3: 1.90,
+  gearRatio4: 1.52,
+  gearRatio5: 1.27,
+  gearRatio6: 1.05,
+  gearRatio7: 0.88,
+  gearRatio8: 0.78,
+  finalDrive: 3.9,
+}
 
 type ControlsType = {
   controls: {
@@ -22,16 +57,12 @@ type ControlsType = {
     }
     vehicle: {
       body: {
-        vehicleSize: [number, number, number] // length, height, width
+        vehicleSize: [number, number, number]
         mass: number
         wheels: {
-          wheelSize: [number, number] // radius and width
-          front: {
-            force: number
-          }
-          back: {
-            force: number
-          }
+          wheelSize: [number, number]
+          front: { force: number }
+          back: { force: number }
         }
       }
       gears: {
@@ -49,229 +80,100 @@ type ControlsType = {
   }
 }
 
-const defaultValues: ControlsType = {
+const defaultControls: ControlsType = {
   controls: {
     scene: {
       grid: {
-        size: [10, 10],
-        cellSize: 1,
-        cellThickness: 1,
-        cellColor: '#E5EAF6',
-        sectionSize: 5,
-        sectionThickness: 1.5,
-        sectionColor: '#E5EAF6',
-        fadeDistance: 25,
-        fadeStrength: 1,
-        followCamera: false,
-        infiniteGrid: true,
+        size: defaults.gridSize,
+        cellSize: defaults.cellSize,
+        cellThickness: defaults.cellThickness,
+        cellColor: defaults.cellColor,
+        sectionSize: defaults.sectionSize,
+        sectionThickness: defaults.sectionThickness,
+        sectionColor: defaults.sectionColor,
+        fadeDistance: defaults.fadeDistance,
+        fadeStrength: defaults.fadeStrength,
+        followCamera: defaults.followCamera,
+        infiniteGrid: defaults.infiniteGrid,
       },
     },
     vehicle: {
       body: {
-        vehicleSize: [3, 0.5, 1.5], // length, height, width
-        mass: 1000,
+        vehicleSize: defaults.vehicleSize,
+        mass: defaults.mass,
         wheels: {
-          wheelSize: [0.33, 0.4], // radius and width
-          front: {
-            force: 2500,
-          },
-          back: {
-            force: 2000,
-          },
+          wheelSize: defaults.wheelSize,
+          front: { force: defaults.frontForce },
+          back: { force: defaults.backForce },
         },
       },
       gears: {
-        // F1 8-speed gear ratios for realistic speed ranges
-        gearRatio1: 6.20,   // 0-100 km/h (2x faster, monstrous)
-        gearRatio2: 2.41,   // 100-135 km/h
-        gearRatio3: 1.90,   // 135-170 km/h
-        gearRatio4: 1.52,   // 170-210 km/h
-        gearRatio5: 1.27,   // 210-250 km/h
-        gearRatio6: 1.05,   // 250-290 km/h
-        gearRatio7: 0.88,   // 290-330 km/h
-        gearRatio8: 0.78,   // 330+ km/h
-        finalDrive: 3.9,
+        gearRatio1: defaults.gearRatio1,
+        gearRatio2: defaults.gearRatio2,
+        gearRatio3: defaults.gearRatio3,
+        gearRatio4: defaults.gearRatio4,
+        gearRatio5: defaults.gearRatio5,
+        gearRatio6: defaults.gearRatio6,
+        gearRatio7: defaults.gearRatio7,
+        gearRatio8: defaults.gearRatio8,
+        finalDrive: defaults.finalDrive,
       },
     },
   },
 }
 
-const ControlsContext = createContext<ControlsType>(defaultValues)
+const ControlsContext = createContext<ControlsType>(defaultControls)
 
 export const ControlsProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const getStoredValue = <T,>(key: string, defaultValue: T): T => {
-    if (typeof window === 'undefined') return defaultValue
-    try {
-      const stored = localStorage.getItem('controls')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (parsed && key in parsed) return parsed[key]
-      }
-    } catch {}
-    return defaultValue
-  }
-
   const controls = useLevaControls({
     Scene: folder({
-      Grid: folder(
-        {
-          gridSize: {
-            value: getStoredValue('gridSize', [10, 10]),
-          },
-          cellSize: {
-            value: getStoredValue('cellSize', 1),
-            min: 0,
-            max: 10,
-            step: 0.1,
-          },
-          cellThickness: {
-            value: getStoredValue('cellThickness', 1),
-            min: 0,
-            max: 5,
-            step: 0.1,
-          },
-          cellColor: {
-            value: getStoredValue('cellColor', '#E5EAF6'),
-          },
-          sectionSize: {
-            value: getStoredValue('sectionSize', 5),
-            min: 0,
-            max: 10,
-            step: 0.1,
-          },
-          sectionThickness: {
-            value: getStoredValue('sectionThickness', 1.5),
-            min: 0,
-            max: 5,
-            step: 0.1,
-          },
-          sectionColor: {
-            value: getStoredValue('sectionColor', '#E5EAF6'),
-          },
-          fadeDistance: {
-            value: getStoredValue('fadeDistance', 25),
-            min: 0,
-            max: 100,
-            step: 1,
-          },
-          fadeStrength: {
-            value: getStoredValue('fadeStrength', 1),
-            min: 0,
-            max: 1,
-            step: 0.1,
-          },
-          followCamera: {
-            value: getStoredValue('followCamera', false),
-          },
-          infiniteGrid: {
-            value: getStoredValue('infiniteGrid', true),
-          },
-        },
-        { collapsed: true, color: '#4A90E2' },
-      ),
+      Grid: folder({
+        gridSize: { value: defaults.gridSize },
+        cellSize: { value: defaults.cellSize, min: 0, max: 10, step: 0.1 },
+        cellThickness: { value: defaults.cellThickness, min: 0, max: 5, step: 0.1 },
+        cellColor: { value: defaults.cellColor },
+        sectionSize: { value: defaults.sectionSize, min: 0, max: 10, step: 0.1 },
+        sectionThickness: { value: defaults.sectionThickness, min: 0, max: 5, step: 0.1 },
+        sectionColor: { value: defaults.sectionColor },
+        fadeDistance: { value: defaults.fadeDistance, min: 0, max: 100, step: 1 },
+        fadeStrength: { value: defaults.fadeStrength, min: 0, max: 1, step: 0.1 },
+        followCamera: { value: defaults.followCamera },
+        infiniteGrid: { value: defaults.infiniteGrid },
+      }, { collapsed: true, color: '#4A90E2' }),
     }),
-    Vehicle: folder(
-      {
-        Body: folder({
-          vehicleSize: {
-            value: getStoredValue('vehicleSize', [4, 0.5, 2]), // length, height, width
-            min: [3, 0.2, 1],
-            max: [5, 1, 3],
-            step: [0.1, 0.1, 0.1],
-          },
-          mass: {
-            value: getStoredValue('mass', 600), // reduced from 800 for lighter, faster car
-            min: 500,
-            max: 2000,
-            step: 1,
-          },
-        }),
-        Wheels: folder({
-          wheelSize: {
-            value: getStoredValue('wheelSize', [0.25, 0.5]), // radius and width
-            min: [0.1, 0.1],
-            max: [0.5, 1],
-            step: [0.01, 0.01],
-          },
-          frontForce: {
-            value: getStoredValue('frontForce', 3000),
-            min: 0,
-            max: 5000,
-            step: 100,
-          },
-          backForce: {
-            value: getStoredValue('backForce', 2000),
-            min: 0,
-            max: 5000,
-            step: 100,
-          },
-        }),
-        Gears: folder({
-          gearRatio1: {
-            value: getStoredValue('gearRatio1', 3.10),
-            min: 2.0,
-            max: 20.0,
-            step: 0.1,
-          },
-          gearRatio2: {
-            value: getStoredValue('gearRatio2', 2.41),
-            min: 1.5,
-            max: 3.0,
-            step: 0.1,
-          },
-          gearRatio3: {
-            value: getStoredValue('gearRatio3', 1.90),
-            min: 1.2,
-            max: 2.5,
-            step: 0.1,
-          },
-          gearRatio4: {
-            value: getStoredValue('gearRatio4', 1.52),
-            min: 1.0,
-            max: 2.0,
-            step: 0.1,
-          },
-          gearRatio5: {
-            value: getStoredValue('gearRatio5', 1.27),
-            min: 0.8,
-            max: 1.8,
-            step: 0.1,
-          },
-          gearRatio6: {
-            value: getStoredValue('gearRatio6', 1.05),
-            min: 0.7,
-            max: 1.5,
-            step: 0.1,
-          },
-          gearRatio7: {
-            value: getStoredValue('gearRatio7', 0.88),
-            min: 0.5,
-            max: 1.2,
-            step: 0.1,
-          },
-          gearRatio8: {
-            value: getStoredValue('gearRatio8', 0.78),
-            min: 0.4,
-            max: 1.0,
-            step: 0.1,
-          },
-          finalDrive: {
-            value: getStoredValue('finalDrive', 3.9),
-            min: 2.0,
-            max: 5.0,
-            step: 0.1,
-          },
-        }),
-      },
-      { collapsed: false, color: '#4A90E2' },
-    ),
+    Vehicle: folder({
+      Body: folder({
+        vehicleSize: {
+          value: defaults.vehicleSize,
+          min: [3, 0.2, 1],
+          max: [5, 1, 3],
+          step: [0.1, 0.1, 0.1],
+        },
+        mass: { value: defaults.mass, min: 500, max: 1000, step: 1 },
+      }),
+      Wheels: folder({
+        wheelSize: {
+          value: defaults.wheelSize,
+          min: [0.1, 0.1],
+          max: [0.5, 1],
+          step: [0.01, 0.01],
+        },
+        frontForce: { value: defaults.frontForce, min: 0, max: 5000, step: 100 },
+        backForce: { value: defaults.backForce, min: 0, max: 5000, step: 100 },
+      }),
+      Gears: folder({
+        gearRatio1: { value: defaults.gearRatio1, min: 2.0, max: 20.0, step: 0.1 },
+        gearRatio2: { value: defaults.gearRatio2, min: 1.5, max: 3.0, step: 0.1 },
+        gearRatio3: { value: defaults.gearRatio3, min: 1.2, max: 2.5, step: 0.1 },
+        gearRatio4: { value: defaults.gearRatio4, min: 1.0, max: 2.0, step: 0.1 },
+        gearRatio5: { value: defaults.gearRatio5, min: 0.8, max: 1.8, step: 0.1 },
+        gearRatio6: { value: defaults.gearRatio6, min: 0.7, max: 1.5, step: 0.1 },
+        gearRatio7: { value: defaults.gearRatio7, min: 0.5, max: 1.2, step: 0.1 },
+        gearRatio8: { value: defaults.gearRatio8, min: 0.4, max: 1.0, step: 0.1 },
+        finalDrive: { value: defaults.finalDrive, min: 2.0, max: 5.0, step: 0.1 },
+      }),
+    }, { collapsed: false, color: '#4A90E2' }),
   })
-
-  useEffect(() => {
-    localStorage.setItem('controls', JSON.stringify(controls))
-    const prev = JSON.parse(localStorage.getItem('controlsHistory') || '[]')
-    localStorage.setItem('controlsHistory', JSON.stringify([...prev, controls]))
-  }, [controls])
 
   const mappedControls: ControlsType = {
     controls: {
@@ -296,12 +198,8 @@ export const ControlsProvider: FC<{ children: ReactNode }> = ({ children }) => {
           mass: controls.mass,
           wheels: {
             wheelSize: controls.wheelSize,
-            front: {
-              force: controls.frontForce,
-            },
-            back: {
-              force: controls.backForce,
-            },
+            front: { force: controls.frontForce },
+            back: { force: controls.backForce },
           },
         },
         gears: {

@@ -7,6 +7,7 @@ import { useBox, useRaycastVehicle } from '@react-three/cannon'
 import { useWheels } from './wheels'
 import { Wheel } from './wheels/wheel'
 import { useVehicleControls } from './controls'
+import VehicleCamera from './camera'
 import { useControls } from '@/context/use-controls'
 import { getTransmissionData, getAeroModifiers, getSteeringAngles } from '@/lib/vehicle/calc'
 import { shouldDeactivateDrs } from '@/lib/vehicle/controls'
@@ -20,7 +21,7 @@ export default function Vehicle() {
     type: 'Static',
     userData: { name: 'obstacle' },
   }))
-  
+
   const [drsEnabled, setDrsEnabled] = useState(false)
   const [throttle, setThrottle] = useState(1)
   const [brakePressed, setBrakePressed] = useState(false)
@@ -122,23 +123,13 @@ export default function Vehicle() {
     const v = Math.max(speedKmh, 0) / 3.6         // m/s
     const wheelOmega = v / wheelRadius            // rad/s
     const overall = gearRatios[gearIndex] * finalDrive
-      let rpm: number;
-      if (gearIndex === 0) {
-        // In first gear, scale very quickly from idle to 15,000rpm
-        const maxRpm = 15000;
-        const upshiftSpeed = gearSpeedLimits[0];
-        if (speedKmh < upshiftSpeed * 0.2) {
-          rpm = idle + ((12000 - idle) * (speedKmh / (upshiftSpeed * 0.2)));
-        } else {
-          rpm = 12000 + ((maxRpm - 12000) * ((speedKmh - upshiftSpeed * 0.2) / (upshiftSpeed * 0.8)));
-        }
-        rpm = Math.min(Math.max(rpm, idle), maxRpm);
-      } else {
-        const engineOmega = wheelOmega * overall;      // rad/s
-        rpm = (engineOmega * 60) / (2 * Math.PI);
-        rpm = Math.min(Math.max(rpm, idle), redline);
-      }
-      return rpm;
+    let rpm: number;
+
+    const engineOmega = wheelOmega * overall;
+    rpm = (engineOmega * 60) / (2 * Math.PI);
+    rpm = Math.min(Math.max(rpm, idle), redline);
+
+    return rpm;
   }
 
   // F1-like torque curve (broader, more high-RPM power)
@@ -152,8 +143,8 @@ export default function Vehicle() {
   }
 
   // Grip limit (maximum longitudinal force per wheel)
-  const rearLoadPerWheel = (mass * g * rearFracStatic) / 2
-  const frontLoadPerWheel = (mass * g * (1 - rearFracStatic)) / 2
+  const rearLoadPerWheel = (mass * 1.5 * g * rearFracStatic) / 2
+  const frontLoadPerWheel = (mass * 1.5 * g * (1 - rearFracStatic)) / 2
   function clampByGrip(force: number, isRear: boolean) {
     const N = isRear ? rearLoadPerWheel : frontLoadPerWheel
     const Fmax = mu * N
@@ -193,23 +184,23 @@ export default function Vehicle() {
 
     // --- DRS/Active Aero Logic ---
     // Only manual DRS toggle for now (N = enable, M = disable)
-        // --- Synchronous hard speed limiter ---
-        // Smooth speed limiter for DRS off
-        if (!drsEnabled && speed > topSpeedKmh && chassisApi.velocity && typeof chassisApi.velocity.set === 'function') {
-          // If above 340, gently decelerate
-          if (v.length() > 0) {
-            // Calculate new speed with gentle deceleration (e.g., 2% per frame)
-            const decel = Math.max(topSpeedKmh / 3.6, v.length() * 0.98)
-            const clamped = v.clone().setLength(decel)
-            chassisApi.velocity.set(clamped.x, clamped.y, clamped.z)
-          }
-        } else if (drsEnabled && speed > topSpeedKmh && chassisApi.velocity && typeof chassisApi.velocity.set === 'function') {
-          // DRS on: hard clamp to 360
-          if (v.length() > 0) {
-            const clamped = v.clone().setLength(topSpeedKmh / 3.6)
-            chassisApi.velocity.set(clamped.x, clamped.y, clamped.z)
-          }
-        }
+    // --- Synchronous hard speed limiter ---
+    // Smooth speed limiter for DRS off
+    if (!drsEnabled && speed > topSpeedKmh && chassisApi.velocity && typeof chassisApi.velocity.set === 'function') {
+      // If above 340, gently decelerate
+      if (v.length() > 0) {
+        // Calculate new speed with gentle deceleration (e.g., 2% per frame)
+        const decel = Math.max(topSpeedKmh / 3.6, v.length() * 0.98)
+        const clamped = v.clone().setLength(decel)
+        chassisApi.velocity.set(clamped.x, clamped.y, clamped.z)
+      }
+    } else if (drsEnabled && speed > topSpeedKmh && chassisApi.velocity && typeof chassisApi.velocity.set === 'function') {
+      // DRS on: hard clamp to 360
+      if (v.length() > 0) {
+        const clamped = v.clone().setLength(topSpeedKmh / 3.6)
+        chassisApi.velocity.set(clamped.x, clamped.y, clamped.z)
+      }
+    }
     let currentGear = gear
     // Speed limits:
     // No DRS: ~315 km/h
@@ -241,7 +232,7 @@ export default function Vehicle() {
     const drivePerWheelMax = engineForcePerDrivenWheel(speed, currentGear)
     // Flatten brake force curve for more consistent braking
     // Less aggressive at low speeds, still drops at high speed
-    const brakeScale = Math.max(0.18, 0.45 - (speed / 400) ** 1.2)
+    const brakeScale = Math.max(0.18, 0.45 - (speed / 400) ** 2)
     // Cap max brake force per wheel to 7000N (F1 is ~12-15kN, but scale for sim)
     const maxBrakePerWheel = 15000
     // Reduce brake force at high steering angles to prevent drifting
@@ -263,7 +254,7 @@ export default function Vehicle() {
     // Map minRpm to 50%, upshiftRpm to 100%
     let progress = 50 + ((estRpm - minRpm) / (upshiftRpm - minRpm)) * 50
     setGearProgress(Math.min(100, Math.max(50, progress)))
-    
+
     // DRS auto-deactivation using pure controls logic
     if (shouldDeactivateDrs(brakePower, steering.base * 30)) {
       setDrsEnabled(false)
@@ -310,11 +301,12 @@ export default function Vehicle() {
             <meshBasicMaterial wireframe color='#98ADDD' />
           </mesh>
         </group>
-        <Wheel wheelRef={wheels[0]} color={wheelInfos[0]?.color}  />
+        <Wheel wheelRef={wheels[0]} color={wheelInfos[0]?.color} />
         <Wheel wheelRef={wheels[1]} color={wheelInfos[1]?.color} />
         <Wheel wheelRef={wheels[2]} color={wheelInfos[2]?.color} />
         <Wheel wheelRef={wheels[3]} color={wheelInfos[3]?.color} />
       </group>
+      <VehicleCamera target={chassisRef} />
     </>
   )
 }
