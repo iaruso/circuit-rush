@@ -1,14 +1,14 @@
 'use client'
 import { memo } from 'react'
 import {
-  Grid,
-  Center,
   AccumulativeShadows,
-  RandomizedLight,
+  Center,
   Environment,
-  Outlines,
-  Stats,
+  Grid,
   KeyboardControls,
+  Outlines,
+  RandomizedLight,
+  Stats,
 } from '@react-three/drei'
 import { Physics, type PlaneProps, usePlane } from '@react-three/cannon'
 import { Canvas } from '@react-three/fiber'
@@ -24,6 +24,20 @@ const keyboardMap = [
   { name: 'reset', keys: ['KeyR'] },
   { name: 'cameraToggle', keys: ['KeyC'] },
 ]
+
+const physicsProps = {
+  gravity: [0, -9.81, 0] as [number, number, number],
+  broadphase: 'SAP' as const,
+  allowSleep: true,
+  iterations: 12,
+  tolerance: 0.001,
+  defaultContactMaterial: {
+    friction: 0.001,
+    restitution: 0,
+    contactEquationStiffness: 1e8,
+    contactEquationRelaxation: 3,
+  },
+}
 
 function Plane(props: PlaneProps) {
   const [ref] = usePlane(() => ({
@@ -46,51 +60,39 @@ export default function Scene() {
 
   return (
     <KeyboardControls map={keyboardMap}>
-      <Canvas shadows={'basic'}>
-        <Stats showPanel={0} className='stats' />
-        <color attach='background' args={['#405CB0']} />
+      <Canvas shadows="basic">
+        <Stats showPanel={0} className="stats" />
+        <color attach="background" args={['#405CB0']} />
         <group position={[0, -0.5, 0]}>
           <Center top position={[-2, 0, 2]}>
             <mesh castShadow>
               <sphereGeometry args={[0.5, 64, 64]} />
-              <meshStandardMaterial color='#98ADDD' />
-              <Outlines thickness={3} color='#E5EAF6' />
+              <meshStandardMaterial color="#98ADDD" />
+              <Outlines thickness={3} color="#E5EAF6" />
             </mesh>
           </Center>
           <Center top position={[2.5, 0, 1]}>
             <mesh castShadow rotation={[0, Math.PI / 4, 0]}>
               <boxGeometry args={[0.7, 0.7, 0.7]} />
-              <meshStandardMaterial color='#98ADDD' />
-              <Outlines thickness={3} color='#E5EAF6' />
+              <meshStandardMaterial color="#98ADDD" />
+              <Outlines thickness={3} color="#E5EAF6" />
             </mesh>
           </Center>
           <Grid position={[0, -0.01, 0]} args={controls.scene.grid.size} {...controls.scene.grid} />
           <Shadows />
-          <Physics
-            gravity={[0, -9.81, 0]}
-            broadphase={'SAP'}
-            allowSleep={true}
-            iterations={12}
-            tolerance={0.001}
-            defaultContactMaterial={{
-              friction: 0.001,
-              restitution: 0,
-              contactEquationStiffness: 1e8,
-              contactEquationRelaxation: 3,
-            }}
-          >
+          <Physics {...physicsProps}>
             <Vehicle />
             <Plane />
           </Physics>
         </group>
-        <Environment preset='city' />
+        <Environment preset="city" />
       </Canvas>
     </KeyboardControls>
   )
 }
 
 const Shadows = memo(() => (
-  <AccumulativeShadows temporal frames={60} color='#E5EAF6' colorBlend={0.5} alphaTest={0.9} scale={20}>
+  <AccumulativeShadows temporal frames={60} color="#E5EAF6" colorBlend={0.5} alphaTest={0.9} scale={20}>
     <RandomizedLight amount={8} radius={4} position={[5, 5, -10]} />
   </AccumulativeShadows>
 ))

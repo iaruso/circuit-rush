@@ -13,12 +13,14 @@ export const Wheel: FC<WheelProps> = ({ wheelRef, color }) => {
   return (
     <group ref={wheelRef}>
       <mesh rotation={[Math.PI / 2, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[
-          controls.vehicle.body.wheels.wheelSize[0],
-          controls.vehicle.body.wheels.wheelSize[0],
-          controls.vehicle.body.wheels.wheelSize[1],
-          24
-        ]} />
+        <cylinderGeometry
+          args={[
+            controls.vehicle.body.wheels.wheelSize[0],
+            controls.vehicle.body.wheels.wheelSize[0],
+            controls.vehicle.body.wheels.wheelSize[1],
+            24,
+          ]}
+        />
         <meshBasicMaterial wireframe color={wireColor} />
       </mesh>
     </group>

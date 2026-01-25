@@ -1,49 +1,44 @@
 export interface TransmissionData {
-  min: number;
-  max: number;
+  min: number
+  max: number
 }
 
 export interface AeroState {
-  powerMultiplier: number;
-  topSpeed: number;
-  drag: number;
+  powerMultiplier: number
+  topSpeed: number
+  drag: number
 }
 
 export interface SteeringOutput {
-  inner: number;
-  outer: number;
-  base: number;
+  inner: number
+  outer: number
+  base: number
 }
 
-export const GEAR_SPEED_LIMITS: number[] = [
-  105, 135, 165, 195, 230, 275, 315, 360
-];
+export const GEAR_SPEED_LIMITS = [105, 135, 165, 195, 230, 275, 315, 360]
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max))
 
 export function getTransmissionData(speed: number, gear: number): TransmissionData {
-  const clampedGear = Math.max(1, Math.min(gear, GEAR_SPEED_LIMITS.length));
-  const max = GEAR_SPEED_LIMITS[clampedGear - 1];
-  const min = clampedGear === 1 ? 0 : GEAR_SPEED_LIMITS[clampedGear - 2];
-  return { min, max };
+  const clampedGear = clamp(gear, 1, GEAR_SPEED_LIMITS.length)
+  const max = GEAR_SPEED_LIMITS[clampedGear - 1]
+  const min = clampedGear === 1 ? 0 : GEAR_SPEED_LIMITS[clampedGear - 2]
+  return { min, max }
 }
 
 export function getAeroModifiers(drsActive: boolean): AeroState {
   return drsActive
     ? { powerMultiplier: 1.1, topSpeed: 360, drag: 0.7 }
-    : { powerMultiplier: 1.0, topSpeed: 320, drag: 1.0 };
+    : { powerMultiplier: 1.0, topSpeed: 320, drag: 1.0 }
 }
 
 export function getSteeringAngles(input: number, speed: number): SteeringOutput {
-  // Speed sensitivity: 1.0x at 100km/h, 1.2x at 300km/h
-  const minFactor = 1.0;
-  const maxFactor = 1.2;
-  const clampedSpeed = Math.max(0, Math.min(speed, 300));
-  const speedFactor = minFactor + ((maxFactor - minFactor) * (clampedSpeed - 100)) / 200;
-  const factor = Math.max(minFactor, Math.min(speedFactor, maxFactor));
-  // Ackermann: inner 1.4x, outer 0.6x
-  const base = input * factor;
+  const clampedSpeed = clamp(speed, 0, 300)
+  const factor = clamp(1.0 + ((clampedSpeed - 100) / 200) * 0.2, 1.0, 1.2)
+  const base = input * factor
   return {
     inner: base * 1.4,
     outer: base * 0.6,
     base,
-  };
+  }
 }

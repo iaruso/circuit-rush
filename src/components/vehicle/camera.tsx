@@ -1,7 +1,6 @@
 'use client'
 import { useRef, useState, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { useKeyboardControls } from '@react-three/drei'
 import { Vector3, Object3D, Quaternion } from 'three'
 
 type CameraMode = 'first-person' | 'third-person' | 'sky-view'
@@ -15,14 +14,35 @@ type VehicleCameraProps = {
 export default function VehicleCamera({ target }: VehicleCameraProps) {
   const { camera } = useThree()
   const [modeIndex, setModeIndex] = useState(0)
-  const [, getKeys] = useKeyboardControls()
   const wasPressed = useRef(false)
 
-  // Smooth camera position
-  const smoothPos = useRef(new Vector3())
-  const smoothLookAt = useRef(new Vector3())
+  const work = useRef({
+    vehiclePos: new Vector3(),
+    targetPos: new Vector3(),
+    lookAtPos: new Vector3(),
+    worldQuat: new Quaternion(),
+    vehicleDir: new Vector3(),
+    flatDir: new Vector3(),
+    up: new Vector3(0, 1, 0),
+  })
+  const offsets = useRef<Record<CameraMode, { offset: Vector3; lookOffset: Vector3; stabilizeHorizon: boolean }>>({
+    'first-person': {
+      offset: new Vector3(0, 0.8, 0.5),
+      lookOffset: new Vector3(0, 0.6, 20),
+      stabilizeHorizon: false,
+    },
+    'third-person': {
+      offset: new Vector3(0, 3, -8),
+      lookOffset: new Vector3(0, 1, 0),
+      stabilizeHorizon: true,
+    },
+    'sky-view': {
+      offset: new Vector3(0, 25, 0),
+      lookOffset: new Vector3(0, 0, 0),
+      stabilizeHorizon: true,
+    },
+  })
 
-  // Handle camera toggle with debounce
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'KeyC' && !wasPressed.current) {
@@ -47,45 +67,34 @@ export default function VehicleCamera({ target }: VehicleCameraProps) {
     if (!target.current) return
 
     const mode = CAMERA_MODES[modeIndex]
-    const vehiclePos = new Vector3()
+    const config = offsets.current[mode]
+    const { vehiclePos, targetPos, lookAtPos, worldQuat, vehicleDir, flatDir, up } = work.current
+
     target.current.getWorldPosition(vehiclePos)
-
-    // Get vehicle forward direction using world quaternion
-    const worldQuat = new Quaternion()
     target.current.getWorldQuaternion(worldQuat)
-    const vehicleDir = new Vector3(0, 0, 1)
-    vehicleDir.applyQuaternion(worldQuat)
-
-    let targetPos = new Vector3()
-    let lookAtPos = new Vector3()
-
-    switch (mode) {
-      case 'first-person':
-        // Inside the car, looking forward
-        targetPos.copy(vehiclePos).add(new Vector3(0, 0.8, 0)).add(vehicleDir.clone().multiplyScalar(0.5))
-        lookAtPos.copy(vehiclePos).add(vehicleDir.clone().multiplyScalar(20))
-        break
-
-      case 'third-person':
-        // Behind and above the car
-        targetPos.copy(vehiclePos).sub(vehicleDir.clone().multiplyScalar(8)).add(new Vector3(0, 3, 0))
-        lookAtPos.copy(vehiclePos).add(new Vector3(0, 1, 0))
-        break
-
-      case 'sky-view':
-        // High above looking down
-        targetPos.copy(vehiclePos).add(new Vector3(0, 25, 0))
-        lookAtPos.copy(vehiclePos)
-        break
+    vehicleDir.set(0, 0, 1).applyQuaternion(worldQuat)
+    flatDir.copy(vehicleDir)
+    flatDir.y = 0
+    if (flatDir.lengthSq() < 0.0001) {
+      flatDir.set(0, 0, 1)
     }
+    flatDir.normalize()
+    const forward = config.stabilizeHorizon ? flatDir : vehicleDir
 
-    // Smooth camera movement
-    const smoothFactor = mode === 'sky-view' ? 0.05 : 0.1
-    smoothPos.current.lerp(targetPos, smoothFactor)
-    smoothLookAt.current.lerp(lookAtPos, smoothFactor)
+    targetPos
+      .copy(vehiclePos)
+      .addScaledVector(up, config.offset.y)
+      .addScaledVector(forward, config.offset.z)
+      .addScaledVector(flatDir, config.offset.x)
 
-    camera.position.copy(smoothPos.current)
-    camera.lookAt(smoothLookAt.current)
+    lookAtPos
+      .copy(vehiclePos)
+      .addScaledVector(up, config.lookOffset.y)
+      .addScaledVector(forward, config.lookOffset.z)
+      .addScaledVector(flatDir, config.lookOffset.x)
+
+    camera.position.copy(targetPos)
+    camera.lookAt(lookAtPos)
   })
 
   return null
