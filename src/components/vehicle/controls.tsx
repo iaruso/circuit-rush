@@ -1,12 +1,20 @@
 'use client'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max))
+const MAX_STEER_DEG = 40
+const MAX_STEER_RAD = (MAX_STEER_DEG * Math.PI) / 180
+const SLIDE_FORCE_MULTIPLIER = 0.2
 
 type VehicleApi = {
   applyEngineForce: (force: number, wheelIndex: number) => void
   setBrake: (brake: number, wheelIndex: number) => void
   setSteeringValue: (value: number, wheelIndex: number) => void
+  sliding: {
+    subscribe: (callback: (sliding: boolean) => void) => void | (() => void)
+  }
 }
 
 type ChassisApi = {
@@ -44,6 +52,17 @@ export const useVehicleControls = ({
   const [, getKeys] = useKeyboardControls()
   const brakeAmtRef = useRef(0)
   const steerRef = useRef(0)
+  const slidingRef = useRef(false)
+
+  useEffect(() => {
+    if (!vehicleApi?.sliding) return
+    const unsubscribe = vehicleApi.sliding.subscribe((sliding) => {
+      slidingRef.current = sliding
+    })
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe()
+    }
+  }, [vehicleApi])
 
   useFrame(() => {
     if (!vehicleApi || !chassisApi) return
@@ -53,33 +72,37 @@ export const useVehicleControls = ({
 
     const { forward, backward, leftward, rightward, brake, reset } = keys
 
+    const steerInput = leftward ? 1 : rightward ? -1 : 0
+    const steerSpeedMultiplier = 1 + Math.min(speed, 300) / 1000
+    const targetSteer = clamp(
+      steerInput * MAX_STEER_RAD * steerSpeedMultiplier,
+      -MAX_STEER_RAD,
+      MAX_STEER_RAD,
+    )
+
     if (setThrottle) setThrottle(forward ? 1 : 0)
     if (setBrakePressed) setBrakePressed(!!brake)
     if (setSteerAngle) {
-      let baseAngle = leftward ? 0.48 : rightward ? -0.48 : 0
-      const speedClamped = Math.max(100, Math.min(speed, 300))
-      const speedMultiplier = 1.0 + ((speedClamped - 100) / 200) * 0.2
-      baseAngle *= speedMultiplier
-      setSteerAngle(baseAngle)
+      setSteerAngle(targetSteer)
     }
 
     if (forward) {
       if (gear === 0) setReverseFlag(false)
       const steercomp = 1.0 - Math.abs(steerRef.current) * 0.3
-      const f = -forcePower * steercomp
-      vehicleApi.applyEngineForce(f, 0)
-      vehicleApi.applyEngineForce(f, 1)
+      const f = -forcePower * steercomp * 1.4
+      const slideBoost = slidingRef.current ? f * SLIDE_FORCE_MULTIPLIER : 0
+      vehicleApi.applyEngineForce(f + slideBoost, 0)
+      vehicleApi.applyEngineForce(f + slideBoost, 1)
     } else if (backward) {
       const scale = speed > 25 ? 0.15 : speed > 10 ? 0.35 : 0.6
       const f = forcePower * scale
+      const slideBoost = slidingRef.current ? f * SLIDE_FORCE_MULTIPLIER : 0
       if (gear === 0) setReverseFlag(true)
-      vehicleApi.applyEngineForce(f, 0)
-      vehicleApi.applyEngineForce(f, 1)
+      vehicleApi.applyEngineForce(f + slideBoost, 0)
+      vehicleApi.applyEngineForce(f + slideBoost, 1)
     } else {
       vehicleApi.applyEngineForce(0, 0)
       vehicleApi.applyEngineForce(0, 1)
-      vehicleApi.setBrake(Math.abs(brakePower), 0)
-      vehicleApi.setBrake(Math.abs(brakePower), 1)
     }
 
     const targetBrake = brake ? 1 : 0
@@ -90,28 +113,15 @@ export const useVehicleControls = ({
     let maxBrakePerWheel = maxEngineForce * speedFactor
     maxBrakePerWheel = Math.min(maxBrakePerWheel, maxEngineForce * 100.0)
     maxBrakePerWheel = Math.max(maxBrakePerWheel, maxEngineForce * 10.0)
-    const brakeForce = Math.min(Math.abs(brakePower), maxBrakePerWheel) * brakeAmtRef.current
+    const slideBrakeMultiplier = slidingRef.current ? 0.5 : 1
+    const brakeForce =
+      Math.min(Math.abs(brakePower), maxBrakePerWheel) * brakeAmtRef.current * slideBrakeMultiplier
     vehicleApi.setBrake(brakeForce, 0)
     vehicleApi.setBrake(brakeForce, 1)
 
-    const maxBaseSteer = 0.40
-    const steerInput = leftward ? 1 : rightward ? -1 : 0
-    const speedMultiplier = 1 + speed / 1000
-    const targetAngle = steerInput * maxBaseSteer * speedMultiplier
-    steerRef.current += (targetAngle - steerRef.current) * 0.25
-
-    let leftSteer = 0
-    let rightSteer = 0
-    if (steerRef.current > 0) {
-      leftSteer = steerRef.current * 1.40
-      rightSteer = steerRef.current * 0.60
-    } else if (steerRef.current < 0) {
-      leftSteer = steerRef.current * 0.60
-      rightSteer = steerRef.current * 1.40
-    }
-
-    vehicleApi.setSteeringValue(leftSteer, 2)
-    vehicleApi.setSteeringValue(rightSteer, 3)
+    steerRef.current += (targetSteer - steerRef.current) * 0.25
+    vehicleApi.setSteeringValue(steerRef.current, 2)
+    vehicleApi.setSteeringValue(steerRef.current, 3)
 
     if (reset) {
       chassisApi.position.set(0, 0.7, 0)
@@ -120,7 +130,6 @@ export const useVehicleControls = ({
       chassisApi.rotation.set(0, 0, 0)
       for (let i = 0; i < 4; i++) {
         vehicleApi.setBrake(0, i)
-        vehicleApi.applyEngineForce(0, i)
         vehicleApi.setSteeringValue(0, i)
       }
       brakeAmtRef.current = 0

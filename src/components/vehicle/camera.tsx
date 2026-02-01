@@ -37,7 +37,7 @@ export default function VehicleCamera({ target }: VehicleCameraProps) {
       stabilizeHorizon: true,
     },
     'sky-view': {
-      offset: new Vector3(0, 25, 0),
+      offset: new Vector3(0, 25, -25),
       lookOffset: new Vector3(0, 0, 0),
       stabilizeHorizon: true,
     },

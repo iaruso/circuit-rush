@@ -32,13 +32,11 @@ export function getAeroModifiers(drsActive: boolean): AeroState {
     : { powerMultiplier: 1.0, topSpeed: 320, drag: 1.0 }
 }
 
-export function getSteeringAngles(input: number, speed: number): SteeringOutput {
-  const clampedSpeed = clamp(speed, 0, 300)
-  const factor = clamp(1.0 + ((clampedSpeed - 100) / 200) * 0.2, 1.0, 1.2)
-  const base = input * factor
+export function getSteeringAngles(input: number, _speed: number): SteeringOutput {
+  const base = input
   return {
-    inner: base * 1.4,
-    outer: base * 0.6,
+    inner: base,
+    outer: base,
     base,
   }
 }

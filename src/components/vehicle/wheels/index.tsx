@@ -36,13 +36,13 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
     radius,
     directionLocal: [0, -1, 0] as [number, number, number],
     axleLocal: [-1, 0, 0] as [number, number, number],
-    suspensionStiffness: 60,
-    suspensionRestLength: 0.3,
-    frictionSlip: 6.0,
+    suspensionStiffness: 40,
+    suspensionRestLength: 0.4,
+    frictionSlip: 4.2,
     dampingRelaxation: 8,
-    dampingCompression: 4,
+    dampingCompression: 1,
     maxSuspensionForce: 200000,
-    rollInfluence: 0.08,
+    rollInfluence: 0.01,
     maxSuspensionTravel: 0.3,
     customSlidingRotationalSpeed: -90,
     useCustomSlidingRotationalSpeed: true,
@@ -54,26 +54,26 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
       chassisConnectionPointLocal: [-0.7, 0.05, -front + 0.5],
       isFrontWheel: false,
       color: 'red',
-      frictionSlip: 7.5,
+      frictionSlip: 3.6,
     },
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [0.7, 0.05, -front + 0.5],
       isFrontWheel: false,
       color: 'red',
-      frictionSlip: 7.5,
+      frictionSlip: 3.6,
     },
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [-0.7, 0.05, front - 0.5],
       isFrontWheel: true,
-      frictionSlip: 6.0,
+      frictionSlip: 4.5,
     },
     {
       ...wheelInfo,
       chassisConnectionPointLocal: [0.7, 0.05, front - 0.5],
       isFrontWheel: true,
-      frictionSlip: 6.0,
+      frictionSlip: 4.5,
     },
   ]
 
@@ -90,10 +90,10 @@ export const useWheels = (front: number, radius: number): WheelsReturn => {
     type: 'Kinematic' as const,
   })
 
-  useCompoundBody(() => createProps(10), wheels[0])
-  useCompoundBody(() => createProps(10), wheels[1])
-  useCompoundBody(() => createProps(8), wheels[2])
-  useCompoundBody(() => createProps(8), wheels[3])
+  useCompoundBody(() => createProps(60), wheels[0])
+  useCompoundBody(() => createProps(60), wheels[1])
+  useCompoundBody(() => createProps(40), wheels[2])
+  useCompoundBody(() => createProps(40), wheels[3])
 
   return [wheels, wheelInfos]
 }

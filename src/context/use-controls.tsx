@@ -19,7 +19,7 @@ const defaults = {
 
   // Vehicle - Body
   vehicleSize: [4, 0.5, 2] as [number, number, number],
-  mass: 800,
+  mass: 1500,
 
   // Vehicle - Wheels
   wheelSize: [0.33, 0.4] as [number, number],
@@ -149,7 +149,7 @@ export const ControlsProvider: FC<{ children: ReactNode }> = ({ children }) => {
           max: [5, 1, 3],
           step: [0.1, 0.1, 0.1],
         },
-        mass: { value: defaults.mass, min: 500, max: 1000, step: 1 },
+        mass: { value: defaults.mass, min: 500, max: 2000, step: 1 },
       }),
       Wheels: folder({
         wheelSize: {
