@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html } from '@react-three/drei'
+import { Html, useGLTF, Decal, useTexture } from '@react-three/drei'
 import { Vector3, type Object3D, type Group } from 'three'
 import { useBox, useRaycastVehicle } from '@react-three/cannon'
 import { useWheels } from './wheels'
@@ -39,6 +39,9 @@ export default function Vehicle() {
   const velocityRef = useRef(new Vector3())
   const tempVec = useRef(new Vector3())
   const driveForceRef = useRef(0)
+  const carModel = useGLTF('/car.glb')
+  const carRevModel = useGLTF('/car-test-compressed.glb')
+  // const texture = useTexture('/rev.png')
 
   const chassisBodyArgs: [number, number, number] = [
     controls.vehicle.body.vehicleSize[2],
@@ -199,21 +202,46 @@ export default function Vehicle() {
         
         <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
           <Html style={{ color: 'white', fontSize: '1.2em', textAlign: 'center' }}>
-        <div>
-          <div>Speed: {speed} km/h</div>
-          <div>
-            Gear: {transmission}
-          </div>
-          <div>Motor RPM: {Math.round(rpmState)}</div>
-          <div>Drive Force: {Math.round(forcePower * drivenWheels.length)} N</div>
-          <div>Brake: {Math.round(brakePower)} N</div>
-          <div>Throttle: {throttlePct.toFixed(0)}%</div>
-          <div>DRS: {drsEnabled ? 'ENABLED' : 'OFF'}</div>
-        </div>
-      </Html>
+            <div>
+              <div>Speed: {speed} km/h</div>
+              <div>
+                Gear: {transmission}
+              </div>
+              <div>Motor RPM: {Math.round(rpmState)}</div>
+              <div>Drive Force: {Math.round(forcePower * drivenWheels.length)} N</div>
+              <div>Brake: {Math.round(brakePower)} N</div>
+              <div>Throttle: {throttlePct.toFixed(0)}%</div>
+              <div>DRS: {drsEnabled ? 'ENABLED' : 'OFF'}</div>
+            </div>
+          </Html>
+          {/* <primitive
+            object={carModel.scene}
+            scale={[1, 1, 1]}
+            position={[0, -0.5, 0]}
+          /> */}
+          <mesh
+            geometry={carRevModel.nodes.Renault_R5_Turbo_3E.geometry}
+            material={carRevModel.nodes.Renault_R5_Turbo_3E.material}
+            scale={[0.25, 0.25, 0.25]}
+            position={[0, 0, 0]}
+            rotation={[-Math.PI/2, Math.PI, 0]}
+          >
+            {/* <Decal
+              debug // Makes "bounding box" of the decal visible
+              position={[0, 0, -4]} // Position of the decal
+              rotation={[0, 0, 0]} // Rotation of the decal (can be a vector or a degree in radians)
+              scale={1} // Scale of the decal
+            >
+              <meshBasicMaterial
+                map={texture}
+                polygonOffset
+                polygonOffsetFactor={-1}
+              />
+            </Decal> */}
+          </mesh>
           <mesh>
             <boxGeometry args={chassisBodyArgs} />
-            <meshBasicMaterial wireframe color="#98ADDD" />
+            <meshBasicMaterial visible={false} color="#98ADDD" />
           </mesh>
         </group>
         <Wheel wheelRef={wheels[0]} color={wheelInfos[0]?.color} />
