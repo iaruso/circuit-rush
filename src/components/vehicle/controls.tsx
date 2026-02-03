@@ -4,7 +4,7 @@ import { useKeyboardControls } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max))
-const MAX_STEER_DEG = 40
+const MAX_STEER_DEG = 53
 const MAX_STEER_RAD = (MAX_STEER_DEG * Math.PI) / 180
 const SLIDE_FORCE_MULTIPLIER = 0.2
 

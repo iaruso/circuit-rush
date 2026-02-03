@@ -79,16 +79,16 @@ export default function VehicleCamera({ target }: VehicleCameraProps) {
       forwardDamp: 10,
     },
     'sky-view': {
-      offset: new Vector3(0, 25, -25),
-      lookOffset: new Vector3(0, 0, 0),
+      offset: new Vector3(0, 10, -15),
+      lookOffset: new Vector3(0, 0, 10),
       stabilizeHorizon: true,
-      velocityInfluence: 0,
-      slideStrength: 0,
-      maxSlide: 0,
-      slideDamp: 0,
-      lookSlide: 0,
-      followDamp: 0,
-      forwardDamp: 0,
+      velocityInfluence: 1,
+      slideStrength: 0.4,
+      maxSlide: 10,
+      slideDamp: 8,
+      lookSlide: 1.2,
+      followDamp: 14,
+      forwardDamp: 10,
     },
   })
 
@@ -198,14 +198,14 @@ export default function VehicleCamera({ target }: VehicleCameraProps) {
       .copy(vehiclePos)
       .addScaledVector(up, config.offset.y)
       .addScaledVector(forward, config.offset.z)
-      .addScaledVector(flatDir, config.offset.x)
+      .addScaledVector(right, config.offset.x)
       .addScaledVector(right, work.current.slide)
 
     lookAtPos
       .copy(vehiclePos)
       .addScaledVector(up, config.lookOffset.y)
       .addScaledVector(forward, config.lookOffset.z)
-      .addScaledVector(flatDir, config.lookOffset.x)
+      .addScaledVector(right, config.lookOffset.x)
       .addScaledVector(right, work.current.slide * config.lookSlide)
 
     if (!work.current.hasSmooth) {

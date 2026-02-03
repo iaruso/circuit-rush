@@ -43,11 +43,7 @@ export default function Vehicle() {
   const carRevModel = useGLTF('/car-test-compressed.glb')
   // const texture = useTexture('/rev.png')
 
-  const chassisBodyArgs: [number, number, number] = [
-    controls.vehicle.body.vehicleSize[2],
-    controls.vehicle.body.vehicleSize[1],
-    controls.vehicle.body.vehicleSize[0],
-  ]
+  const chassisBodyArgs: [number, number, number] = [2.4,1.2,4]
 
   const chassisRef = useRef<Object3D>(null)
   const [chassisBody, chassisApi] = useBox(
@@ -220,12 +216,16 @@ export default function Vehicle() {
             position={[0, -0.5, 0]}
           /> */}
           <mesh
+            // @ts-expect-error
             geometry={carRevModel.nodes.Renault_R5_Turbo_3E.geometry}
+            // @ts-expect-error
             material={carRevModel.nodes.Renault_R5_Turbo_3E.material}
             scale={[0.25, 0.25, 0.25]}
             position={[0, 0, 0]}
             rotation={[-Math.PI/2, Math.PI, 0]}
-          >
+            material-transparent={true}
+            material-opacity={0.5}
+            >
             {/* <Decal
               debug // Makes "bounding box" of the decal visible
               position={[0, 0, -4]} // Position of the decal
@@ -241,7 +241,11 @@ export default function Vehicle() {
           </mesh>
           <mesh>
             <boxGeometry args={chassisBodyArgs} />
-            <meshBasicMaterial visible={false} color="#98ADDD" />
+            <meshBasicMaterial
+              visible={true}
+              transparent={true}
+              opacity={0.5}
+            />
           </mesh>
         </group>
         <Wheel wheelRef={wheels[0]} color={wheelInfos[0]?.color} />
@@ -249,7 +253,7 @@ export default function Vehicle() {
         <Wheel wheelRef={wheels[2]} color={wheelInfos[2]?.color} />
         <Wheel wheelRef={wheels[3]} color={wheelInfos[3]?.color} />
       </group>
-      <VehicleCamera target={chassisRef} />
+      {/* <VehicleCamera target={chassisRef} /> */}
     </>
   )
 }

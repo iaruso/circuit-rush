@@ -6,6 +6,7 @@ import {
   Environment,
   Grid,
   KeyboardControls,
+  OrbitControls,
   Outlines,
   RandomizedLight,
   Stats,
@@ -61,23 +62,10 @@ export default function Scene() {
   return (
     <KeyboardControls map={keyboardMap}>
       <Canvas shadows="basic">
+        <OrbitControls/>
         <Stats showPanel={0} className="stats" />
         <color attach="background" args={['#405CB0']} />
         <group position={[0, -0.5, 0]}>
-          <Center top position={[-2, 0, 2]}>
-            <mesh castShadow>
-              <sphereGeometry args={[0.5, 64, 64]} />
-              <meshStandardMaterial color="#98ADDD" />
-              <Outlines thickness={3} color="#E5EAF6" />
-            </mesh>
-          </Center>
-          <Center top position={[2.5, 0, 1]}>
-            <mesh castShadow rotation={[0, Math.PI / 4, 0]}>
-              <boxGeometry args={[0.7, 0.7, 0.7]} />
-              <meshStandardMaterial color="#98ADDD" />
-              <Outlines thickness={3} color="#E5EAF6" />
-            </mesh>
-          </Center>
           <Grid position={[0, -0.01, 0]} args={controls.scene.grid.size} {...controls.scene.grid} />
           <Shadows />
           <Physics {...physicsProps}>
