@@ -1,29 +1,24 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Html, useGLTF, Decal, useTexture } from '@react-three/drei'
+import { Html, useGLTF } from '@react-three/drei'
 import { Vector3, type Object3D, type Group } from 'three'
 import { useBox, useRaycastVehicle } from '@react-three/cannon'
 import { useWheels } from './wheels'
 import { Wheel } from './wheels/wheel'
 import { useVehicleControls } from './controls'
-import VehicleCamera from './camera'
 import { useControls } from '@/context/use-controls'
 import { getSteeringAngles } from '@/lib/vehicle/calc'
 import { shouldDeactivateDrs } from '@/lib/vehicle/controls'
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max))
 
-export default function Vehicle() {
-  const [obstacleRef] = useBox(() => ({
-    args: [200, 2, 2],
-    friction: 0,
-    restitution: 1,
-    position: [0, 1, -10],
-    type: 'Static',
-    userData: { name: 'obstacle' },
-  }))
+type VehicleProps = {
+  onSpeedChange?: (speedKmh: number) => void
+  onResetReady?: (resetFn: () => void) => void
+}
 
+export default function Vehicle({ onSpeedChange, onResetReady }: VehicleProps) {
   const [drsEnabled, setDrsEnabled] = useState(false)
   const [steerAngle, setSteerAngle] = useState(0)
   const topSpeedKmh = 220
@@ -39,9 +34,7 @@ export default function Vehicle() {
   const velocityRef = useRef(new Vector3())
   const tempVec = useRef(new Vector3())
   const driveForceRef = useRef(0)
-  const carModel = useGLTF('/car.glb')
   const carRevModel = useGLTF('/car-test-compressed.glb')
-  // const texture = useTexture('/rev.png')
 
   const chassisBodyArgs: [number, number, number] = [2.4,1.2,4]
 
@@ -77,10 +70,27 @@ export default function Vehicle() {
   useEffect(() => {
     const unsubscribe = chassisApi.velocity.subscribe((velocity: [number, number, number]) => {
       velocityRef.current.set(velocity[0], velocity[1], velocity[2])
-      setSpeed(Math.round(velocityRef.current.length() * 3.6))
+      const nextSpeed = Math.round(velocityRef.current.length() * 3.6)
+      setSpeed(nextSpeed)
+      onSpeedChange?.(nextSpeed)
     })
     return unsubscribe
-  }, [chassisApi.velocity])
+  }, [chassisApi.velocity, onSpeedChange])
+
+  // Expose a reset function so the parent (Scene) can reset vehicle position on race restart
+  useEffect(() => {
+    if (!onResetReady) return
+    onResetReady(() => {
+      chassisApi.position.set(0, 0.7, 0)
+      chassisApi.velocity.set(0, 0, 0)
+      chassisApi.angularVelocity.set(0, 0, 0)
+      chassisApi.rotation.set(0, 0, 0)
+      for (let i = 0; i < 4; i++) {
+        vehicleApi.setBrake(0, i)
+        vehicleApi.setSteeringValue(0, i)
+      }
+    })
+  }, [chassisApi, vehicleApi, onResetReady])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -190,10 +200,6 @@ export default function Vehicle() {
 
   return (
     <>
-      <mesh ref={obstacleRef} position={[0, 1, -10]}>
-        <boxGeometry args={[200, 2, 2]} />
-        <meshStandardMaterial color="orange" />
-      </mesh>
       <group ref={vehicle} name="vehicle">
         
         <group ref={chassisBody} matrixWorldNeedsUpdate={true}>
@@ -210,11 +216,6 @@ export default function Vehicle() {
               <div>DRS: {drsEnabled ? 'ENABLED' : 'OFF'}</div>
             </div>
           </Html>
-          {/* <primitive
-            object={carModel.scene}
-            scale={[1, 1, 1]}
-            position={[0, -0.5, 0]}
-          /> */}
           <mesh
             // @ts-expect-error
             geometry={carRevModel.nodes.Renault_R5_Turbo_3E.geometry}
@@ -226,18 +227,6 @@ export default function Vehicle() {
             material-transparent={true}
             material-opacity={0.5}
             >
-            {/* <Decal
-              debug // Makes "bounding box" of the decal visible
-              position={[0, 0, -4]} // Position of the decal
-              rotation={[0, 0, 0]} // Rotation of the decal (can be a vector or a degree in radians)
-              scale={1} // Scale of the decal
-            >
-              <meshBasicMaterial
-                map={texture}
-                polygonOffset
-                polygonOffsetFactor={-1}
-              />
-            </Decal> */}
           </mesh>
           <mesh>
             <boxGeometry args={chassisBodyArgs} />
@@ -253,7 +242,6 @@ export default function Vehicle() {
         <Wheel wheelRef={wheels[2]} color={wheelInfos[2]?.color} />
         <Wheel wheelRef={wheels[3]} color={wheelInfos[3]?.color} />
       </group>
-      {/* <VehicleCamera target={chassisRef} /> */}
     </>
   )
 }

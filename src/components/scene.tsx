@@ -1,19 +1,21 @@
 'use client'
-import { memo } from 'react'
+import { memo, useCallback, useEffect, useRef } from 'react'
 import {
   AccumulativeShadows,
-  Center,
   Environment,
   Grid,
   KeyboardControls,
   OrbitControls,
-  Outlines,
   RandomizedLight,
   Stats,
 } from '@react-three/drei'
 import { Physics, type PlaneProps, usePlane } from '@react-three/cannon'
 import { Canvas } from '@react-three/fiber'
 import { useControls } from '@/context/use-controls'
+import { useRaceSession } from '@/hooks/use-race-session'
+import RaceGates from './race/race-gates'
+import RaceHud from './race/race-hud'
+import FinishScreen from './race/finish-screen'
 import Vehicle from './vehicle'
 
 const keyboardMap = [
@@ -56,26 +58,102 @@ function Plane(props: PlaneProps) {
   )
 }
 
+import Obstacles from './race/obstacles'
+
 export default function Scene() {
   const { controls } = useControls()
+  const vehicleResetRef = useRef<(() => void) | null>(null)
+
+  const {
+    raceState,
+    currentLapElapsedMs,
+    currentSpeedKmh,
+    topSpeedKmh,
+    storedStats,
+    isPaused,
+    handleGateHit,
+    handleSpeedChange,
+    restartRace,
+    togglePause,
+  } = useRaceSession()
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'KeyP') {
+        togglePause()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [togglePause])
+
+  const handleRestart = useCallback(() => {
+    restartRace()
+    vehicleResetRef.current?.()
+  }, [restartRace])
+
+  const handleVehicleResetReady = useCallback((resetFn: () => void) => {
+    vehicleResetRef.current = resetFn
+  }, [])
 
   return (
-    <KeyboardControls map={keyboardMap}>
-      <Canvas shadows="basic">
-        <OrbitControls/>
-        <Stats showPanel={0} className="stats" />
-        <color attach="background" args={['#405CB0']} />
-        <group position={[0, -0.5, 0]}>
-          <Grid position={[0, -0.01, 0]} args={controls.scene.grid.size} {...controls.scene.grid} />
-          <Shadows />
-          <Physics {...physicsProps}>
-            <Vehicle />
-            <Plane />
-          </Physics>
-        </group>
-        <Environment preset="city" />
-      </Canvas>
-    </KeyboardControls>
+    <div className="relative h-full w-full">
+      {isPaused && !raceState.finished && (
+        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <h2 className="text-6xl font-extrabold tracking-tight text-white drop-shadow-xl">
+            PAUSED
+          </h2>
+        </div>
+      )}
+      {raceState.finished ? (
+        <FinishScreen
+          lapTimesMs={raceState.lapTimesMs}
+          bestLapMs={storedStats.bestLapMs}
+          topSpeedKmh={topSpeedKmh}
+          onRestart={handleRestart}
+        />
+      ) : (
+        <RaceHud
+          bestLapMs={storedStats.bestLapMs}
+          checkpointIndex={raceState.checkpointIndex}
+          currentLap={raceState.currentLap}
+          currentLapElapsedMs={currentLapElapsedMs}
+          currentSpeedKmh={currentSpeedKmh}
+          finished={raceState.finished}
+          lapTimesMs={raceState.lapTimesMs}
+          status={raceState.status}
+          topSpeedKmh={topSpeedKmh}
+          onRestart={handleRestart}
+          isPaused={isPaused}
+          onTogglePause={togglePause}
+        />
+      )}
+      <KeyboardControls map={keyboardMap}>
+        <Canvas camera={{ position: [24, 28, 34], fov: 45 }} shadows="basic">
+          <OrbitControls target={[8, 0, -18]} />
+          <Stats showPanel={0} className="stats" />
+          <color attach="background" args={['#405CB0']} />
+          <group position={[0, -0.5, 0]}>
+            <Grid position={[0, -0.01, 0]} args={controls.scene.grid.size} {...controls.scene.grid} />
+            <Shadows />
+            <Physics {...physicsProps} isPaused={isPaused}>
+              <Vehicle
+                onSpeedChange={handleSpeedChange}
+                onResetReady={handleVehicleResetReady}
+              />
+              <RaceGates
+                onGateHit={handleGateHit}
+                checkpointIndex={raceState.checkpointIndex}
+                finished={raceState.finished}
+              />
+              <Obstacles />
+              <Plane />
+            </Physics>
+          </group>
+          <Environment preset="city" />
+        </Canvas>
+      </KeyboardControls>
+    </div>
   )
 }
 
